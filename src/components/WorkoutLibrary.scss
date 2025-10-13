@@ -1,0 +1,66 @@
+.workout-library {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+
+  h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .workout-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+
+    .workout-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+      button {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #e74c3c;
+
+        &:hover {
+          color: #c0392b;
+        }
+      }
+    }
+  }
+
+  .add-workout-form {
+    display: flex;
+    gap: 0.5rem;
+
+    input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+
+      &:hover {
+        background: #2980b9;
+      }
+    }
+  }
+}
