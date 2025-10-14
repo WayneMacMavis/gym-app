@@ -1,18 +1,6 @@
 // src/components/EditWorkoutForm.jsx
-import React from "react";
-import { getRule } from "../rules/progressionRules";
-
-const generateReps = (name, sets) => {
-  const { minReps, maxReps } = getRule(name);
-  const decrement = 2;
-  const reps = [];
-  let current = maxReps;
-  for (let i = 0; i < sets; i++) {
-    reps.push(current.toString());
-    current = Math.max(minReps, current - decrement);
-  }
-  return reps;
-};
+import React, { useEffect } from "react";
+import useSetsAndReps from "../hooks/useSetsAndReps";
 
 const EditWorkoutForm = ({
   editData,
@@ -21,29 +9,27 @@ const EditWorkoutForm = ({
   cancelEdit,
   workoutId,
 }) => {
-  const handleEditChange = (field, value) => {
-    if (field === "sets") {
-      const num = parseInt(value, 10) || 0;
-      setEditData({
-        ...editData,
-        sets: num,
-        reps: generateReps(editData.name, num),
-      });
-    } else if (field === "name") {
-      setEditData({
-        ...editData,
-        name: value, // let user type freely
-        reps: generateReps(value, editData.sets),
-      });
-    } else {
-      setEditData({ ...editData, [field]: value });
-    }
-  };
+  // Hook manages sets/reps based on current editData
+  const { sets, reps, handleSetChange, handleRepChange } = useSetsAndReps(
+    editData.sets || 3,
+    editData.reps && editData.reps.length ? editData.reps : [12, 10, 8],
+    editData.name
+  );
 
-  const handleEditRepChange = (idx, value) => {
-    const reps = [...editData.reps];
-    reps[idx] = value;
-    setEditData({ ...editData, reps });
+  // Keep parent editData in sync with hook state
+  useEffect(() => {
+    setEditData((prev) => ({
+      ...prev,
+      sets,
+      reps,
+    }));
+  }, [sets, reps, setEditData]);
+
+  const handleNameChange = (value) => {
+    setEditData((prev) => ({
+      ...prev,
+      name: value, // free typing
+    }));
   };
 
   return (
@@ -51,24 +37,29 @@ const EditWorkoutForm = ({
       <input
         type="text"
         value={editData.name}
-        onChange={(e) => handleEditChange("name", e.target.value)}
+        onChange={(e) => handleNameChange(e.target.value)}
         placeholder="Workout name"
       />
+
       <input
         type="number"
-        value={editData.sets}
-        onChange={(e) => handleEditChange("sets", e.target.value)}
+        value={sets}
+        min={1}
+        onChange={(e) => handleSetChange(Number(e.target.value))}
         placeholder="Number of sets"
       />
-      {editData.reps.map((rep, i) => (
+
+      {reps.map((rep, i) => (
         <input
           key={i}
           type="number"
           value={rep}
-          onChange={(e) => handleEditRepChange(i, e.target.value)}
+          min={1}
+          onChange={(e) => handleRepChange(i, Number(e.target.value))}
           placeholder={`Reps for set ${i + 1}`}
         />
       ))}
+
       <div className="edit-actions">
         <button type="submit" className="save-btn">Save</button>
         <button type="button" className="back-btn" onClick={cancelEdit}>

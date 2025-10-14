@@ -1,278 +1,101 @@
-.day-routine {
-  max-width: 500px;
-  margin: 2rem auto;
-  padding: 1rem;
+/* Keyframes for shake */
+@keyframes shake {
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(-3px); }
+  50%  { transform: translateX(3px); }
+  75%  { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
 
-  h2 {
+/* Number adjuster with side-by-side arrows */
+.number-adjuster.cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  .display-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 28px;
     text-align: center;
-    margin-bottom: 0.25rem;
   }
 
-  .day-total-time {
-    text-align: center;
-    margin: 0 0 1.5rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: #666; // fallback, overridden inline
-  }
-
-  .workout-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .workout-card {
-    background: #f9f9f9;
-    border-radius: 8px;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-
-    h3 {
-      margin: 0 0 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .sets-inline {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0.2rem 0;
-      padding-left: 1rem; // align with reps list
-      font-size: 0.9rem;
-      color: #555;
-
-      label {
-        font-weight: 600;
-        min-width: 40px; // aligns with "Set 1:" text
-      }
-
-      // Nudge adjuster left to align with reps
-      .number-adjuster {
-        margin-left: -6px;
-      }
-    }
-
-    ul {
-      margin: 0;
-      padding-left: 1rem;
-      font-size: 0.9rem;
-      color: #555;
-
-      li {
-        margin: 0.2rem 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-    }
-
-    .workout-time {
-      margin-top: 0.4rem;
-      font-size: 0.85rem;
-      color: #666;
-    }
-  }
-
-  .delete-wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .delete-btn {
-    position: relative;
-    background: #e74c3c;
-    border: none;
-    color: white;
-    font-size: 1rem;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    outline: none;
-
-    &:hover {
-      background: #c0392b;
-    }
-
-    &:active {
-      transform: scale(0.98);
-    }
-
-    .progress-ring {
-      position: absolute;
-      top: 0;
-      left: 0;
-      transform: rotate(-90deg);
-      pointer-events: none;
-    }
-
-    .progress-ring__circle {
-      transition: stroke-dashoffset 0.05s linear;
-    }
-  }
-
-  .toggle-btn {
-    display: block;
-    margin: 0 auto 1rem;
-    padding: 0.6rem 1.1rem;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.95rem;
-
-    &:hover {
-      background: #2980b9;
-    }
-  }
-
-  .add-form,
-  .edit-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    background: #f0f0f0;
-    padding: 1rem;
-    border-radius: 6px;
-    margin-bottom: 1.5rem;
-
-    input {
-      padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 0.95rem;
-    }
-
-    .save-btn {
-      background: #27ae60;
-      color: white;
-      border: none;
-      padding: 0.6rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.95rem;
-
-      &:hover {
-        background: #219150;
-      }
-    }
-
-    .back-btn {
-      background: #7f8c8d;
-      color: white;
-      border: none;
-      padding: 0.6rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9rem;
-
-      &:hover {
-        background: #636e72;
-      }
-    }
-
-    .edit-actions {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: flex-end;
-    }
-  }
-
-  .back-btn {
-    display: block;
-    margin: 0 auto;
-    padding: 0.6rem 1.2rem;
-    background: #7f8c8d;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.95rem;
-
-    &:hover {
-      background: #636e72;
-    }
-  }
-
-  // Adjuster styling (number + arrows only)
-  .number-adjuster {
+  .arrow-cluster {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    position: relative;
+  }
 
-    .display-value {
-      font-size: 1rem;
-      font-weight: 500;
-      min-width: 28px; // lock width for alignment
-      text-align: center;
+  .arrow {
+    cursor: pointer;
+    font-size: 1.6rem;
+    line-height: 1;
+    user-select: none;
+    padding: 6px;
+    border-radius: 6px;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background 0.2s,
+                box-shadow 0.2s;
+
+    &.up {
+      color: #27ae60;
+      &:hover {
+        background: rgba(39, 174, 96, 0.1);
+        box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+      }
+      &:active {
+        background: rgba(39, 174, 96, 0.2);
+        transform: translateY(-2px) scale(0.95);
+        box-shadow: none;
+        animation: pulse 0.6s infinite;
+      }
     }
 
-    .arrows {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      margin-left: 2px;
-
-      .arrow {
-        cursor: pointer;
-        font-size: 0.7rem;
-        line-height: 1;
-        color: #333;
-        user-select: none;
-
-        &:hover {
-          color: #000;
-        }
-
-        &.up {
-          margin-bottom: 2px;
-        }
+    &.down {
+      color: #e74c3c;
+      &:hover {
+        background: rgba(231, 76, 60, 0.1);
+        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
       }
+      &:active {
+        background: rgba(231, 76, 60, 0.2);
+        transform: translateY(2px) scale(0.95);
+        box-shadow: none;
+        animation: pulse 0.6s infinite;
+      }
+    }
+
+    /* Shake when hitting min/max */
+    &.shake {
+      animation: shake 0.4s;
     }
   }
 }
 
+/* Pulse animation keyframes */
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
 /* Mobile polish */
 @media (max-width: 420px) {
-  .day-routine {
-    padding: 0.75rem;
+  .number-adjuster.cluster {
+    gap: 4px;
 
-    .workout-card {
-      padding: 0.8rem;
+    .display-value {
+      font-size: 1rem;
+      min-width: 24px;
     }
 
-    .delete-btn {
-      width: 36px;
-      height: 36px;
-
-      .progress-ring {
-        width: 36px;
-        height: 36px;
-      }
+    .arrow-cluster {
+      gap: 2px;
     }
 
-    .number-adjuster {
-      .display-value {
-        font-size: 0.9rem;
-        min-width: 24px;
-      }
-
-      .arrows .arrow {
-        font-size: 0.65rem;
-      }
+    .arrow {
+      font-size: 1.9rem;
+      padding: 8px;
     }
   }
 }

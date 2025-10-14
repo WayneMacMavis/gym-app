@@ -1,73 +1,44 @@
-// src/components/AddWorkoutForm.jsx
-import React from "react";
-import { getRule } from "../rules/progressionRules";
+import React, { useState } from "react";
+import NumberAdjuster from "./NumberAdjuster";
+import useSetsAndReps from "../hooks/useSetsAndReps";
 
-const generateReps = (name, sets) => {
-  const { minReps, maxReps } = getRule(name);
-  const decrement = 2;
-  const reps = [];
-  let current = maxReps;
-  for (let i = 0; i < sets; i++) {
-    reps.push(current.toString());
-    current = Math.max(minReps, current - decrement);
-  }
-  return reps;
-};
+const AddWorkoutForm = ({ onAddWorkout }) => {
+  const [name, setName] = useState("");
+  const { sets, reps, handleSetChange, handleRepChange } = useSetsAndReps(3, [12, 10, 8], name);
 
-const AddWorkoutForm = ({ newWorkout, setNewWorkout, handleAddWorkout }) => {
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "sets") {
-      const num = parseInt(value, 10) || 0;
-      setNewWorkout({
-        ...newWorkout,
-        sets: num,
-        reps: generateReps(newWorkout.name, num),
-      });
-    } else if (name === "name") {
-      // let user type freely (spaces etc.)
-      setNewWorkout({
-        ...newWorkout,
-        name: value,
-        reps: generateReps(value, newWorkout.sets),
-      });
-    } else {
-      setNewWorkout({ ...newWorkout, [name]: value });
-    }
-  };
-
-  const handleRepChange = (idx, value) => {
-    const updated = [...newWorkout.reps];
-    updated[idx] = value;
-    setNewWorkout({ ...newWorkout, reps: updated });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onAddWorkout({ name, sets, reps });
+    setName("");
   };
 
   return (
-    <form onSubmit={handleAddWorkout} className="add-form">
+    <form onSubmit={handleSubmit} className="add-form">
       <input
         type="text"
-        name="name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
         placeholder="Workout name"
-        value={newWorkout.name}
-        onChange={handleChange}
       />
-      <input
-        type="number"
-        name="sets"
-        placeholder="Number of sets"
-        value={newWorkout.sets}
-        onChange={handleChange}
-      />
-      {newWorkout.reps.map((rep, i) => (
-        <input
-          key={i}
-          type="number"
-          placeholder={`Reps for set ${i + 1}`}
-          value={rep}
-          onChange={(e) => handleRepChange(i, e.target.value)}
-        />
+
+      <div className="sets-inline">
+        <label>Sets:</label>
+        <NumberAdjuster value={sets} min={1} onChange={handleSetChange} />
+      </div>
+
+      {reps.map((rep, i) => (
+        <div key={i} className="rep-input">
+          <label>Set {i + 1}:</label>
+          <NumberAdjuster
+            value={rep}
+            min={1}
+            showUnit="reps"
+            onChange={(val) => handleRepChange(i, val)}
+          />
+        </div>
       ))}
-      <button type="submit" className="save-btn">Save</button>
+
+      <button type="submit" className="save-btn">Add</button>
     </form>
   );
 };

@@ -8,6 +8,7 @@ import EditWorkoutForm from "../components/EditWorkoutForm";
 import { useHoldToDelete } from "../hooks/useHoldToDelete";
 import { useDayEstimates } from "../hooks/useDayEstimates";
 import NumberAdjuster from "../components/NumberAdjuster";
+import { adjustRepsForSets } from "../hooks/useSetsAndReps";
 
 const uid = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
@@ -23,15 +24,12 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
     ? (programs[weekIdParam]?.[dayIdParam] || [])
     : (program?.[dayIdParam] || []);
 
-  const [newWorkout, setNewWorkout] = useState({ name: "", sets: 3, reps: ["", "", ""] });
   const [showForm, setShowForm] = useState(false);
-
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({ name: "", sets: 0, reps: [] });
 
   const addingRef = useRef(false);
 
-  // Hook for hold-to-delete (2s)
   const { holdingId, progress, handleHoldStart, handleHoldEnd } = useHoldToDelete(
     (id) => {
       if (hasWeeks) {
@@ -43,61 +41,34 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
     2000
   );
 
-  // Time estimation helpers
   const { estimateWorkoutSeconds, estimateDayMinutes, getColor } = useDayEstimates();
-
   const totalMinutes = workouts.length ? estimateDayMinutes(workouts) : null;
 
-  // Generate default descending reps
-  const generateReps = (name, sets) => {
-    const { minReps, maxReps } = { minReps: 6, maxReps: 12 }; // fallback if no rule
-    let current = maxReps;
-    const reps = [];
-    for (let i = 0; i < sets; i++) {
-      reps.push(current.toString());
-      current = Math.max(minReps, current - 2);
-    }
-    return reps;
-  };
-
-  // Fill blanks with generated reps
-  const normalizeReps = (name, reps, sets) => {
-    const generated = generateReps(name, sets);
-    return Array.from({ length: sets }, (_, i) => {
-      const v = reps?.[i];
-      return String(v ?? "").trim() ? String(v) : generated[i];
-    });
-  };
-
-  // Add workout
-  const handleAddWorkout = (e) => {
-    e.preventDefault();
+  const handleAddWorkout = (workout) => {
     if (addingRef.current) return;
     addingRef.current = true;
 
-    const formattedName = capitalizeWords(newWorkout.name);
-    const normalizedReps = normalizeReps(formattedName, newWorkout.reps, newWorkout.sets);
-
-    const workout = { ...newWorkout, name: formattedName, reps: normalizedReps, id: uid() };
+    const formatted = {
+      ...workout,
+      id: uid(),
+      name: capitalizeWords(workout.name),
+    };
 
     if (hasWeeks) {
-      addWorkout(dayIdParam, workout, weekIdParam);
+      addWorkout(dayIdParam, formatted, weekIdParam);
     } else {
-      addWorkout(dayIdParam, workout);
+      addWorkout(dayIdParam, formatted);
     }
 
-    setNewWorkout({ name: "", sets: 3, reps: ["", "", ""] });
     setShowForm(false);
-
     setTimeout(() => {
       addingRef.current = false;
     }, 0);
   };
 
-  // Edit handlers
   const startEditing = (w) => {
     setEditingId(w.id);
-    setEditData({ name: w.name, sets: w.sets || 0, reps: [...(w.reps || [])] });
+    setEditData({ name: w.name, sets: Number(w.sets || 0), reps: [...(w.reps || [])] });
   };
 
   const saveEdit = (e, id) => {
@@ -107,8 +78,13 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
       return;
     }
     const formattedName = capitalizeWords(editData.name);
-    const normalizedReps = normalizeReps(formattedName, editData.reps, editData.sets);
-    const updatedWorkout = { ...editData, name: formattedName, reps: normalizedReps, id };
+    const updatedWorkout = {
+      ...editData,
+      name: formattedName,
+      id,
+      reps: editData.reps.map((r) => Number(r)),
+      sets: Number(editData.sets),
+    };
 
     if (hasWeeks) {
       updateWorkout(dayIdParam, updatedWorkout, weekIdParam);
@@ -151,14 +127,15 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
                 <>
                   <div>
                     <h3>{capitalizeWords(w.name)}</h3>
-
                     <div className="sets-inline">
                       <label>Sets:</label>
                       <NumberAdjuster
-                        value={w.sets}
+                        value={Number(w.sets)}
                         min={1}
                         onChange={(val) => {
-                          const updated = { ...w, sets: val };
+                          const nextSets = Number(val);
+                          const nextReps = adjustRepsForSets(w.name, w.reps, nextSets);
+                          const updated = { ...w, sets: nextSets, reps: nextReps };
                           if (hasWeeks) {
                             updateWorkout(dayIdParam, updated, weekIdParam);
                           } else {
@@ -167,17 +144,17 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
                         }}
                       />
                     </div>
-
                     <ul>
                       {(w.reps || []).map((r, i) => (
                         <li key={i}>
                           Set {i + 1}:{" "}
                           <NumberAdjuster
-                            value={r}
+                            value={Number(r)}
                             min={1}
+                            showUnit="reps"
                             onChange={(val) => {
-                              const updatedReps = [...w.reps];
-                              updatedReps[i] = val;
+                              const updatedReps = [...(w.reps || [])];
+                              updatedReps[i] = Number(val);
                               const updated = { ...w, reps: updatedReps };
                               if (hasWeeks) {
                                 updateWorkout(dayIdParam, updated, weekIdParam);
@@ -244,9 +221,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
 
       {showForm && (
         <AddWorkoutForm
-          newWorkout={newWorkout}
-          setNewWorkout={setNewWorkout}
-          handleAddWorkout={handleAddWorkout}
+          onAddWorkout={handleAddWorkout}
         />
       )}
 
