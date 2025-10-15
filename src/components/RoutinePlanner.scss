@@ -1,53 +1,55 @@
+@use "../styles/variables" as *;
+
 .routine-planner {
-  margin: 2rem auto;
+  margin: $spacing-xl auto;
   max-width: 1000px;
-  padding: 1rem;
+  padding: $spacing-lg;
 
   h2 {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: $spacing-xl;
   }
 
   .planner-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    gap: $spacing-lg;
   }
 
   .day-column {
-    background: #f9f9f9;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: $color-bg-light;
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    box-shadow: $shadow-light;
   }
 }
 
-/* 🔽 Add these at the bottom of routinePlanner.scss */
+/* 🔽 Refresh banner */
 .refresh-banner {
-  background: #ffeaa7;
-  border: 1px solid #fdcb6e;
-  padding: 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
+  background: $color-banner-bg;
+  border: 1px solid $color-banner-border;
+  padding: $spacing-lg;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
   text-align: center;
 
   button {
-    margin-top: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #0984e3;
-    color: white;
+    margin-top: $spacing-sm;
+    padding: $spacing-sm $spacing-lg;
+    background: $color-info-blue;
+    color: $color-bg-white;
     border: none;
-    border-radius: 4px;
+    border-radius: $radius-sm;
     cursor: pointer;
 
     &:hover {
-      background: #0652dd;
+      background: $color-info-blue-hover;
     }
   }
 }
 
 .cycle-info {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 1rem;
+  font-size: $font-size-small;
+  color: $color-gray-dark;
+  margin-bottom: $spacing-lg;
 }

@@ -26,7 +26,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({ name: "", sets: 0, reps: [] });
+  const [editData, setEditData] = useState({ name: "", sets: 0, reps: [], weights: [] });
 
   const addingRef = useRef(false);
 
@@ -52,6 +52,9 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
       ...workout,
       id: uid(),
       name: capitalizeWords(workout.name),
+      reps: Array.isArray(workout.reps) ? workout.reps : [],
+      weights: Array.isArray(workout.weights) ? workout.weights : [],
+      sets: Number(workout.sets || 0),
     };
 
     if (hasWeeks) {
@@ -68,7 +71,12 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
 
   const startEditing = (w) => {
     setEditingId(w.id);
-    setEditData({ name: w.name, sets: Number(w.sets || 0), reps: [...(w.reps || [])] });
+    setEditData({
+      name: w.name,
+      sets: Number(w.sets || 0),
+      reps: [...(w.reps || [])],
+      weights: [...(w.weights || [])],
+    });
   };
 
   const saveEdit = (e, id) => {
@@ -83,6 +91,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
       name: formattedName,
       id,
       reps: editData.reps.map((r) => Number(r)),
+      weights: editData.weights.map((wt) => Number(wt)),
       sets: Number(editData.sets),
     };
 
@@ -113,6 +122,9 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
       <div className="workout-list">
         {workouts.map((w) => {
           const workoutMinutes = Math.round(estimateWorkoutSeconds(w) / 60);
+          const repsArr = w.reps || [];
+          const weightsArr = w.weights || [];
+
           return (
             <div key={w.id} className="workout-card">
               {editingId === w.id ? (
@@ -127,42 +139,76 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
                 <>
                   <div>
                     <h3>{capitalizeWords(w.name)}</h3>
-                    <div className="sets-inline">
-                      <label>Sets:</label>
-                      <NumberAdjuster
-                        value={Number(w.sets)}
-                        min={1}
-                        onChange={(val) => {
-                          const nextSets = Number(val);
-                          const nextReps = adjustRepsForSets(w.name, w.reps, nextSets);
-                          const updated = { ...w, sets: nextSets, reps: nextReps };
-                          if (hasWeeks) {
-                            updateWorkout(dayIdParam, updated, weekIdParam);
-                          } else {
-                            updateWorkout(dayIdParam, updated);
-                          }
-                        }}
-                      />
+
+                    {/* Header row: spacer | Weights label | Sets control */}
+                    <div className="sets-weights-header">
+                      <div className="header-spacer" />
+                      <div className="weights-col-label">Weights</div>
+                      <div className="sets-control">
+                        <label>Sets:</label>
+                        <NumberAdjuster
+                          value={Number(w.sets)}
+                          min={1}
+                          onChange={(nextSets) => {
+                            const nextReps = adjustRepsForSets(w.name, repsArr, nextSets);
+                            const nextWeights = adjustRepsForSets(w.name, weightsArr, nextSets);
+                            const updated = {
+                              ...w,
+                              sets: nextSets,
+                              reps: nextReps,
+                              weights: nextWeights,
+                            };
+                            if (hasWeeks) {
+                              updateWorkout(dayIdParam, updated, weekIdParam);
+                            } else {
+                              updateWorkout(dayIdParam, updated);
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
-                    <ul>
-                      {(w.reps || []).map((r, i) => (
-                        <li key={i}>
-                          Set {i + 1}:{" "}
-                          <NumberAdjuster
-                            value={Number(r)}
-                            min={1}
-                            showUnit="reps"
-                            onChange={(val) => {
-                              const updatedReps = [...(w.reps || [])];
-                              updatedReps[i] = Number(val);
-                              const updated = { ...w, reps: updatedReps };
-                              if (hasWeeks) {
-                                updateWorkout(dayIdParam, updated, weekIdParam);
-                              } else {
-                                updateWorkout(dayIdParam, updated);
-                              }
-                            }}
-                          />
+
+                    {/* Numbered rows: row number | weight adjuster | reps adjuster */}
+                    <ul className="set-list">
+                      {repsArr.map((r, i) => (
+                        <li key={i} className="set-row">
+                          <span className="row-number">{i + 1}</span>
+
+                          <div className="weight-info">
+                            <NumberAdjuster
+                              value={Number(weightsArr[i] ?? 0)}
+                              min={0}
+                              showUnit="kg"
+                              onChange={(val) => {
+                                const updatedWeights = [...weightsArr];
+                                updatedWeights[i] = Number(val);
+                                const updated = { ...w, weights: updatedWeights };
+                                if (hasWeeks) {
+                                  updateWorkout(dayIdParam, updated, weekIdParam);
+                                } else {
+                                  updateWorkout(dayIdParam, updated);
+                                }
+                              }}
+                            />
+                          </div>
+
+                          <div className="set-info">
+                            <NumberAdjuster
+                              value={Number(r)}
+                              min={1}
+                              showUnit="reps"
+                              onChange={(val) => {
+                                const updatedReps = [...repsArr];
+                                updatedReps[i] = Number(val);
+                                const updated = { ...w, reps: updatedReps };
+                                if (hasWeeks) {
+                                  updateWorkout(dayIdParam, updated, weekIdParam);
+                                } else {
+                                  updateWorkout(dayIdParam, updated);
+                                }
+                              }}
+                            />
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -219,11 +265,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
         {showForm ? "Cancel" : "➕ Add Workout"}
       </button>
 
-      {showForm && (
-        <AddWorkoutForm
-          onAddWorkout={handleAddWorkout}
-        />
-      )}
+      {showForm && <AddWorkoutForm onAddWorkout={handleAddWorkout} />}
 
       <button className="back-btn" onClick={() => navigate("/")}>
         ← Back to Overview

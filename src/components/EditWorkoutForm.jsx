@@ -1,6 +1,7 @@
 // src/components/EditWorkoutForm.jsx
 import React, { useEffect } from "react";
 import useSetsAndReps from "../hooks/useSetsAndReps";
+import "./EditWorkoutForm.scss";
 
 const EditWorkoutForm = ({
   editData,

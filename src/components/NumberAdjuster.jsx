@@ -1,49 +1,50 @@
+// src/components/NumberAdjuster.jsx
 import React, { useState } from "react";
 import "./NumberAdjuster.scss";
 
-const NumberAdjuster = ({ value, onChange, min = 0, max = 999, showUnit }) => {
-  const [shake, setShake] = useState(null);
+const NumberAdjuster = ({ value, min = 0, max, step = 1, showUnit, onChange }) => {
+  const [shakeTarget, setShakeTarget] = useState(null); // "up" or "down"
 
-  const triggerShake = (dir) => {
-    setShake(dir);
-    if (navigator.vibrate) navigator.vibrate(50);
-    setTimeout(() => setShake(null), 400);
+  const triggerShake = (target) => {
+    setShakeTarget(target);
+    // Trigger haptic vibration if supported
+    if (navigator.vibrate) {
+      navigator.vibrate(100); // vibrate for 100ms
+    }
+    setTimeout(() => setShakeTarget(null), 400); // match SCSS animation duration
   };
 
-  const inc = () => {
-    const newVal = (parseInt(value, 10) || 0) + 1;
-    if (newVal > max) {
+  const handleIncrement = () => {
+    const next = max !== undefined ? Math.min(value + step, max) : value + step;
+    if (max !== undefined && value >= max) {
       triggerShake("up");
-    } else {
-      onChange(newVal);
+      return;
     }
+    onChange(next);
   };
 
-  const dec = () => {
-    const newVal = (parseInt(value, 10) || 0) - 1;
-    if (newVal < min) {
+  const handleDecrement = () => {
+    if (value <= min) {
       triggerShake("down");
-    } else {
-      onChange(newVal);
+      return;
     }
+    onChange(value - step);
   };
 
   return (
     <div className="number-adjuster cluster">
       <span className="display-value">{value}</span>
-      {showUnit && <span className="unit-label"> {showUnit}</span>}
-      <div className="arrow-cluster" role="group" aria-label="Adjust number">
+      {showUnit && <span className="unit-label">{showUnit}</span>}
+      <div className="arrow-cluster">
         <span
-          className={`arrow up ${shake === "up" ? "shake" : ""}`}
-          onClick={inc}
-          aria-label="Increase"
+          className={`arrow up ${shakeTarget === "up" ? "shake" : ""}`}
+          onClick={handleIncrement}
         >
           ▲
         </span>
         <span
-          className={`arrow down ${shake === "down" ? "shake" : ""}`}
-          onClick={dec}
-          aria-label="Decrease"
+          className={`arrow down ${shakeTarget === "down" ? "shake" : ""}`}
+          onClick={handleDecrement}
         >
           ▼
         </span>

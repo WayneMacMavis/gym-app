@@ -1,0 +1,46 @@
+@use "../styles/variables" as *;
+
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  background: $color-bg-form;
+  padding: $spacing-lg;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-xl;
+
+  input {
+    padding: $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    font-size: $font-size-base;
+  }
+
+  .save-btn {
+    background: $color-success;
+    color: $color-bg-white;
+    border: none;
+    padding: $spacing-md;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    font-size: $font-size-base;
+
+    &:hover {
+      background: $color-success-hover;
+    }
+  }
+
+  .back-btn {
+    background: $color-gray-light;
+    color: $color-bg-white;
+    border: none;
+    padding: $spacing-md;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    font-size: $font-size-small;
+
+    &:hover {
+      background: $color-gray-light-hover;
+    }
+  }
+}
