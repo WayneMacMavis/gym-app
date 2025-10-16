@@ -62,3 +62,30 @@ $color-banner-border: #fdcb6e;
 
 $color-info-blue: #0984e3;
 $color-info-blue-hover: #0652dd;
+
+// Arrow button tokens
+$arrow-up-color: $color-success;   // green
+$arrow-down-color: $color-danger;  // red
+$arrow-hover-opacity: 0.8;
+
+// Arrow button sizing tokens
+$arrow-size-sm: 0.75rem;   // small arrows
+$arrow-size-md: 1.1rem;    // default
+$arrow-size-lg: 1.1rem;    // larger arrows
+
+
+// Base colors
+$color-white: #ffffff;
+$color-black: #000000;
+$color-gray-light: #e0e0e0;
+$color-gray-dark: #555555;
+
+// Brand colors
+$color-primary: #3f51b5;
+$color-primary-hover: #303f9f;
+$color-success: #4caf50;
+$color-danger: #f44336;
+$color-danger-hover: #d32f2f;
+
+// Surface/background
+$color-surface: #f9f9f9; // <-- add this

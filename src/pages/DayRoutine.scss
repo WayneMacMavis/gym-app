@@ -46,73 +46,27 @@
     }
   }
 
-  /* Buttons wrapper: red + green closer together */
   .delete-wrapper {
     display: flex;
-    flex-direction: row;
+    flex-direction: column; // mobile: stack
     align-items: center;
-    gap: $spacing-xs; // tighter spacing between buttons
-  }
+    gap: $spacing-sm;
 
-  .delete-btn {
-    background: $color-danger;
-    border: none;
-    color: white;
-    font-size: 1rem;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &:hover {
-      background: $color-danger-hover;
-    }
-  }
-
-  .toggle-btn {
-    background: $color-success;
-    border: none;
-    color: white;
-    font-size: $font-size-small;
-    padding: 0.4rem 0.6rem;
-    border-radius: $radius-md;
-    cursor: pointer;
-
-    &:hover {
-      background: darken($color-success, 5%);
-    }
-  }
-
-  .back-btn {
-    display: block;
-    margin: 0 auto;
-    padding: $spacing-md $spacing-lg;
-    background: $color-gray-light;
-    color: white;
-    border: none;
-    border-radius: $radius-md;
-    cursor: pointer;
-    font-size: $font-size-base;
-
-    &:hover {
-      background: $color-gray-light-hover;
+    @media (min-width: 480px) {
+      flex-direction: row; // desktop: side-by-side
+      gap: $spacing-xs;
     }
   }
 }
 
-/* ===========================
-   Header row: number | weights | reps
-   =========================== */
+/* Header: number | weights | reps */
 .sets-weights-header {
   display: grid;
-  grid-template-columns: 30px 1fr 1fr; // narrower number col, weights + reps shifted left
+  grid-template-columns: 30px 1fr 1fr;
   align-items: center;
   column-gap: $spacing-xs;
   margin: $spacing-xs 0 $spacing-sm;
-  margin-left: -6px; // pull grid slightly left
+  margin-left: -6px;
 
   .header-spacer {
     grid-column: 1;
@@ -140,9 +94,7 @@
   }
 }
 
-/* ===========================
-   Rows: number | weights | reps
-   =========================== */
+/* Rows: number | weights | reps */
 .set-list {
   margin: 0;
   padding: 0;
@@ -151,12 +103,12 @@
 
 .set-row {
   display: grid;
-  grid-template-columns: 30px 1fr 1fr; // narrower number col
+  grid-template-columns: 30px 1fr 1fr;
   align-items: center;
   column-gap: $spacing-xs;
   padding: $spacing-sm 0;
   border-bottom: 1px solid $color-border-light;
-  margin-left: -6px; // align with header shift
+  margin-left: -6px;
 
   &:last-child {
     border-bottom: none;
@@ -184,20 +136,28 @@
   }
 }
 
-/* ===========================
-   Mobile polish
-   =========================== */
+/* Center the primary and secondary actions */
+.day-routine > .btn.btn-primary {
+  display: block;
+  margin: $spacing-lg auto;
+  width: auto;
+  text-align: center;
+}
+
+.day-routine > .btn.btn-secondary {
+  display: block;
+  margin: 0 auto;
+  width: auto;
+  text-align: center;
+}
+
+/* Mobile tweaks */
 @media (max-width: 420px) {
   .day-routine {
     padding: 0.75rem;
 
     .workout-card {
       padding: 0.8rem;
-    }
-
-    .delete-btn {
-      width: 32px;
-      height: 32px;
     }
   }
 
@@ -207,4 +167,59 @@
     column-gap: 4px;
     margin-left: -4px;
   }
+}
+
+/* --- NEW ADDITIONS --- */
+
+/* Delete button with progress ring */
+.delete-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .delete-icon {
+    position: relative;
+    z-index: 2;
+  }
+
+  .progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    transform: rotate(-90deg); // start stroke at top
+    z-index: 1;
+  }
+
+  .progress-ring__circle {
+    transition: stroke-dashoffset 0.2s linear;
+  }
+}
+
+/* Lifted button effect (applies to all .btn) */
+.btn {
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: all 0.15s ease;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+}
+
+/* Shake animation for NumberAdjuster arrows */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+.arrow.shake {
+  animation: shake 0.3s;
 }

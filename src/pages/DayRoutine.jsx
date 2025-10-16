@@ -9,6 +9,7 @@ import { useHoldToDelete } from "../hooks/useHoldToDelete";
 import { useDayEstimates } from "../hooks/useDayEstimates";
 import NumberAdjuster from "../components/NumberAdjuster";
 import { adjustRepsForSets } from "../hooks/useSetsAndReps";
+import Button from "../components/Button/Button";
 
 const uid = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
@@ -30,6 +31,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
 
   const addingRef = useRef(false);
 
+  // Hold-to-delete with progress
   const { holdingId, progress, handleHoldStart, handleHoldEnd } = useHoldToDelete(
     (id) => {
       if (hasWeeks) {
@@ -140,7 +142,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
                   <div>
                     <h3>{capitalizeWords(w.name)}</h3>
 
-                    {/* Header row: spacer | Weights label | Sets control */}
+                    {/* Header: spacer | Weights label | Sets control */}
                     <div className="sets-weights-header">
                       <div className="header-spacer" />
                       <div className="weights-col-label">Weights</div>
@@ -168,7 +170,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
                       </div>
                     </div>
 
-                    {/* Numbered rows: row number | weight adjuster | reps adjuster */}
+                    {/* Rows: number | weights | reps */}
                     <ul className="set-list">
                       {repsArr.map((r, i) => (
                         <li key={i} className="set-row">
@@ -219,40 +221,47 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
                   </div>
 
                   <div className="delete-wrapper">
-                    <button
+                    <Button
+                      variant="danger"
                       className="delete-btn"
-                      onMouseDown={() => handleHoldStart(w.id)}
+                      onMouseDown={() => {
+                        handleHoldStart(w.id);
+                        if (navigator.vibrate) navigator.vibrate(50);
+                      }}
                       onMouseUp={handleHoldEnd}
                       onMouseLeave={handleHoldEnd}
-                      onTouchStart={() => handleHoldStart(w.id)}
+                      onTouchStart={() => {
+                        handleHoldStart(w.id);
+                        if (navigator.vibrate) navigator.vibrate(50);
+                      }}
                       onTouchEnd={handleHoldEnd}
                       aria-label="Hold to delete"
                       title="Hold to delete"
                     >
-                      ✕
+                      <span className="delete-icon">✕</span>
                       {holdingId === w.id && (
-                        <svg className="progress-ring" width="40" height="40">
+                        <svg className="progress-ring" width="36" height="36">
                           <circle
                             className="progress-ring__circle"
                             stroke="green"
                             strokeWidth="3"
                             fill="transparent"
-                            r="18"
-                            cx="20"
-                            cy="20"
+                            r="16"
+                            cx="18"
+                            cy="18"
                             style={{
-                              strokeDasharray: 2 * Math.PI * 18,
+                              strokeDasharray: 2 * Math.PI * 16,
                               strokeDashoffset:
-                                2 * Math.PI * 18 - (progress / 100) * (2 * Math.PI * 18),
+                                2 * Math.PI * 16 - (progress / 100) * (2 * Math.PI * 16),
                             }}
                           />
                         </svg>
                       )}
-                    </button>
+                    </Button>
 
-                    <button className="toggle-btn" onClick={() => startEditing(w)}>
+                    <Button variant="primary" onClick={() => startEditing(w)}>
                       Edit
-                    </button>
+                    </Button>
                   </div>
                 </>
               )}
@@ -261,15 +270,16 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
         })}
       </div>
 
-      <button className="toggle-btn" onClick={() => setShowForm(!showForm)}>
+      {/* Stacked, centered actions (no wrapper) */}
+      <Button variant="primary" onClick={() => setShowForm(!showForm)}>
         {showForm ? "Cancel" : "➕ Add Workout"}
-      </button>
+      </Button>
 
       {showForm && <AddWorkoutForm onAddWorkout={handleAddWorkout} />}
 
-      <button className="back-btn" onClick={() => navigate("/")}>
+      <Button variant="secondary" onClick={() => navigate("/")}>
         ← Back to Overview
-      </button>
+      </Button>
     </div>
   );
 };

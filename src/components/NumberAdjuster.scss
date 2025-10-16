@@ -1,113 +1,54 @@
+// src/components/NumberAdjuster.scss
 @use "../styles/variables" as *;
 
-/* Keyframes for shake */
 @keyframes shake {
-  0%   { transform: translateX(0); }
-  25%  { transform: translateX(-3px); }
-  50%  { transform: translateX(3px); }
-  75%  { transform: translateX(-2px); }
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
   100% { transform: translateX(0); }
 }
 
-/* Pulse animation keyframes */
-@keyframes pulse {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-/* Number adjuster with side-by-side arrows */
-.number-adjuster.cluster {
-  display: inline-flex;
+.number-adjuster {
+  display: inline-grid;
+  grid-template-columns: auto auto; // value | arrows
   align-items: center;
-  gap: $spacing-sm;
+  gap: $spacing-xs;
 
-  .display-value {
-    font-size: $font-size-large;
-    font-weight: 600;
-    min-width: 28px;
+  .value {
     text-align: center;
+    font-weight: 600;
+    min-width: 2.25rem; // stabilizes width for 2-digit values
   }
 
-  .unit-label {
-    font-size: $font-size-small;
+  .unit {
+    font-size: 0.8rem;
     color: $color-gray-dark;
-    margin-left: 0.25rem;
   }
 
-  .arrow-cluster {
-    display: inline-flex;
+  .arrows {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: $spacing-xs;
-  }
-
-  .arrow {
-    cursor: pointer;
-    font-size: 1.6rem;
+    justify-content: center;
     line-height: 1;
-    user-select: none;
-    padding: $spacing-sm;
-    border-radius: $radius-md;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-                background 0.2s,
-                box-shadow 0.2s;
-
-    &.up {
-      color: $color-success;
-
-      &:hover {
-        background: rgba($color-success, 0.1);
-        box-shadow: $shadow-hover-green;
-      }
-
-      &:active {
-        background: rgba($color-success, 0.2);
-        transform: translateY(-2px) scale(0.95);
-        box-shadow: none;
-        animation: pulse 0.6s infinite;
-      }
-    }
-
-    &.down {
-      color: $color-danger;
-
-      &:hover {
-        background: rgba($color-danger, 0.1);
-        box-shadow: $shadow-hover-red;
-      }
-
-      &:active {
-        background: rgba($color-danger, 0.2);
-        transform: translateY(2px) scale(0.95);
-        box-shadow: none;
-        animation: pulse 0.6s infinite;
-      }
-    }
-
-    /* Shake when hitting min/max */
-    &.shake {
-      animation: shake 0.4s;
-    }
-  }
-}
-
-/* Mobile polish */
-@media (max-width: 420px) {
-  .number-adjuster.cluster {
-    gap: $spacing-xs;
-
-    .display-value {
-      font-size: $font-size-base;
-      min-width: 24px;
-    }
-
-    .arrow-cluster {
-      gap: 2px;
-    }
 
     .arrow {
-      font-size: 1.9rem;
-      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      color: inherit;
+
+      &.up { color: $arrow-up-color; }
+      &.down { color: $arrow-down-color; }
+
+      &.sm { font-size: $arrow-size-sm; }
+      &.md { font-size: $arrow-size-md; }
+      &.lg { font-size: $arrow-size-lg; }
+
+      &:hover { opacity: $arrow-hover-opacity; }
+      &.shake { animation: shake 0.3s; }
     }
   }
 }
