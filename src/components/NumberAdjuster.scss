@@ -39,6 +39,7 @@
       cursor: pointer;
       padding: 0;
       color: inherit;
+      margin: -3px;
 
       &.up { color: $arrow-up-color; }
       &.down { color: $arrow-down-color; }
