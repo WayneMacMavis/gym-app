@@ -43,4 +43,60 @@
       background: $color-gray-light-hover;
     }
   }
+
+  // 🔽 Suggestions dropdown for workout search
+  .input-with-suggestions {
+    position: relative;
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: $color-bg-white;
+      border: 1px solid $color-border-light;
+      border-radius: $radius-sm;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      z-index: 10;
+      box-shadow: $shadow-light;
+      max-height: 250px;
+      overflow-y: auto;
+
+      li {
+        padding: $spacing-md;
+        min-height: 44px; // 👈 mobile-friendly tap target
+        cursor: pointer;
+        transition: background 0.15s ease;
+
+        &:hover {
+          background: $color-bg-hover;
+        }
+
+        // 👇 Bounce-back press animation
+        &:active {
+          background: $color-bg-hover;
+          animation: pressFeedback 120ms ease-out;
+        }
+
+        strong {
+          display: block;
+          font-weight: 600;
+        }
+
+        .category {
+          font-size: $font-size-small;
+          color: $color-gray-dark;
+        }
+      }
+    }
+  }
+}
+
+// 🔑 Keyframes for press feedback
+@keyframes pressFeedback {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
 }

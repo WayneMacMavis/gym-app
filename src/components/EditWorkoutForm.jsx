@@ -1,6 +1,10 @@
 // src/components/EditWorkoutForm.jsx
-import React, { useEffect } from "react";
+// Form for editing an existing workout with autocomplete suggestions.
+// Mirrors AddWorkoutForm for consistency.
+
+import React, { useEffect, useState } from "react";
 import useSetsAndReps from "../hooks/useSetsAndReps";
+import { searchWorkouts } from "../utils/searchWorkouts";
 import "./EditWorkoutForm.scss";
 
 const EditWorkoutForm = ({
@@ -10,6 +14,8 @@ const EditWorkoutForm = ({
   cancelEdit,
   workoutId,
 }) => {
+  const [suggestions, setSuggestions] = useState([]);
+
   // Hook manages sets/reps based on current editData
   const { sets, reps, handleSetChange, handleRepChange } = useSetsAndReps(
     editData.sets || 3,
@@ -29,18 +35,39 @@ const EditWorkoutForm = ({
   const handleNameChange = (value) => {
     setEditData((prev) => ({
       ...prev,
-      name: value, // free typing
+      name: value,
     }));
+    setSuggestions(searchWorkouts(value));
+  };
+
+  const handleSuggestionClick = (workoutName) => {
+    setEditData((prev) => ({
+      ...prev,
+      name: workoutName,
+    }));
+    setSuggestions([]);
   };
 
   return (
     <form onSubmit={(e) => saveEdit(e, workoutId)} className="edit-form">
-      <input
-        type="text"
-        value={editData.name}
-        onChange={(e) => handleNameChange(e.target.value)}
-        placeholder="Workout name"
-      />
+      <div className="input-with-suggestions">
+        <input
+          type="text"
+          value={editData.name}
+          onChange={(e) => handleNameChange(e.target.value)}
+          placeholder="Workout name"
+        />
+        {suggestions.length > 0 && (
+          <ul className="suggestions">
+            {suggestions.map((s, i) => (
+              <li key={i} onClick={() => handleSuggestionClick(s.name)}>
+                <strong>{s.name}</strong>
+                <span className="category">{s.category}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <input
         type="number"
