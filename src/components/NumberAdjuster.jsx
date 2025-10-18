@@ -1,8 +1,19 @@
-// src/components/NumberAdjuster.jsx
+// NumberAdjuster.jsx
+// A numeric stepper with up/down arrows. Supports units (kg, reps, etc).
+// Digits and unit are split into separate spans so digits can have a fixed width.
+// The width is configurable via the `maxDigits` prop.
+
 import React, { useState } from "react";
 import "./NumberAdjuster.scss";
 
-const NumberAdjuster = ({ value, min = 0, onChange, showUnit, size = "md" }) => {
+const NumberAdjuster = ({
+  value,
+  min = 0,
+  onChange,
+  showUnit,
+  size = "md",
+  maxDigits = 2, // NEW: controls reserved width for digits
+}) => {
   const [shake, setShake] = useState(false);
 
   const increment = () => onChange(value + 1);
@@ -20,8 +31,13 @@ const NumberAdjuster = ({ value, min = 0, onChange, showUnit, size = "md" }) => 
   return (
     <div className="number-adjuster">
       <span className="value">
-        {value}
-        {showUnit && <span className="unit"> {showUnit}</span>}
+        <span
+          className="digits"
+          style={{ minWidth: `${maxDigits + 0.5}ch` }} // inline style based on prop
+        >
+          {value}
+        </span>
+        {showUnit && <span className="unit">{showUnit}</span>}
       </span>
       <div className="arrows">
         <button

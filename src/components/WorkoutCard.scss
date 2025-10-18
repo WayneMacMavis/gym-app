@@ -1,0 +1,82 @@
+@use "../styles/variables" as *;
+
+.workout-card {
+  background: $color-bg-light;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: $shadow-card;
+
+  h3 {
+    margin: 0 0 $spacing-sm;
+    font-size: $font-size-large;
+  }
+
+  .workout-time {
+    margin-top: $spacing-sm;
+    font-size: $font-size-small;
+    color: $color-gray;
+  }
+}
+
+.delete-wrapper {
+  display: flex;
+  flex-direction: column; // mobile: stack
+  align-items: center;
+  gap: $spacing-sm;
+
+  @media (min-width: 480px) {
+    flex-direction: row; // desktop: side-by-side
+    gap: $spacing-xs;
+  }
+}
+
+/* Header: number | weights | reps */
+.sets-weights-header {
+  display: grid;
+  grid-template-columns: 30px 1fr 1fr;
+  align-items: center;
+  column-gap: $spacing-xs;
+  margin: $spacing-xs 0 $spacing-sm;
+  margin-left: -6px;
+
+  .header-spacer {
+    grid-column: 1;
+  }
+
+  .weights-col-label {
+    grid-column: 2;
+    justify-self: start;
+    font-weight: 600;
+    font-size: $font-size-small;
+    color: $color-gray-dark;
+  }
+
+  .sets-control {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    label {
+      font-weight: 600;
+      font-size: $font-size-small;
+      color: $color-gray-dark;
+    }
+  }
+}
+
+/* Mobile tweaks */
+@media (max-width: 420px) {
+  .workout-card {
+    padding: 0.8rem;
+  }
+
+  .sets-weights-header {
+    grid-template-columns: 28px 1fr 1fr;
+    column-gap: 4px;
+    margin-left: -4px;
+  }
+}

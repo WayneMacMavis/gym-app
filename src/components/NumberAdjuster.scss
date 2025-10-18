@@ -1,4 +1,3 @@
-// src/components/NumberAdjuster.scss
 @use "../styles/variables" as *;
 
 @keyframes shake {
@@ -16,14 +15,21 @@
   gap: $spacing-xs;
 
   .value {
-    text-align: center;
+    display: flex;
+    align-items: baseline;
     font-weight: 600;
-    min-width: 2.25rem; // stabilizes width for 2-digit values
-  }
 
-  .unit {
-    font-size: 0.8rem;
-    color: $color-gray-dark;
+    .digits {
+      display: inline-block;
+      text-align: right;
+      // width is controlled dynamically via inline style
+    }
+
+    .unit {
+      margin-left: 0.25rem;
+      font-size: 0.8rem;
+      color: $color-gray-dark;
+    }
   }
 
   .arrows {

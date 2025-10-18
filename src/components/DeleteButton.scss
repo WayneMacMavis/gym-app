@@ -1,0 +1,29 @@
+@use "../styles/variables" as *;
+
+.delete-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .delete-icon {
+    position: relative;
+    z-index: 2;
+  }
+
+  .progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    transform: rotate(-90deg); // start stroke at top
+    z-index: 1;
+  }
+
+  .progress-ring__circle {
+    transition: stroke-dashoffset 0.2s linear;
+  }
+}
