@@ -16,7 +16,8 @@ export const workouts = [
   // Back
   { name: "Pull-Up", category: "Back" },
   { name: "Chin-Up", category: "Back" },
-  { name: "Lat Pulldown", category: "Back" },
+  { name: "Lat Pulldown(Wide Grip)", category: "Back" },
+  { name: "Lat Pulldown(Close Grip)", category: "Back" },
   { name: "Seated Row", category: "Back" },
   { name: "Barbell Row", category: "Back" },
   { name: "Dumbbell Row", category: "Back" },
@@ -47,6 +48,7 @@ export const workouts = [
 
   // Arms – Triceps
   { name: "Tricep Pushdown", category: "Triceps" },
+  { name: "Tricep Pushdown(Rope)", category: "Triceps" },
   { name: "Overhead Tricep Extension", category: "Triceps" },
   { name: "Skullcrusher", category: "Triceps" },
   { name: "Close-Grip Bench Press", category: "Triceps" },
