@@ -1,12 +1,18 @@
 @use "../styles/variables" as *;
 
 .workout-card {
+  /* Shared grid column sizes for header + rows */
+  --weights-col: auto;      // hug content instead of stretching
+  --reps-col: auto;         // hug content instead of stretching
+  --cols-gap: 4px;          // tighter gap between columns
+
   background: $color-bg-light;
   border-radius: $radius-lg;
   padding: $spacing-lg;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr auto; // left grows, right auto
+  align-items: start;
+  column-gap: 8rem;
   box-shadow: $shadow-card;
 
   h3 {
@@ -19,26 +25,58 @@
     font-size: $font-size-small;
     color: $color-gray;
   }
+
+  .collapsed-summary {
+    font-size: $font-size-small;
+    color: $color-text;
+    margin-top: $spacing-xs;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    transition: opacity 0.25s ease, height 0.25s ease;
+  }
+
+  .collapsible-content {
+    max-height: 1000px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+    will-change: max-height, opacity;
+  }
+
+  &.collapsed {
+    .collapsible-content {
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .collapsed-summary {
+      opacity: 1;
+      height: auto;
+    }
+  }
 }
 
+/* Right column buttons */
 .delete-wrapper {
   display: flex;
-  flex-direction: column; // mobile: stack
+  flex-direction: column;
   align-items: center;
   gap: $spacing-sm;
 
   @media (min-width: 480px) {
-    flex-direction: row; // desktop: side-by-side
+    flex-direction: row;
     gap: $spacing-xs;
   }
 }
 
-/* Header: number | weights | reps */
+/* Header: number | weights | sets control */
 .sets-weights-header {
   display: grid;
-  grid-template-columns: 30px 1fr 1fr;
+  grid-template-columns: var(--num-col) var(--weights-col) var(--reps-col);
   align-items: center;
-  column-gap: $spacing-xs;
+  column-gap: var(--cols-gap);
   margin: $spacing-xs 0 $spacing-sm;
   margin-left: -6px;
 
@@ -48,7 +86,6 @@
 
   .weights-col-label {
     grid-column: 2;
-    justify-self: start;
     font-weight: 600;
     font-size: $font-size-small;
     color: $color-gray-dark;
@@ -56,9 +93,9 @@
 
   .sets-control {
     grid-column: 3;
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
+    display: inline-flex;
+    align-items: baseline;
+    gap: -40px;
 
     label {
       font-weight: 600;
@@ -68,15 +105,29 @@
   }
 }
 
+/* Rows: number | weights | reps */
+.set-list {
+  margin: 0;
+  padding: 0;
+
+  .set-row {
+    display: grid;
+    grid-template-columns: var(--num-col) var(--weights-col) var(--reps-col);
+    align-items: center;
+    column-gap: var(--cols-gap);
+    margin-bottom: $spacing-xs;
+  }
+}
+
 /* Mobile tweaks */
 @media (max-width: 420px) {
   .workout-card {
     padding: 0.8rem;
+    --num-col: 24px;
+    --cols-gap: 2px; // even tighter on mobile
   }
 
   .sets-weights-header {
-    grid-template-columns: 28px 1fr 1fr;
-    column-gap: 4px;
     margin-left: -4px;
   }
 }

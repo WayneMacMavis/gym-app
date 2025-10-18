@@ -1,16 +1,10 @@
 @use "../styles/variables" as *;
 
-.set-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .set-row {
   display: grid;
-  grid-template-columns: 30px 1fr 1fr;
+  grid-template-columns: var(--num-col) var(--weights-col) var(--reps-col);
   align-items: center;
-  column-gap: $spacing-xs;
+  column-gap: 300px; // 👈 use the shared variable
   padding: $spacing-sm 0;
   border-bottom: 1px solid $color-border-light;
   margin-left: -6px;
@@ -24,6 +18,7 @@
     font-weight: 600;
     font-size: $font-size-small;
     color: $color-gray-dark;
+    text-align: center;
   }
 
   .weight-info {
@@ -41,11 +36,10 @@
   }
 }
 
-/* Mobile tweaks */
 @media (max-width: 420px) {
   .set-row {
-    grid-template-columns: 28px 1fr 1fr;
-    column-gap: 4px;
+    grid-template-columns: 24px auto auto;
+    column-gap: 2px; // tighter on mobile
     margin-left: -4px;
   }
 }

@@ -18,6 +18,24 @@
     color: $color-gray;
   }
 
+  // 👇 Container for collapse/expand toggle
+  .collapse-toggle {
+    display: inline-block;
+    margin-bottom: $spacing-md;
+    margin-left: auto; // push to right
+    background: $color-gray-light;
+    color: $color-bg-white;
+    border: none;
+    padding: $spacing-xs $spacing-md;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    font-size: $font-size-small;
+
+    &:hover {
+      background: $color-gray-light-hover;
+    }
+  }
+
   .workout-list {
     display: flex;
     flex-direction: column;
@@ -45,5 +63,11 @@
 @media (max-width: 420px) {
   .day-routine {
     padding: 0.75rem;
+  }
+
+  .day-routine .collapse-toggle {
+    width: 100%; // full-width button on small screens
+    margin-left: 0;
+    text-align: center;
   }
 }

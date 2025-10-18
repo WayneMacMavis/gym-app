@@ -1,56 +1,57 @@
 // SetRow.jsx
-// Represents a single row in a workout (set number, weight, reps).
-// Uses NumberAdjuster for inline editing of weights and reps.
+// Restored to use .set-row grid container with three columns
+// Aligns perfectly with .sets-weights-header in WorkoutCard
 
 import React from "react";
 import NumberAdjuster from "./NumberAdjuster";
-import "./SetRow.scss"; 
+import "./SetRow.scss";
 
-const SetRow = ({ index, rep, weight, workout, updateWorkout, hasWeeks, dayIdParam, weekIdParam }) => {
-  const repsArr = workout.reps || [];
-  const weightsArr = workout.weights || [];
+const SetRow = ({
+  index,
+  rep,
+  weight,
+  workout,
+  updateWorkout,
+  hasWeeks,
+  dayIdParam,
+  weekIdParam,
+}) => {
+  const handleChange = (field, value) => {
+    const updated = {
+      ...workout,
+      [field]: workout[field].map((v, i) => (i === index ? value : v)),
+    };
+    if (hasWeeks) {
+      updateWorkout(dayIdParam, updated, weekIdParam);
+    } else {
+      updateWorkout(dayIdParam, updated);
+    }
+  };
 
   return (
-    <li className="set-row">
-      <span className="row-number">{index + 1}</span>
+    <div className="set-row">
+      <div className="row-number">{index + 1}</div>
 
       <div className="weight-info">
         <NumberAdjuster
-          value={Number(weight ?? 0)}
+          value={Number(weight) || 0}
           min={0}
-          showUnit="kg"
-          onChange={(val) => {
-            const updatedWeights = [...weightsArr];
-            updatedWeights[index] = Number(val);
-            const updated = { ...workout, weights: updatedWeights };
-            if (hasWeeks) {
-              updateWorkout(dayIdParam, updated, weekIdParam);
-            } else {
-              updateWorkout(dayIdParam, updated);
-            }
-          }}
+          onChange={(val) => handleChange("weights", val)}
+          suffix="kg"
         />
       </div>
 
       <div className="set-info">
         <NumberAdjuster
-          value={Number(rep)}
-          min={1}
-          showUnit="reps"
-          onChange={(val) => {
-            const updatedReps = [...repsArr];
-            updatedReps[index] = Number(val);
-            const updated = { ...workout, reps: updatedReps };
-            if (hasWeeks) {
-              updateWorkout(dayIdParam, updated, weekIdParam);
-            } else {
-              updateWorkout(dayIdParam, updated);
-            }
-          }}
+          value={Number(rep) || 0}
+          min={0}
+          onChange={(val) => handleChange("reps", val)}
+          suffix="reps"
         />
       </div>
-    </li>
+    </div>
   );
 };
 
 export default SetRow;
+

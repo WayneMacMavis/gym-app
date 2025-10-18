@@ -2,6 +2,7 @@
 // Container for a single day's routine. Handles routing params, state, CRUD plumbing,
 // and estimate logic. Renders a list of WorkoutCard components and controls for adding
 // workouts and navigating back. Editing state is managed via useWorkoutEditor.
+// Now includes a global collapse/expand toggle for all WorkoutCards.
 
 import React, { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -27,6 +28,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
     : (program?.[dayIdParam] || []);
 
   const [showForm, setShowForm] = useState(false);
+  const [collapsed, setCollapsed] = useState(false); // 👈 new state
   const addingRef = useRef(false);
 
   // Hold-to-delete with progress
@@ -87,6 +89,16 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
         </p>
       )}
 
+      {/* 👇 Collapse/Expand toggle */}
+      {workouts.length > 0 && (
+        <Button
+          variant="secondary"
+          onClick={() => setCollapsed((prev) => !prev)}
+        >
+          {collapsed ? "Expand All" : "Collapse All"}
+        </Button>
+      )}
+
       <div className="workout-list">
         {workouts.map((w) => (
           <WorkoutCard
@@ -108,6 +120,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
             handleHoldEnd={handleHoldEnd}
             getColor={getColor}
             estimateWorkoutSeconds={estimateWorkoutSeconds}
+            collapsed={collapsed} // 👈 pass down
           />
         ))}
       </div>
