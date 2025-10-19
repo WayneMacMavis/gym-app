@@ -1,6 +1,6 @@
 // SetRow.jsx
-// Restored to use .set-row grid container with three columns
-// Aligns perfectly with .sets-weights-header in WorkoutCard
+// A single set row: index | weight adjuster | reps adjuster
+// Shows set index number in column 1.
 
 import React from "react";
 import NumberAdjuster from "./NumberAdjuster";
@@ -30,8 +30,10 @@ const SetRow = ({
 
   return (
     <div className="set-row">
+      {/* Column 1: Set number */}
       <div className="row-number">{index + 1}</div>
 
+      {/* Column 2: Weight adjuster */}
       <div className="weight-info">
         <NumberAdjuster
           value={Number(weight) || 0}
@@ -41,6 +43,7 @@ const SetRow = ({
         />
       </div>
 
+      {/* Column 3: Reps adjuster */}
       <div className="set-info">
         <NumberAdjuster
           value={Number(rep) || 0}
@@ -54,4 +57,3 @@ const SetRow = ({
 };
 
 export default SetRow;
-

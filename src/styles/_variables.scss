@@ -1,32 +1,44 @@
 // src/styles/_variables.scss
 
-// Colors
-$color-primary: #3498db;
-$color-primary-hover: #2980b9;
+// Brand colors
+$color-primary: #3f51b5;
+$color-primary-hover: #303f9f;
 
-$color-success: #27ae60;
+$color-success: #4caf50;
 $color-success-hover: #219150;
 
-$color-danger: #e74c3c;
-$color-danger-hover: #c0392b;
+$color-danger: #f44336;
+$color-danger-hover: #d32f2f;
 
-$color-gray-dark: #555;
-$color-gray: #666;
-$color-gray-light: #7f8c8d;
+// Neutral colors
+$color-white: #ffffff;
+$color-black: #000000;
+
+$color-gray-dark: #555555;
+$color-gray: #666666;
+$color-gray-light: #e0e0e0;
 $color-gray-light-hover: #636e72;
-$color-border: #ccc;
-$color-border-light: #eee;
+$color-border: #cccccc;
+$color-border-light: #eeeeee;
 
+// Backgrounds and surfaces
 $color-bg-light: #f9f9f9;
 $color-bg-form: #f0f0f0;
-$color-bg-hover: #eaeaea;       // ✅ new: hover background for buttons
-$color-bg-white: #fff;          // ✅ new: plain white background
-$color-bg-tag: #e0f7e9;         // ✅ new: tag background
+$color-bg-hover: #eaeaea;  // hover background for buttons
+$color-bg-white: #ffffff;  // plain white background
+$color-surface: #f9f9f9;   // unified surface background
 
-$color-text-dark: #222;         // ✅ new: darkest text
-$color-text: #333;              // ✅ new: standard text
+// Tags
+$color-bg-tag: #e0f7e9;    // tag background
+$color-tag-text: #2a7a4b;  // green tag text
 
-$color-tag-text: #2a7a4b;       // ✅ new: green tag text
+// Text
+$color-text-dark: #222222; // darkest text
+$color-text: #333333;      // standard text
+
+// Accent (used for highlights like Preview button)
+$color-accent: #ff9800;        // orange accent
+$color-accent-hover: #e68900;  // darker hover state
 
 // Typography
 $font-size-base: 0.95rem;
@@ -44,19 +56,16 @@ $spacing-xl: 2rem;
 $radius-sm: 4px;
 $radius-md: 6px;
 $radius-lg: 8px;
-$radius-xl: 10px;               // ✅ new: for larger cards
-
+$radius-xl: 10px; // larger cards
 
 // Shadows
 $shadow-card: 0 2px 6px rgba(0, 0, 0, 0.08);
 $shadow-hover-green: 0 2px 6px rgba(39, 174, 96, 0.3);
 $shadow-hover-red: 0 2px 6px rgba(231, 76, 60, 0.3);
 $shadow-hover-strong: 0 4px 10px rgba(0, 0, 0, 0.12);
+$shadow-light: 0 2px 4px rgba(0, 0, 0, 0.05); // subtle shadow
 
-// ✅ New subtle shadow for small cards/elements
-$shadow-light: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-// Extra colors for banners / accents
+// Info banner colors
 $color-banner-bg: #ffeaa7;
 $color-banner-border: #fdcb6e;
 
@@ -64,28 +73,11 @@ $color-info-blue: #0984e3;
 $color-info-blue-hover: #0652dd;
 
 // Arrow button tokens
-$arrow-up-color: $color-success;   // green
-$arrow-down-color: $color-danger;  // red
+$arrow-up-color: $color-success;  // green
+$arrow-down-color: $color-danger; // red
 $arrow-hover-opacity: 0.8;
 
-// Arrow button sizing tokens
-$arrow-size-sm: 0.75rem;   // small arrows
-$arrow-size-md: 1.3rem;    // default
-$arrow-size-lg: 1.1rem;    // larger arrows
-
-
-// Base colors
-$color-white: #ffffff;
-$color-black: #000000;
-$color-gray-light: #e0e0e0;
-$color-gray-dark: #555555;
-
-// Brand colors
-$color-primary: #3f51b5;
-$color-primary-hover: #303f9f;
-$color-success: #4caf50;
-$color-danger: #f44336;
-$color-danger-hover: #d32f2f;
-
-// Surface/background
-$color-surface: #f9f9f9; // <-- add this
+// Arrow sizes
+$arrow-size-sm: 0.75rem; // small arrows
+$arrow-size-md: 1.3rem;  // default
+$arrow-size-lg: 1.1rem;  // larger arrows

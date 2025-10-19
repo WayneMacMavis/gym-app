@@ -1,18 +1,19 @@
 @use "../styles/variables" as *;
 
+/* Card container and shared grid columns */
 .workout-card {
-  /* Shared grid column sizes for header + rows */
-  --weights-col: auto;      // hug content instead of stretching
-  --reps-col: auto;         // hug content instead of stretching
-  --cols-gap: 4px;          // tighter gap between columns
+  --num-col: 28px;
+  --weights-col: auto;
+  --reps-col: auto;
+  --cols-gap: 4px;
 
   background: $color-bg-light;
   border-radius: $radius-lg;
   padding: $spacing-lg;
   display: grid;
-  grid-template-columns: 1fr auto; // left grows, right auto
+  grid-template-columns: 1fr auto;
   align-items: start;
-  column-gap: 8rem;
+  column-gap: $spacing-lg;
   box-shadow: $shadow-card;
 
   h3 {
@@ -26,6 +27,13 @@
     color: $color-gray;
   }
 
+  .collapsible-content {
+    max-height: 1000px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+  }
+
   .collapsed-summary {
     font-size: $font-size-small;
     color: $color-text;
@@ -34,14 +42,16 @@
     height: 0;
     overflow: hidden;
     transition: opacity 0.25s ease, height 0.25s ease;
-  }
 
-  .collapsible-content {
-    max-height: 1000px;
-    opacity: 1;
-    overflow: hidden;
-    transition: max-height 0.35s ease, opacity 0.25s ease;
-    will-change: max-height, opacity;
+    p {
+      margin: 0 0 2px;
+      line-height: 1.3;
+
+      strong {
+        font-weight: 600;
+        color: $color-gray-dark;
+      }
+    }
   }
 
   &.collapsed {
@@ -58,17 +68,61 @@
   }
 }
 
-/* Right column buttons */
+/* Actions column */
 .delete-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: $spacing-sm;
 
-  @media (min-width: 480px) {
+  .top-actions {
+    display: flex;
     flex-direction: row;
     gap: $spacing-xs;
+
+    button {
+      flex: 0 0 auto; // natural width
+    }
   }
+
+  /* Explicit divider element to avoid Button styling conflicts */
+  .actions-divider {
+    border-top: 1px solid $color-border-light;
+    width: 100%;
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      border-color 0.3s ease,
+      opacity 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .preview-btn {
+    margin-top: $spacing-sm;
+    width: 100%;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+}
+
+/* Collapsed animations */
+.workout-card.collapsed .top-actions {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.workout-card.collapsed .actions-divider {
+  border-color: transparent;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.workout-card.collapsed .preview-btn {
+  transform: translateY(-6px);
+  transition-delay: 0.1s; // stagger after divider fade
 }
 
 /* Header: number | weights | sets control */
@@ -95,7 +149,7 @@
     grid-column: 3;
     display: inline-flex;
     align-items: baseline;
-    gap: -40px;
+    gap: 4px;
 
     label {
       font-weight: 600;
@@ -105,7 +159,7 @@
   }
 }
 
-/* Rows: number | weights | reps */
+/* Rows list wrapper */
 .set-list {
   margin: 0;
   padding: 0;
@@ -116,6 +170,60 @@
     align-items: center;
     column-gap: var(--cols-gap);
     margin-bottom: $spacing-xs;
+
+    .row-number {
+      grid-column: 1;
+      font-weight: 600;
+      font-size: $font-size-small;
+      color: $color-gray-dark;
+      text-align: center;
+    }
+
+    .weight-info {
+      grid-column: 2;
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+    }
+
+    .set-info {
+      grid-column: 3;
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+    }
+  }
+}
+
+/* Preview mode */
+.preview-mode {
+  padding: $spacing-md;
+  text-align: left;
+
+  h3 {
+    margin-bottom: $spacing-sm;
+    font-size: $font-size-large;
+  }
+
+  .description {
+    font-size: $font-size-base;
+    margin-bottom: $spacing-sm;
+    color: $color-text;
+  }
+
+  button {
+    margin-top: $spacing-sm;
+  }
+}
+
+/* Highlight Preview button when active */
+button.preview-active {
+  background-color: $color-primary;
+  color: $color-white;
+  font-weight: 600;
+
+  &:hover {
+    background-color: $color-primary-hover;
   }
 }
 
@@ -124,10 +232,62 @@
   .workout-card {
     padding: 0.8rem;
     --num-col: 24px;
-    --cols-gap: 2px; // even tighter on mobile
+    --cols-gap: 2px;
   }
 
   .sets-weights-header {
     margin-left: -4px;
   }
+
+  .set-list .set-row {
+    grid-template-columns: var(--num-col) var(--weights-col) var(--reps-col);
+    column-gap: var(--cols-gap);
+  }
+
+  .delete-wrapper {
+    align-items: stretch;
+
+    .top-actions {
+      flex-direction: row;
+
+      button {
+        width: 100%;
+      }
+    }
+
+    .preview-btn {
+      width: 100%;
+    }
+  }
+}
+
+/* ----- Minimal, scoped additions for media in preview-mode ----- */
+
+/* YouTube iframe: responsive 16:9 wrapper */
+.preview-mode .video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; // 16:9
+  height: 0;
+  overflow: hidden;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+  background: #000;
+
+  iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+}
+
+/* Local/MP4 video styling */
+.preview-mode .workout-demo {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+  background: #000; // fallback background
 }

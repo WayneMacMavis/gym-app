@@ -9,27 +9,25 @@
 }
 
 .number-adjuster {
-  display: inline-grid;
-  grid-template-columns: auto auto; // value | arrows
+  display: inline-flex;
   align-items: center;
   gap: $spacing-xs;
 
-  .value {
-    display: flex;
-    align-items: baseline;
+  /* Group digits + suffix together */
+  .value-group {
+    display: inline-flex;
+    align-items: center; // 👈 centers digits + suffix vertically
+    gap: 0.25rem;
+  }
+
+  .digits {
     font-weight: 600;
+    text-align: right;
+  }
 
-    .digits {
-      display: inline-block;
-      text-align: center;
-      // width is controlled dynamically via inline style
-    }
-
-    .unit {
-      margin-left: 0.25rem;
-      font-size: 0.8rem;
-      color: $color-gray-dark;
-    }
+  .unit {
+    font-size: 0.8rem;
+    color: $color-gray-dark;
   }
 
   .arrows {
@@ -37,7 +35,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    line-height: 1;
+    margin-left: 2px;
 
     .arrow {
       background: none;
