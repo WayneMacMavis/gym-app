@@ -249,19 +249,21 @@ button.preview-active {
 
     .top-actions {
       flex-direction: row;
+      gap: $spacing-xs;
 
       button {
-        width: 100%;
+        flex: 0 0 auto; // 👈 keep natural size
+        width: auto;    // 👈 prevent stretching
       }
     }
 
     .preview-btn {
-      width: 100%;
+      width: 100%; // 👈 only Preview stretches full width
     }
   }
 }
 
-/* ----- Minimal, scoped additions for media in preview-mode ----- */
+/* ----- Scoped additions for media in preview-mode ----- */
 
 /* YouTube iframe: responsive 16:9 wrapper */
 .preview-mode .video-wrapper {
