@@ -85,7 +85,6 @@
     }
   }
 
-  /* Explicit divider element to avoid Button styling conflicts */
   .actions-divider {
     border-top: 1px solid $color-border-light;
     width: 100%;
@@ -122,7 +121,7 @@
 
 .workout-card.collapsed .preview-btn {
   transform: translateY(-6px);
-  transition-delay: 0.1s; // stagger after divider fade
+  transition-delay: 0.1s;
 }
 
 /* Header: number | weights | sets control */
@@ -252,20 +251,33 @@ button.preview-active {
       gap: $spacing-xs;
 
       button {
-        flex: 0 0 auto; // 👈 keep natural size
-        width: auto;    // 👈 prevent stretching
+        flex: 0 0 auto;
+        width: auto;
+      }
+
+      /* 👇 Lock Delete button square */
+      .delete-button {
+        flex: 0 0 44px;   // fixed basis, no grow, no shrink
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        max-width: 44px;
+        max-height: 44px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
 
     .preview-btn {
-      width: 100%; // 👈 only Preview stretches full width
+      width: 100%;
     }
   }
 }
 
 /* ----- Scoped additions for media in preview-mode ----- */
-
-/* YouTube iframe: responsive 16:9 wrapper */
 .preview-mode .video-wrapper {
   position: relative;
   padding-bottom: 56.25%; // 16:9
@@ -284,12 +296,11 @@ button.preview-active {
   }
 }
 
-/* Local/MP4 video styling */
 .preview-mode .workout-demo {
   width: 100%;
   max-height: 220px;
   object-fit: cover;
   border-radius: $radius-md;
   margin-bottom: $spacing-sm;
-  background: #000; // fallback background
+  background: #000;
 }
