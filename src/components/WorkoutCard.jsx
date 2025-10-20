@@ -1,5 +1,4 @@
-// WorkoutCard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import EditWorkoutForm from "./EditWorkoutForm";
 import NumberAdjuster from "./NumberAdjuster";
 import DeleteButton from "./DeleteButton";
@@ -13,17 +12,12 @@ import "./WorkoutCard.scss";
 // Helper: convert YouTube watch/short links into embed with autoplay/mute/loop
 const getYouTubeEmbedUrl = (url, start, end) => {
   if (!url) return null;
-
-  // Match both ?v=VIDEOID and youtu.be/VIDEOID
   const idMatch = url.match(/(?:v=|\.be\/)([a-zA-Z0-9_-]{11})/);
   const videoId = idMatch ? idMatch[1] : null;
-  if (!videoId) return url; // fallback if not a YouTube link
-
+  if (!videoId) return url;
   let embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&loop=1&playlist=${videoId}`;
-
   if (start) embedUrl += `&start=${start}`;
   if (end) embedUrl += `&end=${end}`;
-
   return embedUrl;
 };
 
@@ -48,40 +42,88 @@ const WorkoutCard = ({
   collapsed,
 }) => {
   const [preview, setPreview] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // ✅ Track online/offline state
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const repsArr = workout.reps || [];
-  const weightsArr = workout.weights || [];
-  const workoutMinutes = Math.round(estimateWorkoutSeconds(workout) / 60);
+  const weightsArr =
+    workout.weights && workout.weights.length
+      ? workout.weights
+      : Array(repsArr.length).fill(0);
 
+  const workoutMinutes = Math.round(estimateWorkoutSeconds(workout) / 60);
   const workoutMeta = workouts.find((w) => w.name === workout.name);
 
-  const togglePreview = () => setPreview((prev) => !prev);
+  const togglePreview = () => {
+    setVideoError(false);
+    setPreview((prev) => !prev);
+  };
 
   const renderMedia = () => {
-    if (!workoutMeta?.videoUrl) return null;
+    // ✅ If offline or video error, show fallback image
+    if (!isOnline || videoError || !workoutMeta?.videoUrl) {
+      return workoutMeta?.imageUrl ? (
+        <img
+          src={workoutMeta.imageUrl}
+          alt={`${workout.name} fallback`}
+          className="video-fallback"
+        />
+      ) : null;
+    }
 
+    // ✅ YouTube case
     if (
       workoutMeta.videoUrl.includes("youtube") ||
       workoutMeta.videoUrl.includes("youtu.be")
     ) {
+      const idMatch = workoutMeta.videoUrl.match(
+        /(?:v=|\.be\/)([a-zA-Z0-9_-]{11})/
+      );
+      const videoId = idMatch ? idMatch[1] : null;
+      if (!videoId) return null;
+
+      const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
       return (
         <div className="video-wrapper">
-          <iframe
-            src={getYouTubeEmbedUrl(
-              workoutMeta.videoUrl,
-              workoutMeta.videoStart,
-              workoutMeta.videoEnd
-            )}
-            title={`${workout.name} demo`}
-            frameBorder="0"
-            allow="autoplay; encrypted-media"
-            allowFullScreen
-          />
+          {preview ? (
+            <iframe
+              src={getYouTubeEmbedUrl(
+                workoutMeta.videoUrl,
+                workoutMeta.videoStart,
+                workoutMeta.videoEnd
+              )}
+              title={`${workout.name} demo`}
+              frameBorder="0"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              onError={() => setVideoError(true)}
+            />
+          ) : (
+            <img
+              src={thumbUrl}
+              alt={`${workout.name} thumbnail`}
+              className="video-fallback"
+              onError={() => setVideoError(true)}
+            />
+          )}
         </div>
       );
     }
 
-    // Local MP4 fallback
+    // ✅ Local MP4 fallback
     return (
       <video
         className="workout-demo"
@@ -90,7 +132,8 @@ const WorkoutCard = ({
         loop
         muted
         playsInline
-        preload="none"
+        preload="auto"
+        onError={() => setVideoError(true)}
       />
     );
   };
@@ -106,26 +149,20 @@ const WorkoutCard = ({
           workoutId={workout.id}
         />
       ) : preview ? (
-        // ---------------- Preview Mode ----------------
         <div className="preview-mode">
           <h3>{capitalizeWords(workout.name)}</h3>
-
           {renderMedia()}
-
           <p className="description">
             {workoutMeta?.description || "No description available."}
           </p>
-
           <Button variant="secondary" onClick={togglePreview}>
             Back to Workout
           </Button>
         </div>
       ) : (
-        // ---------------- Normal Mode ----------------
         <>
           <div>
             <h3>{capitalizeWords(workout.name)}</h3>
-
             <div className="collapsed-summary">
               <p>
                 <strong>Weights:</strong>{" "}
@@ -138,7 +175,6 @@ const WorkoutCard = ({
                 {workout.sets}: {repsArr.map((r) => `${r} reps`).join(", ")}
               </p>
             </div>
-
             <div className="collapsible-content">
               <div className="sets-weights-header">
                 <div className="header-spacer" />
@@ -174,7 +210,6 @@ const WorkoutCard = ({
                   />
                 </div>
               </div>
-
               <div className="set-list">
                 {repsArr.map((r, i) => (
                   <SetRow
@@ -190,7 +225,6 @@ const WorkoutCard = ({
                   />
                 ))}
               </div>
-
               <p
                 className="workout-time"
                 style={{ color: getColor(workoutMinutes) }}
@@ -199,8 +233,6 @@ const WorkoutCard = ({
               </p>
             </div>
           </div>
-
-          {/* ---------------- Actions Column ---------------- */}
           <div className="delete-wrapper">
             <div className="top-actions">
               <DeleteButton
@@ -214,9 +246,7 @@ const WorkoutCard = ({
                 Edit
               </Button>
             </div>
-
             <div className="actions-divider" />
-
             <Button
               variant="secondary"
               className={`preview-btn ${preview ? "preview-active" : ""}`}

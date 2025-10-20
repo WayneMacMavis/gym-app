@@ -20,6 +20,8 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
       name: capitalizeWords(name),
       sets,
       reps,
+      // ✅ Initialize weights array so NumberAdjuster works immediately
+      weights: Array(sets).fill(0),
     };
     onAddWorkout(workout);
 

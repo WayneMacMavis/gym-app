@@ -9,6 +9,7 @@ export const workouts = [
   name: "Bench Press",
   category: "Chest",
   description: "The bench press is a foundational compound movement that primarily targets the chest, shoulders, and triceps. Performed lying flat on a bench, you lower the barbell to mid‑chest under control and then press it upward until arms are extended. Keep your feet planted firmly on the floor, shoulder blades retracted against the bench, and maintain a stable torso without excessive arching. This setup ensures maximum chest activation while protecting your shoulders and lower back.",
+  imageUrl: "/assets/images/benchpress.jpg",
   videoUrl: "youtube.com/watch?v=t3f2L7NRRUY",
     videoStart: 10, // seconds
   videoEnd: 50    // seconds
