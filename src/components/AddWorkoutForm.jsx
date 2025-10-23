@@ -3,8 +3,9 @@
 // Suggestions come from searchWorkouts(), which returns objects { name, category }.
 
 import React, { useState, useEffect } from "react";
-import useSetsRepsWeights from "../hooks/useSetsRepsWeights";
 import { capitalizeWords } from "../utils/format";
+import { searchWorkouts } from "../utils/searchWorkouts";
+import useSetsRepsWeights from "../hooks/useSetsRepsWeights";
 import "./AddWorkoutForm.scss";
 
 const AddWorkoutForm = ({ onAddWorkout }) => {
@@ -17,25 +18,40 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
     handleWeightChange,
   } = useSetsRepsWeights(3, [12, 10, 8], [0, 0, 0], "");
 
-  // Local string buffers for smooth typing
+  const [name, setName] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
   const [repInputs, setRepInputs] = useState(reps.map(String));
   const [weightInputs, setWeightInputs] = useState(weights.map(String));
-  const [name, setName] = useState("");
 
-  // Keep buffers in sync when sets change or hook adjusts arrays
+  // Keep buffers in sync when sets or arrays change
   useEffect(() => {
-    setRepInputs((prev) => {
-      const next = [...reps.map(String)];
-      // preserve user-in-progress edits if lengths match
-      return next.length === prev.length ? prev : next;
-    });
-    setWeightInputs((prev) => {
-      const next = [...weights.map(String)];
-      return next.length === prev.length ? prev : next;
-    });
-  }, [sets, reps, weights]);
+    setRepInputs(reps.map(String));
+    setWeightInputs(weights.map(String));
+  }, [reps, weights]);
 
-  const onSubmit = (e) => {
+  const handleNameChange = async (e) => {
+    const val = e.target.value;
+    setName(val);
+
+    if (val.trim().length > 0) {
+      try {
+        const results = await searchWorkouts(val);
+        setSuggestions(results);
+      } catch (err) {
+        console.error("Error fetching workouts:", err);
+        setSuggestions([]);
+      }
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (workoutName) => {
+    setName(workoutName);
+    setSuggestions([]);
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     onAddWorkout({
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -45,27 +61,40 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
       weights,
     });
     setName("");
+    setSuggestions([]);
     handleSetChange(3);
   };
 
   return (
-    <form className="add-form" onSubmit={onSubmit}>
-      <label>
-        Workout name
-        <input
-          type="text"
-          placeholder="Workout name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </label>
+    <form onSubmit={handleSubmit} className="add-form">
+      <div className="input-with-suggestions">
+        <label>
+          Workout name
+          <input
+            type="text"
+            placeholder="Workout name"
+            value={name}
+            onChange={handleNameChange}
+          />
+        </label>
+        {suggestions.length > 0 && (
+          <ul className="suggestions">
+            {suggestions.map((s, i) => (
+              <li key={i} onClick={() => handleSuggestionClick(s.name)}>
+                <strong>{s.name}</strong>
+                <span className="category">{s.category}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <label>
         Number of sets
         <input
           type="number"
-          min={1}
           value={sets}
+          min={1}
           onChange={(e) => handleSetChange(Number(e.target.value))}
         />
       </label>
@@ -77,7 +106,6 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
 
       {Array.from({ length: sets }).map((_, i) => (
         <div key={i} className="set-row">
-          {/* Reps input: string while typing, numeric in hook */}
           <input
             type="text"
             inputMode="numeric"
@@ -90,7 +118,6 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
                 next[i] = val;
                 return next;
               });
-              // only push numeric when valid; otherwise let user type freely
               const num = Number(val);
               if (!Number.isNaN(num)) handleRepChange(i, num);
             }}
@@ -105,7 +132,6 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
             }}
           />
 
-          {/* Weight input: same approach */}
           <input
             type="text"
             inputMode="decimal"
@@ -134,7 +160,10 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
         </div>
       ))}
 
-      <button type="submit" className="save-btn">Save</button>
+      <div className="form-actions">
+        <button type="submit" className="save-btn">Save</button>
+        <button type="button" className="back-btn">Back</button>
+      </div>
     </form>
   );
 };
