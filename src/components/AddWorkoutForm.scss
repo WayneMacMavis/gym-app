@@ -17,6 +17,38 @@
     font-size: $font-size-base;
   }
 
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    font-size: $font-size-small;
+    font-weight: 500;
+  }
+
+  .set-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-sm;
+    font-size: $font-size-small;
+    font-weight: 600;
+    margin-top: $spacing-sm;
+    margin-bottom: $spacing-xs;
+
+    span {
+      text-align: left;
+    }
+  }
+
+  .set-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-sm;
+
+    input {
+      background: $color-bg-white;
+    }
+  }
+
   .save-btn {
     background: $color-success;
     color: $color-bg-white;
@@ -25,6 +57,7 @@
     border-radius: $radius-sm;
     cursor: pointer;
     font-size: $font-size-base;
+    width: 100%;
 
     &:hover {
       background: $color-success-hover;
@@ -39,9 +72,30 @@
     border-radius: $radius-sm;
     cursor: pointer;
     font-size: $font-size-small;
+    width: 100%;
 
     &:hover {
       background: $color-gray-light-hover;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    flex-direction: column; /* ✅ stack vertically on mobile */
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+  }
+
+  /* On larger screens, switch back to row layout */
+  @media (min-width: 768px) {
+    .form-actions {
+      flex-direction: row;
+      justify-content: flex-end;
+
+      .save-btn,
+      .back-btn {
+        width: auto;
+      }
     }
   }
 }

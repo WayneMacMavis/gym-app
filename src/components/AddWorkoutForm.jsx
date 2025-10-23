@@ -1,86 +1,137 @@
-// AddWorkoutForm.jsx
+// src/components/AddWorkoutForm.jsx
 // Form for adding a workout with autocomplete suggestions.
 // Suggestions come from searchWorkouts(), which returns objects { name, category }.
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import useSetsRepsWeights from "../hooks/useSetsRepsWeights";
 import { capitalizeWords } from "../utils/format";
-import useSetsAndReps from "../hooks/useSetsAndReps";
-import { searchWorkouts } from "../utils/searchWorkouts";
 import "./AddWorkoutForm.scss";
 
 const AddWorkoutForm = ({ onAddWorkout }) => {
-  const [name, setName] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const { sets, reps, handleSetChange, handleRepChange } = useSetsAndReps(3, [12, 10, 8]);
+  const {
+    sets,
+    reps,
+    weights,
+    handleSetChange,
+    handleRepChange,
+    handleWeightChange,
+  } = useSetsRepsWeights(3, [12, 10, 8], [0, 0, 0], "");
 
-  const handleSubmit = (e) => {
+  // Local string buffers for smooth typing
+  const [repInputs, setRepInputs] = useState(reps.map(String));
+  const [weightInputs, setWeightInputs] = useState(weights.map(String));
+  const [name, setName] = useState("");
+
+  // Keep buffers in sync when sets change or hook adjusts arrays
+  useEffect(() => {
+    setRepInputs((prev) => {
+      const next = [...reps.map(String)];
+      // preserve user-in-progress edits if lengths match
+      return next.length === prev.length ? prev : next;
+    });
+    setWeightInputs((prev) => {
+      const next = [...weights.map(String)];
+      return next.length === prev.length ? prev : next;
+    });
+  }, [sets, reps, weights]);
+
+  const onSubmit = (e) => {
     e.preventDefault();
-    const workout = {
+    onAddWorkout({
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       name: capitalizeWords(name),
       sets,
       reps,
-      // ✅ Initialize weights array so NumberAdjuster works immediately
-      weights: Array(sets).fill(0),
-    };
-    onAddWorkout(workout);
-
-    // reset
+      weights,
+    });
     setName("");
-    setSuggestions([]);
     handleSetChange(3);
-    [12, 10, 8].forEach((val, idx) => handleRepChange(idx, val));
-  };
-
-  const handleNameChange = (e) => {
-    const val = e.target.value;
-    setName(val);
-    setSuggestions(searchWorkouts(val));
-  };
-
-  const handleSuggestionClick = (workoutName) => {
-    setName(workoutName);
-    setSuggestions([]);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="add-form">
-      <div className="input-with-suggestions">
+    <form className="add-form" onSubmit={onSubmit}>
+      <label>
+        Workout name
         <input
           type="text"
           placeholder="Workout name"
           value={name}
-          onChange={handleNameChange}
+          onChange={(e) => setName(e.target.value)}
         />
-        {suggestions.length > 0 && (
-          <ul className="suggestions">
-            {suggestions.map((s, i) => (
-              <li key={i} onClick={() => handleSuggestionClick(s.name)}>
-                <strong>{s.name}</strong>
-                <span className="category">{s.category}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+      </label>
+
+      <label>
+        Number of sets
+        <input
+          type="number"
+          min={1}
+          value={sets}
+          onChange={(e) => handleSetChange(Number(e.target.value))}
+        />
+      </label>
+
+      <div className="set-header">
+        <span>Reps</span>
+        <span>Weight</span>
       </div>
 
-      <input
-        type="number"
-        placeholder="Number of sets"
-        value={sets}
-        min={1}
-        onChange={(e) => handleSetChange(Number(e.target.value))}
-      />
+      {Array.from({ length: sets }).map((_, i) => (
+        <div key={i} className="set-row">
+          {/* Reps input: string while typing, numeric in hook */}
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder={`Set ${i + 1}`}
+            value={repInputs[i] ?? ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              setRepInputs((prev) => {
+                const next = [...prev];
+                next[i] = val;
+                return next;
+              });
+              // only push numeric when valid; otherwise let user type freely
+              const num = Number(val);
+              if (!Number.isNaN(num)) handleRepChange(i, num);
+            }}
+            onBlur={(e) => {
+              const num = Number(e.target.value);
+              handleRepChange(i, Number.isNaN(num) ? 0 : num);
+              setRepInputs((prev) => {
+                const next = [...prev];
+                next[i] = Number.isNaN(num) ? "" : String(num);
+                return next;
+              });
+            }}
+          />
 
-      {reps.map((rep, i) => (
-        <input
-          key={i}
-          type="number"
-          placeholder={`Reps for set ${i + 1}`}
-          value={rep}
-          min={1}
-          onChange={(e) => handleRepChange(i, Number(e.target.value))}
-        />
+          {/* Weight input: same approach */}
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="kg"
+            value={weightInputs[i] ?? ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              setWeightInputs((prev) => {
+                const next = [...prev];
+                next[i] = val;
+                return next;
+              });
+              const num = Number(val);
+              if (!Number.isNaN(num)) handleWeightChange(i, num);
+            }}
+            onBlur={(e) => {
+              const num = Number(e.target.value);
+              handleWeightChange(i, Number.isNaN(num) ? 0 : num);
+              setWeightInputs((prev) => {
+                const next = [...prev];
+                next[i] = Number.isNaN(num) ? "" : String(num);
+                return next;
+              });
+            }}
+          />
+        </div>
       ))}
 
       <button type="submit" className="save-btn">Save</button>

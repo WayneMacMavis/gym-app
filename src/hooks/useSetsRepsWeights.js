@@ -1,9 +1,9 @@
-// src/hooks/useSetsAndReps.js
+// src/hooks/useSetsRepsWeights.js
 import { useState, useEffect } from "react";
 import { getRule } from "../rules/progressionRules";
 
 /**
- * Adjust an existing reps array when sets change.
+ * Adjust reps array when sets change.
  * - Preserves existing values where possible.
  * - Fills new slots with defaults from progression rules.
  * - Trims if sets decrease.
@@ -25,17 +25,33 @@ export const adjustRepsForSets = (name, prevReps = [], newSets) => {
   });
 };
 
-export default function useSetsAndReps(
+/**
+ * Adjust weights array when sets change.
+ * - Preserves existing values where possible.
+ * - Fills new slots with 0.
+ * - Trims if sets decrease.
+ */
+export const adjustWeightsForSets = (prevWeights = [], newSets) => {
+  return Array.from({ length: newSets }, (_, i) => {
+    const v = prevWeights[i];
+    return v !== undefined && v !== null ? Number(v) : 0;
+  });
+};
+
+export default function useSetsRepsWeights(
   initialSets = 3,
   initialReps = [12, 10, 8],
+  initialWeights = [0, 0, 0],
   exerciseName = ""
 ) {
   const [sets, setSets] = useState(initialSets);
   const [reps, setReps] = useState(initialReps);
+  const [weights, setWeights] = useState(initialWeights);
 
-  // Whenever sets or exercise name changes, adjust reps accordingly
+  // Whenever sets or exercise name changes, adjust reps + weights
   useEffect(() => {
     setReps((prev) => adjustRepsForSets(exerciseName, prev, sets));
+    setWeights((prev) => adjustWeightsForSets(prev, sets));
   }, [sets, exerciseName]);
 
   const handleSetChange = (newCount) => setSets(newCount);
@@ -48,5 +64,13 @@ export default function useSetsAndReps(
     });
   };
 
-  return { sets, reps, handleSetChange, handleRepChange };
+  const handleWeightChange = (index, newVal) => {
+    setWeights((prev) => {
+      const updated = [...prev];
+      updated[index] = Number(newVal);
+      return updated;
+    });
+  };
+
+  return { sets, reps, weights, handleSetChange, handleRepChange, handleWeightChange };
 }

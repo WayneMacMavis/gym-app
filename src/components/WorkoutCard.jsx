@@ -5,7 +5,7 @@ import DeleteButton from "./DeleteButton";
 import SetRow from "./SetRow";
 import Button from "./Button/Button";
 import { capitalizeWords } from "../utils/format";
-import { adjustRepsForSets } from "../hooks/useSetsAndReps";
+import { adjustRepsForSets } from "../hooks/useSetsRepsWeights";
 import { workouts } from "../data/workouts";
 import "./WorkoutCard.scss";
 
