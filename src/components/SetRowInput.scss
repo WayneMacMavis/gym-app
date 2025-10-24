@@ -1,0 +1,30 @@
+.set-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.unit-input {
+  position: relative;
+  display: inline-block;
+
+  input {
+    width: 90px;
+    padding: 0.4rem 0.5rem;
+    padding-right: 2.5rem; // make space for the unit
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: left;
+  }
+
+  .unit {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: #666;
+    pointer-events: none; // so clicks still focus the input
+  }
+}

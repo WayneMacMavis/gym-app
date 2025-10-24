@@ -13,7 +13,6 @@
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: start;
-  column-gap: $spacing-lg;
   box-shadow: $shadow-card;
 
   h3 {

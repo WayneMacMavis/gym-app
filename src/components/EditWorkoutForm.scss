@@ -10,11 +10,19 @@
   border-radius: $radius-md;
   margin-bottom: $spacing-xl;
 
+  /* ✅ Center the form and prevent overflow */
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+
   input {
     padding: $spacing-md;
     border: 1px solid $color-border;
     border-radius: $radius-sm;
     font-size: $font-size-base;
+    box-sizing: border-box; /* ✅ padding doesn’t push width */
   }
 
   label {
@@ -27,12 +35,13 @@
 
   .set-header {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; /* ✅ always two columns */
     gap: $spacing-sm;
     font-size: $font-size-small;
     font-weight: 600;
     margin-top: $spacing-sm;
     margin-bottom: $spacing-xs;
+    width: 100%;
 
     span {
       text-align: left;
@@ -41,11 +50,14 @@
 
   .set-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; /* ✅ always two columns */
     gap: $spacing-sm;
+    width: 100%;
 
     input {
       background: $color-bg-white;
+      width: 100%;   /* ✅ inputs respect their grid cell */
+      min-width: 0;  /* ✅ prevents right-side push */
     }
   }
 

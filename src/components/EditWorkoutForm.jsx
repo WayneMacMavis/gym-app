@@ -1,10 +1,11 @@
 // src/components/EditWorkoutForm.jsx
 // Form for editing an existing workout with autocomplete suggestions.
-// Mirrors AddWorkoutForm for consistency.
+// Mirrors AddWorkoutForm for consistency, including string-buffer inputs for smooth typing.
 
 import React, { useEffect, useState } from "react";
 import useSetsRepsWeights from "../hooks/useSetsRepsWeights";
 import { searchWorkouts } from "../utils/searchWorkouts";
+import SetRowInput from "./SetRowInput";
 import "./EditWorkoutForm.scss";
 
 const EditWorkoutForm = ({
@@ -16,7 +17,7 @@ const EditWorkoutForm = ({
 }) => {
   const [suggestions, setSuggestions] = useState([]);
 
-  // Hook manages sets/reps/weights
+  // Hook manages sets/reps/weights with progression adjustments
   const {
     sets,
     reps,
@@ -31,11 +32,11 @@ const EditWorkoutForm = ({
     editData.name
   );
 
-  // Local string buffers for smooth typing
+  // Local string buffers for smooth typing (prevent cursor jump)
   const [repInputs, setRepInputs] = useState(reps.map(String));
   const [weightInputs, setWeightInputs] = useState(weights.map(String));
 
-  // Keep parent editData in sync with hook state
+  // Keep parent editData in sync with hook state (numeric arrays)
   useEffect(() => {
     setEditData((prev) => ({
       ...prev,
@@ -45,18 +46,30 @@ const EditWorkoutForm = ({
     }));
   }, [sets, reps, weights, setEditData]);
 
-  // Keep buffers in sync when sets or arrays change
+  // Keep buffers in sync when hook arrays change
   useEffect(() => {
     setRepInputs(reps.map(String));
     setWeightInputs(weights.map(String));
   }, [reps, weights]);
 
-  const handleNameChange = (value) => {
+  // Async search for suggestions (consistent with Add form)
+  const handleNameChange = async (value) => {
     setEditData((prev) => ({
       ...prev,
       name: value,
     }));
-    setSuggestions(searchWorkouts(value));
+
+    if (value.trim().length > 0) {
+      try {
+        const results = await searchWorkouts(value);
+        setSuggestions(results);
+      } catch (err) {
+        console.error("Error fetching workouts:", err);
+        setSuggestions([]);
+      }
+    } else {
+      setSuggestions([]);
+    }
   };
 
   const handleSuggestionClick = (workoutName) => {
@@ -101,66 +114,49 @@ const EditWorkoutForm = ({
         />
       </label>
 
-      {/* ✅ Header row for reps/weights */}
+      {/* Header row for reps/weights */}
       <div className="set-header">
         <span>Reps</span>
         <span>Weight</span>
       </div>
 
       {Array.from({ length: sets }).map((_, i) => (
-        <div key={i} className="set-row">
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder={`Set ${i + 1}`}
-            value={repInputs[i] ?? ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              setRepInputs((prev) => {
-                const next = [...prev];
-                next[i] = val;
-                return next;
-              });
-              const num = Number(val);
-              if (!Number.isNaN(num)) handleRepChange(i, num);
-            }}
-            onBlur={(e) => {
-              const num = Number(e.target.value);
-              handleRepChange(i, Number.isNaN(num) ? 0 : num);
-              setRepInputs((prev) => {
-                const next = [...prev];
-                next[i] = Number.isNaN(num) ? "" : String(num);
-                return next;
-              });
-            }}
-          />
-
-          <input
-            type="text"
-            inputMode="decimal"
-            placeholder="kg"
-            value={weightInputs[i] ?? ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              setWeightInputs((prev) => {
-                const next = [...prev];
-                next[i] = val;
-                return next;
-              });
-              const num = Number(val);
-              if (!Number.isNaN(num)) handleWeightChange(i, num);
-            }}
-            onBlur={(e) => {
-              const num = Number(e.target.value);
-              handleWeightChange(i, Number.isNaN(num) ? 0 : num);
-              setWeightInputs((prev) => {
-                const next = [...prev];
-                next[i] = Number.isNaN(num) ? "" : String(num);
-                return next;
-              });
-            }}
-          />
-        </div>
+        <SetRowInput
+          key={i}
+          index={i}
+          repValue={repInputs[i]}
+          weightValue={weightInputs[i]}
+          onRepChange={(idx, val, normalize = false) => {
+            // Update local buffer
+            setRepInputs((prev) => {
+              const next = [...prev];
+              next[idx] = val;
+              return next;
+            });
+            // Sync numeric to hook
+            const num = Number(val);
+            if (normalize) {
+              handleRepChange(idx, Number.isNaN(num) ? 0 : num);
+            } else if (!Number.isNaN(num)) {
+              handleRepChange(idx, num);
+            }
+          }}
+          onWeightChange={(idx, val, normalize = false) => {
+            // Update local buffer
+            setWeightInputs((prev) => {
+              const next = [...prev];
+              next[idx] = val;
+              return next;
+            });
+            // Sync numeric to hook
+            const num = Number(val);
+            if (normalize) {
+              handleWeightChange(idx, Number.isNaN(num) ? 0 : num);
+            } else if (!Number.isNaN(num)) {
+              handleWeightChange(idx, num);
+            }
+          }}
+        />
       ))}
 
       <div className="edit-actions">

@@ -1,10 +1,4 @@
-// DayRoutine.jsx
-// Container for a single day's routine. Handles routing params, state, CRUD plumbing,
-// and estimate logic. Renders a list of WorkoutCard components and controls for adding
-// workouts and navigating back. Editing state is managed via useWorkoutEditor.
-// Now includes a global collapse/expand toggle for all WorkoutCards.
-
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./DayRoutine.scss";
 import AddWorkoutForm from "../components/AddWorkoutForm";
@@ -14,8 +8,10 @@ import { useDayEstimates } from "../hooks/useDayEstimates";
 import { useWorkoutEditor } from "../hooks/useWorkoutEditor";
 import { formatWorkout } from "../utils/workouts";
 import Button from "../components/Button/Button";
+import { useProgram } from "../context/ProgramContext";
 
-const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkout }) => {
+const DayRoutine = () => {
+  const { programs, addWorkout, deleteWorkout, updateWorkout } = useProgram();
   const params = useParams();
   const navigate = useNavigate();
 
@@ -25,13 +21,11 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
   const hasWeeks = Array.isArray(programs) && programs.length > 0;
   const workouts = hasWeeks
     ? (programs[weekIdParam]?.[dayIdParam] || [])
-    : (program?.[dayIdParam] || []);
+    : [];
 
   const [showForm, setShowForm] = useState(false);
-  const [collapsed, setCollapsed] = useState(false); // 👈 new state
-  const addingRef = useRef(false);
+  const [collapsed, setCollapsed] = useState(false);
 
-  // Hold-to-delete with progress
   const { holdingId, progress, handleHoldStart, handleHoldEnd } = useHoldToDelete(
     (id) => {
       if (hasWeeks) {
@@ -43,11 +37,9 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
     2000
   );
 
-  // Estimates
   const { estimateWorkoutSeconds, estimateDayMinutes, getColor } = useDayEstimates();
   const totalMinutes = workouts.length ? estimateDayMinutes(workouts) : null;
 
-  // Editing state machine
   const {
     editingId,
     editData,
@@ -57,23 +49,29 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
     cancelEdit,
   } = useWorkoutEditor(updateWorkout, dayIdParam, weekIdParam, hasWeeks);
 
-  const handleAddWorkout = (workout) => {
-    if (addingRef.current) return;
-    addingRef.current = true;
+  // ✅ Debounced add logic to prevent duplicates
+  const handleAddWorkout = (() => {
+    let lastId = null;
 
-    const formatted = formatWorkout(workout);
+    return (workout) => {
+      const formatted = formatWorkout(workout);
 
-    if (hasWeeks) {
-      addWorkout(dayIdParam, formatted, weekIdParam);
-    } else {
-      addWorkout(dayIdParam, formatted);
-    }
+      if (formatted.id === lastId) {
+        console.warn("Duplicate add prevented:", formatted.id);
+        return;
+      }
 
-    setShowForm(false);
-    setTimeout(() => {
-      addingRef.current = false;
-    }, 0);
-  };
+      lastId = formatted.id;
+
+      if (hasWeeks) {
+        addWorkout(dayIdParam, formatted, weekIdParam);
+      } else {
+        addWorkout(dayIdParam, formatted);
+      }
+
+      setShowForm(false);
+    };
+  })();
 
   return (
     <div className="day-routine">
@@ -89,7 +87,6 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
         </p>
       )}
 
-      {/* 👇 Collapse/Expand toggle */}
       {workouts.length > 0 && (
         <Button
           variant="secondary"
@@ -120,7 +117,7 @@ const DayRoutine = ({ program, programs, addWorkout, deleteWorkout, updateWorkou
             handleHoldEnd={handleHoldEnd}
             getColor={getColor}
             estimateWorkoutSeconds={estimateWorkoutSeconds}
-            collapsed={collapsed} // 👈 pass down
+            collapsed={collapsed}
           />
         ))}
       </div>

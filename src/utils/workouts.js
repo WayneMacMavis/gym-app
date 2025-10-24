@@ -9,7 +9,7 @@ export const formatWorkout = (workout, idOverride) => ({
   id:
     idOverride ||
     workout.id ||
-    `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    `${Date.now()}-${Math.random().toString(36).slice(2)}-${crypto.randomUUID?.() || ""}`,
   name: capitalizeWords(workout.name),
   reps: (workout.reps || []).map(Number),
   weights: (workout.weights || []).map(Number),

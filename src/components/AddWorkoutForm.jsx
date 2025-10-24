@@ -6,6 +6,8 @@ import React, { useState, useEffect } from "react";
 import { capitalizeWords } from "../utils/format";
 import { searchWorkouts } from "../utils/searchWorkouts";
 import useSetsRepsWeights from "../hooks/useSetsRepsWeights";
+import SetRowInput from "./SetRowInput";
+import { formatWorkout } from "../utils/workouts";
 import "./AddWorkoutForm.scss";
 
 const AddWorkoutForm = ({ onAddWorkout }) => {
@@ -22,8 +24,8 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [repInputs, setRepInputs] = useState(reps.map(String));
   const [weightInputs, setWeightInputs] = useState(weights.map(String));
+  const [submitted, setSubmitted] = useState(false); // ✅ new flag
 
-  // Keep buffers in sync when sets or arrays change
   useEffect(() => {
     setRepInputs(reps.map(String));
     setWeightInputs(weights.map(String));
@@ -53,16 +55,31 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAddWorkout({
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+
+    if (submitted) {
+      console.warn("Duplicate submission blocked");
+      return;
+    }
+
+    setSubmitted(true); // ✅ block further submits
+
+    const rawWorkout = {
       name: capitalizeWords(name),
       sets,
       reps,
       weights,
-    });
+    };
+
+    const formatted = formatWorkout(rawWorkout);
+    onAddWorkout(formatted);
+
+    // ✅ Reset form state
     setName("");
     setSuggestions([]);
     handleSetChange(3);
+
+    // Optional: reset flag after short delay
+    setTimeout(() => setSubmitted(false), 1000);
   };
 
   return (
@@ -105,59 +122,38 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
       </div>
 
       {Array.from({ length: sets }).map((_, i) => (
-        <div key={i} className="set-row">
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder={`Set ${i + 1}`}
-            value={repInputs[i] ?? ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              setRepInputs((prev) => {
-                const next = [...prev];
-                next[i] = val;
-                return next;
-              });
-              const num = Number(val);
-              if (!Number.isNaN(num)) handleRepChange(i, num);
-            }}
-            onBlur={(e) => {
-              const num = Number(e.target.value);
-              handleRepChange(i, Number.isNaN(num) ? 0 : num);
-              setRepInputs((prev) => {
-                const next = [...prev];
-                next[i] = Number.isNaN(num) ? "" : String(num);
-                return next;
-              });
-            }}
-          />
-
-          <input
-            type="text"
-            inputMode="decimal"
-            placeholder="kg"
-            value={weightInputs[i] ?? ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              setWeightInputs((prev) => {
-                const next = [...prev];
-                next[i] = val;
-                return next;
-              });
-              const num = Number(val);
-              if (!Number.isNaN(num)) handleWeightChange(i, num);
-            }}
-            onBlur={(e) => {
-              const num = Number(e.target.value);
-              handleWeightChange(i, Number.isNaN(num) ? 0 : num);
-              setWeightInputs((prev) => {
-                const next = [...prev];
-                next[i] = Number.isNaN(num) ? "" : String(num);
-                return next;
-              });
-            }}
-          />
-        </div>
+        <SetRowInput
+          key={i}
+          index={i}
+          repValue={repInputs[i]}
+          weightValue={weightInputs[i]}
+          onRepChange={(idx, val, normalize = false) => {
+            setRepInputs((prev) => {
+              const next = [...prev];
+              next[idx] = val;
+              return next;
+            });
+            const num = Number(val);
+            if (normalize) {
+              handleRepChange(idx, Number.isNaN(num) ? 0 : num);
+            } else if (!Number.isNaN(num)) {
+              handleRepChange(idx, num);
+            }
+          }}
+          onWeightChange={(idx, val, normalize = false) => {
+            setWeightInputs((prev) => {
+              const next = [...prev];
+              next[idx] = val;
+              return next;
+            });
+            const num = Number(val);
+            if (normalize) {
+              handleWeightChange(idx, Number.isNaN(num) ? 0 : num);
+            } else if (!Number.isNaN(num)) {
+              handleWeightChange(idx, num);
+            }
+          }}
+        />
       ))}
 
       <div className="form-actions">
