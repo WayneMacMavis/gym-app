@@ -1,5 +1,5 @@
 @use "../styles/variables" as *;
-@use "../styles/suggestions"; // shared dropdown styles
+@use "../styles/suggestions"; // shared dropdown styles for .input-with-suggestions
 
 .edit-form {
   display: flex;
@@ -9,20 +9,22 @@
   padding: $spacing-lg;
   border-radius: $radius-md;
   margin-bottom: $spacing-xl;
-
-  /* ✅ Center the form and prevent overflow */
-  width: 100%;
   max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
   box-sizing: border-box;
+  position: relative; // for overlay
 
   input {
     padding: $spacing-md;
     border: 1px solid $color-border;
     border-radius: $radius-sm;
     font-size: $font-size-base;
-    box-sizing: border-box; /* ✅ padding doesn’t push width */
+    box-sizing: border-box;
+
+    &:disabled {
+      background: $color-bg-disabled;
+      color: $color-text-light;
+      cursor: not-allowed;
+    }
   }
 
   label {
@@ -33,15 +35,22 @@
     font-weight: 500;
   }
 
+  /* Autocomplete suggestions — styles provided by @use "../styles/suggestions" */
+  .input-with-suggestions {
+    position: relative;
+
+    // If you need local overrides, you can add them here, e.g.:
+    // .suggestions { max-height: 250px; }
+  }
+
   .set-header {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* ✅ always two columns */
+    grid-template-columns: 1fr 1fr;
     gap: $spacing-sm;
     font-size: $font-size-small;
     font-weight: 600;
     margin-top: $spacing-sm;
     margin-bottom: $spacing-xs;
-    width: 100%;
 
     span {
       text-align: left;
@@ -50,14 +59,41 @@
 
   .set-row {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* ✅ always two columns */
+    grid-template-columns: 1fr 1fr;
     gap: $spacing-sm;
     width: 100%;
+    position: relative; // enables lock icon
 
     input {
       background: $color-bg-white;
-      width: 100%;   /* ✅ inputs respect their grid cell */
-      min-width: 0;  /* ✅ prevents right-side push */
+      width: 100%;
+      min-width: 0;
+
+      &:disabled {
+        background: $color-bg-disabled;
+        color: $color-text-light;
+        cursor: not-allowed;
+      }
+    }
+
+    &.locked {
+      opacity: 0.6;
+
+      input {
+        cursor: not-allowed;
+      }
+
+      /* Small lock icon to indicate disabled state */
+      &::after {
+        content: "🔒";
+        position: absolute;
+        top: 50%;
+        right: -1.5rem; // adjust as needed based on layout
+        transform: translateY(-50%);
+        font-size: 0.9rem;
+        color: #666;
+        pointer-events: none;
+      }
     }
   }
 
@@ -74,6 +110,12 @@
     &:hover {
       background: $color-success-hover;
     }
+
+    &:disabled {
+      background: $color-border-muted;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
   }
 
   .back-btn {
@@ -89,16 +131,21 @@
     &:hover {
       background: $color-gray-light-hover;
     }
+
+    &:disabled {
+      background: $color-border-muted;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
   }
 
   .edit-actions {
     display: flex;
-    flex-direction: column; /* ✅ stack vertically on mobile */
+    flex-direction: column;
     gap: $spacing-sm;
     margin-top: $spacing-md;
   }
 
-  /* On larger screens, switch back to row layout */
   @media (min-width: 768px) {
     .edit-actions {
       flex-direction: row;
@@ -109,5 +156,24 @@
         width: auto;
       }
     }
+  }
+
+  /* Locked overlay for entire form */
+  &.locked::after {
+    content: "🔒 Locked";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4); // or use a design token if available
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-md;
+    pointer-events: none;
   }
 }

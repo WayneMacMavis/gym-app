@@ -8,6 +8,7 @@ import { searchWorkouts } from "../utils/searchWorkouts";
 import useSetsRepsWeights from "../hooks/useSetsRepsWeights";
 import SetRowInput from "./SetRowInput";
 import { formatWorkout } from "../utils/workouts";
+import { useProgram } from "../context/ProgramContext"; // ✅ lock state
 import "./AddWorkoutForm.scss";
 
 const AddWorkoutForm = ({ onAddWorkout }) => {
@@ -20,11 +21,13 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
     handleWeightChange,
   } = useSetsRepsWeights(3, [12, 10, 8], [0, 0, 0], "");
 
+  const { locked } = useProgram(); // ✅ consume lock state
+
   const [name, setName] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [repInputs, setRepInputs] = useState(reps.map(String));
   const [weightInputs, setWeightInputs] = useState(weights.map(String));
-  const [submitted, setSubmitted] = useState(false); // ✅ new flag
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     setRepInputs(reps.map(String));
@@ -56,12 +59,17 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (locked) {
+      console.warn("Program is locked. Cannot add workouts.");
+      return;
+    }
+
     if (submitted) {
       console.warn("Duplicate submission blocked");
       return;
     }
 
-    setSubmitted(true); // ✅ block further submits
+    setSubmitted(true);
 
     const rawWorkout = {
       name: capitalizeWords(name),
@@ -73,17 +81,18 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
     const formatted = formatWorkout(rawWorkout);
     onAddWorkout(formatted);
 
-    // ✅ Reset form state
     setName("");
     setSuggestions([]);
     handleSetChange(3);
 
-    // Optional: reset flag after short delay
     setTimeout(() => setSubmitted(false), 1000);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="add-form">
+    <form
+      onSubmit={handleSubmit}
+      className={`add-form ${locked ? "locked" : ""}`} // ✅ add locked class
+    >
       <div className="input-with-suggestions">
         <label>
           Workout name
@@ -92,9 +101,10 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
             placeholder="Workout name"
             value={name}
             onChange={handleNameChange}
+            disabled={locked}
           />
         </label>
-        {suggestions.length > 0 && (
+        {suggestions.length > 0 && !locked && (
           <ul className="suggestions">
             {suggestions.map((s, i) => (
               <li key={i} onClick={() => handleSuggestionClick(s.name)}>
@@ -113,6 +123,7 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
           value={sets}
           min={1}
           onChange={(e) => handleSetChange(Number(e.target.value))}
+          disabled={locked}
         />
       </label>
 
@@ -128,6 +139,7 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
           repValue={repInputs[i]}
           weightValue={weightInputs[i]}
           onRepChange={(idx, val, normalize = false) => {
+            if (locked) return;
             setRepInputs((prev) => {
               const next = [...prev];
               next[idx] = val;
@@ -141,6 +153,7 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
             }
           }}
           onWeightChange={(idx, val, normalize = false) => {
+            if (locked) return;
             setWeightInputs((prev) => {
               const next = [...prev];
               next[idx] = val;
@@ -153,12 +166,17 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
               handleWeightChange(idx, num);
             }
           }}
+          disabled={locked} // ✅ pass lock state down
         />
       ))}
 
       <div className="form-actions">
-        <button type="submit" className="save-btn">Save</button>
-        <button type="button" className="back-btn">Back</button>
+        <button type="submit" className="save-btn" disabled={locked}>
+          Save
+        </button>
+        <button type="button" className="back-btn">
+          Back
+        </button>
       </div>
     </form>
   );

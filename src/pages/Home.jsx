@@ -1,3 +1,6 @@
+// src/pages/Home.jsx
+// Program overview page with lock toggle aligned to inputs.
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useProgram } from "../context/ProgramContext";
@@ -6,27 +9,17 @@ import "./Home.scss";
 const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { programs, numWeeks, numDays, updateStructure } = useProgram();
+  const { programs, numWeeks, numDays, updateStructure, locked, setLocked } =
+    useProgram();
 
   const [selectedWeek, setSelectedWeek] = useState(0);
   const [weeksInput, setWeeksInput] = useState(String(numWeeks));
   const [daysInput, setDaysInput] = useState(String(numDays));
 
-  // ✅ initialize lock state from localStorage
-  const [locked, setLocked] = useState(() => {
-    const saved = localStorage.getItem("programLocked");
-    return saved ? JSON.parse(saved) : false;
-  });
-
   useEffect(() => {
     setWeeksInput(String(numWeeks));
     setDaysInput(String(numDays));
   }, [numWeeks, numDays]);
-
-  // ✅ persist lock state whenever it changes
-  useEffect(() => {
-    localStorage.setItem("programLocked", JSON.stringify(locked));
-  }, [locked]);
 
   const handleWeeksChange = (e) => {
     if (locked) return;
@@ -87,11 +80,43 @@ const Home = () => {
             onChange={handleDaysChange}
           />
         </label>
+
+        {/* Lock toggle button */}
         <button
           className={`lock-toggle ${locked ? "locked" : ""}`}
           onClick={() => setLocked(!locked)}
+          aria-label={locked ? "Unlock program" : "Lock program"}
+          type="button"
         >
-          {locked ? "🔒 Locked" : "🔓 Unlocked"}
+          {locked ? (
+            // Closed lock
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          ) : (
+            // Open lock
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+            </svg>
+          )}
         </button>
       </div>
 

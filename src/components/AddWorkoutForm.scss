@@ -11,6 +11,7 @@
   margin-bottom: $spacing-xl;
   max-width: 100%; /* ✅ prevent form from exceeding viewport */
   box-sizing: border-box;
+  position: relative; /* ✅ allows overlay positioning */
 
   input {
     padding: $spacing-md;
@@ -18,6 +19,12 @@
     border-radius: $radius-sm;
     font-size: $font-size-base;
     box-sizing: border-box; /* ✅ ensures padding doesn’t push width */
+
+    &:disabled {
+      background: $color-bg-disabled;
+      color: $color-text-light;
+      cursor: not-allowed;
+    }
   }
 
   label {
@@ -26,6 +33,10 @@
     gap: $spacing-xs;
     font-size: $font-size-small;
     font-weight: 500;
+  }
+
+  .input-with-suggestions {
+    position: relative;
   }
 
   .set-header {
@@ -52,6 +63,32 @@
       background: $color-bg-white;
       width: 100%; /* ✅ inputs respect their grid cell */
       min-width: 0; /* ✅ prevents overflow on narrow screens */
+
+      &:disabled {
+        background: $color-bg-disabled;
+        color: $color-text-light;
+        cursor: not-allowed;
+      }
+    }
+
+    &.locked {
+      opacity: 0.6; /* ✅ visually dim the row when locked */
+
+      input {
+        cursor: not-allowed; /* ✅ blocked cursor */
+      }
+
+      /* ✅ small lock icon to indicate disabled state */
+      &::after {
+        content: "🔒";
+        position: absolute;
+        top: 50%;
+        right: -1.5rem; /* adjust if needed */
+        transform: translateY(-50%);
+        font-size: 0.9rem;
+        color: #666;
+        pointer-events: none;
+      }
     }
   }
 
@@ -68,6 +105,12 @@
     &:hover {
       background: $color-success-hover;
     }
+
+    &:disabled {
+      background: $color-border-muted;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
   }
 
   .back-btn {
@@ -82,6 +125,12 @@
 
     &:hover {
       background: $color-gray-light-hover;
+    }
+
+    &:disabled {
+      background: $color-border-muted;
+      cursor: not-allowed;
+      opacity: 0.7;
     }
   }
 
@@ -103,5 +152,24 @@
         width: auto;
       }
     }
+  }
+
+  /* ✅ Locked state overlay for entire form */
+  &.locked::after {
+    content: "🔒 Locked";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4); /* use a token if you have one */
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-md;
+    pointer-events: none; /* overlay is visual only */
   }
 }

@@ -54,6 +54,27 @@
 
       &:hover { opacity: $arrow-hover-opacity; }
       &.shake { animation: shake 0.3s; }
+
+      &:disabled {
+        color: $color-text-light;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+  }
+
+  /* ✅ Locked state */
+  &.locked {
+    opacity: 0.6;
+
+    .digits,
+    .unit {
+      color: $color-text-light;
+    }
+
+    .arrow {
+      cursor: not-allowed;
+      pointer-events: none; // block clicks
     }
   }
 }

@@ -1,11 +1,10 @@
 // src/components/EditWorkoutForm.jsx
-// Form for editing an existing workout with autocomplete suggestions.
-// Mirrors AddWorkoutForm for consistency, including string-buffer inputs for smooth typing.
 
 import React, { useEffect, useState } from "react";
 import useSetsRepsWeights from "../hooks/useSetsRepsWeights";
 import { searchWorkouts } from "../utils/searchWorkouts";
 import SetRowInput from "./SetRowInput";
+import { useProgram } from "../context/ProgramContext"; // ✅ lock state
 import "./EditWorkoutForm.scss";
 
 const EditWorkoutForm = ({
@@ -16,8 +15,8 @@ const EditWorkoutForm = ({
   workoutId,
 }) => {
   const [suggestions, setSuggestions] = useState([]);
+  const { locked } = useProgram(); // ✅ consume lock state
 
-  // Hook manages sets/reps/weights with progression adjustments
   const {
     sets,
     reps,
@@ -32,11 +31,9 @@ const EditWorkoutForm = ({
     editData.name
   );
 
-  // Local string buffers for smooth typing (prevent cursor jump)
   const [repInputs, setRepInputs] = useState(reps.map(String));
   const [weightInputs, setWeightInputs] = useState(weights.map(String));
 
-  // Keep parent editData in sync with hook state (numeric arrays)
   useEffect(() => {
     setEditData((prev) => ({
       ...prev,
@@ -46,13 +43,11 @@ const EditWorkoutForm = ({
     }));
   }, [sets, reps, weights, setEditData]);
 
-  // Keep buffers in sync when hook arrays change
   useEffect(() => {
     setRepInputs(reps.map(String));
     setWeightInputs(weights.map(String));
   }, [reps, weights]);
 
-  // Async search for suggestions (consistent with Add form)
   const handleNameChange = async (value) => {
     setEditData((prev) => ({
       ...prev,
@@ -81,7 +76,17 @@ const EditWorkoutForm = ({
   };
 
   return (
-    <form onSubmit={(e) => saveEdit(e, workoutId)} className="edit-form">
+    <form
+      onSubmit={(e) => {
+        if (locked) {
+          e.preventDefault();
+          console.warn("Program is locked. Cannot save edits.");
+          return;
+        }
+        saveEdit(e, workoutId);
+      }}
+      className={`edit-form ${locked ? "locked" : ""}`} // ✅ add locked class
+    >
       <div className="input-with-suggestions">
         <label>
           Workout name
@@ -90,9 +95,10 @@ const EditWorkoutForm = ({
             value={editData.name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Workout name"
+            disabled={locked}
           />
         </label>
-        {suggestions.length > 0 && (
+        {suggestions.length > 0 && !locked && (
           <ul className="suggestions">
             {suggestions.map((s, i) => (
               <li key={i} onClick={() => handleSuggestionClick(s.name)}>
@@ -111,10 +117,10 @@ const EditWorkoutForm = ({
           value={sets}
           min={1}
           onChange={(e) => handleSetChange(Number(e.target.value))}
+          disabled={locked}
         />
       </label>
 
-      {/* Header row for reps/weights */}
       <div className="set-header">
         <span>Reps</span>
         <span>Weight</span>
@@ -127,13 +133,12 @@ const EditWorkoutForm = ({
           repValue={repInputs[i]}
           weightValue={weightInputs[i]}
           onRepChange={(idx, val, normalize = false) => {
-            // Update local buffer
+            if (locked) return;
             setRepInputs((prev) => {
               const next = [...prev];
               next[idx] = val;
               return next;
             });
-            // Sync numeric to hook
             const num = Number(val);
             if (normalize) {
               handleRepChange(idx, Number.isNaN(num) ? 0 : num);
@@ -142,13 +147,12 @@ const EditWorkoutForm = ({
             }
           }}
           onWeightChange={(idx, val, normalize = false) => {
-            // Update local buffer
+            if (locked) return;
             setWeightInputs((prev) => {
               const next = [...prev];
               next[idx] = val;
               return next;
             });
-            // Sync numeric to hook
             const num = Number(val);
             if (normalize) {
               handleWeightChange(idx, Number.isNaN(num) ? 0 : num);
@@ -156,11 +160,14 @@ const EditWorkoutForm = ({
               handleWeightChange(idx, num);
             }
           }}
+          disabled={locked} // ✅ pass lock state down
         />
       ))}
 
       <div className="edit-actions">
-        <button type="submit" className="save-btn">Save</button>
+        <button type="submit" className="save-btn" disabled={locked}>
+          Save
+        </button>
         <button type="button" className="back-btn" onClick={cancelEdit}>
           Cancel
         </button>

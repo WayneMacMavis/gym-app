@@ -1,3 +1,4 @@
+// src/context/ProgramContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { loadProgram, saveProgram } from "../utils/storage";
 
@@ -15,18 +16,33 @@ export const ProgramProvider = ({ children }) => {
     return initial;
   });
 
+  // ✅ Lock state persisted in localStorage
+  const [locked, setLocked] = useState(() => {
+    try {
+      const saved = localStorage.getItem("programLocked");
+      return saved ? JSON.parse(saved) : false;
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
     if (Array.isArray(programs) && programs.length > 0) {
       saveProgram(programs); // ✅ saves full array
     }
   }, [programs]);
 
+  useEffect(() => {
+    localStorage.setItem("programLocked", JSON.stringify(locked));
+  }, [locked]);
+
+  // ✅ Only block structure changes when locked
   const updateStructure = (weeks, days) => {
+    if (locked) return; // prevent changes when locked
     setNumWeeks(weeks);
     setNumDays(days);
 
     const newPrograms = [];
-
     for (let w = 0; w < weeks; w++) {
       const week = {};
       for (let d = 1; d <= days; d++) {
@@ -39,6 +55,7 @@ export const ProgramProvider = ({ children }) => {
     saveProgram(newPrograms); // ✅ save all weeks
   };
 
+  // ✅ Workouts remain editable regardless of lock
   const addWorkout = (dayNumber, workout) => {
     setPrograms((prev) => {
       const updated = [...prev];
@@ -101,6 +118,8 @@ export const ProgramProvider = ({ children }) => {
         addWorkout,
         deleteWorkout,
         updateWorkout,
+        locked,
+        setLocked, // ✅ expose lock state
       }}
     >
       {children}
