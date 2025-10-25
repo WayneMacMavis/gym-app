@@ -9,7 +9,7 @@ export const ProgramProvider = ({ children }) => {
   const [numDays, setNumDays] = useState(3);
 
   const [programs, setPrograms] = useState(() => {
-    const initial = loadProgram(); // ✅ loads full array
+    const initial = loadProgram(); // ✅ loads full array from storage
     const firstWeek = initial[0] || {};
     setNumWeeks(initial.length || 1);
     setNumDays(Object.keys(firstWeek).length || 3);
@@ -36,54 +36,66 @@ export const ProgramProvider = ({ children }) => {
     localStorage.setItem("programLocked", JSON.stringify(locked));
   }, [locked]);
 
-  // ✅ Only block structure changes when locked
-  const updateStructure = (weeks, days) => {
+  // ✅ Update structure but preserve existing workouts
+  const updateStructure = (weeks, days, prevProgramsOverride) => {
     if (locked) return; // prevent changes when locked
     setNumWeeks(weeks);
     setNumDays(days);
 
-    const newPrograms = [];
-    for (let w = 0; w < weeks; w++) {
-      const week = {};
-      for (let d = 1; d <= days; d++) {
-        week[d] = [];
-      }
-      newPrograms.push(week);
-    }
+    setPrograms((prev) => {
+      const base = prevProgramsOverride || prev;
+      const newPrograms = [];
 
-    setPrograms(newPrograms);
-    saveProgram(newPrograms); // ✅ save all weeks
+      for (let w = 0; w < weeks; w++) {
+        const prevWeek = base[w] || {};
+        const newWeek = {};
+
+        for (let d = 1; d <= days; d++) {
+          // ✅ Preserve existing workouts if available
+          newWeek[d] = prevWeek[d] || [];
+        }
+
+        newPrograms.push(newWeek);
+      }
+
+      saveProgram(newPrograms);
+      return newPrograms;
+    });
   };
 
   // ✅ Workouts remain editable regardless of lock
-  const addWorkout = (dayNumber, workout) => {
+  const addWorkout = (dayNumber, workout, weekIndex = 0) => {
     setPrograms((prev) => {
       const updated = [...prev];
+      const week = updated[weekIndex] || {};
       const dayKey = String(dayNumber);
 
-      if (!Array.isArray(updated[0][dayKey])) {
-        updated[0][dayKey] = [];
+      if (!Array.isArray(week[dayKey])) {
+        week[dayKey] = [];
       }
 
-      const alreadyExists = updated[0][dayKey].some((w) => w.id === workout.id);
+      const alreadyExists = week[dayKey].some((w) => w.id === workout.id);
       if (alreadyExists) {
         console.warn("Workout already exists:", workout.id);
         return prev;
       }
 
-      updated[0][dayKey] = [...updated[0][dayKey], workout];
+      week[dayKey] = [...week[dayKey], workout];
+      updated[weekIndex] = week;
       saveProgram(updated);
       return updated;
     });
   };
 
-  const deleteWorkout = (dayNumber, workoutId) => {
+  const deleteWorkout = (dayNumber, workoutId, weekIndex = 0) => {
     setPrograms((prev) => {
       const updated = [...prev];
+      const week = updated[weekIndex] || {};
       const dayKey = String(dayNumber);
 
-      if (Array.isArray(updated[0][dayKey])) {
-        updated[0][dayKey] = updated[0][dayKey].filter((w) => w.id !== workoutId);
+      if (Array.isArray(week[dayKey])) {
+        week[dayKey] = week[dayKey].filter((w) => w.id !== workoutId);
+        updated[weekIndex] = week;
         saveProgram(updated);
       }
 
@@ -91,15 +103,17 @@ export const ProgramProvider = ({ children }) => {
     });
   };
 
-  const updateWorkout = (dayNumber, updatedWorkout) => {
+  const updateWorkout = (dayNumber, updatedWorkout, weekIndex = 0) => {
     setPrograms((prev) => {
       const updated = [...prev];
+      const week = updated[weekIndex] || {};
       const dayKey = String(dayNumber);
 
-      if (Array.isArray(updated[0][dayKey])) {
-        updated[0][dayKey] = updated[0][dayKey].map((w) =>
+      if (Array.isArray(week[dayKey])) {
+        week[dayKey] = week[dayKey].map((w) =>
           w.id === updatedWorkout.id ? updatedWorkout : w
         );
+        updated[weekIndex] = week;
         saveProgram(updated);
       }
 

@@ -20,6 +20,24 @@
     font-size: $font-size-large;
   }
 
+  /* ✅ Title row with inline muscle icon */
+  .workout-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    .muscle-icon {
+      margin: 5px;
+      width: 80px;
+      height: 62px;
+      border-radius: $radius-sm;
+      border: 1px solid $color-border-light;
+      object-fit: cover;
+      flex-shrink: 0;
+      opacity: 0.8;
+    }
+  }
+
   .workout-time {
     margin-top: $spacing-sm;
     font-size: $font-size-small;

@@ -15,8 +15,9 @@ const DayRoutine = () => {
   const params = useParams();
   const navigate = useNavigate();
 
-  const weekIdParam = params.weekId ? parseInt(params.weekId, 10) - 1 : null;
-  const dayIdParam = params.dayId ? String(parseInt(params.dayId, 10)) : null;
+  // ✅ Ensure weekIdParam is a number index, dayIdParam is a string key
+  const weekIdParam = params.weekId ? parseInt(params.weekId, 10) - 1 : 0;
+  const dayIdParam = params.dayId ? String(parseInt(params.dayId, 10)) : "1";
 
   const hasWeeks = Array.isArray(programs) && programs.length > 0;
   const workouts = hasWeeks
@@ -97,29 +98,43 @@ const DayRoutine = () => {
       )}
 
       <div className="workout-list">
-        {workouts.map((w) => (
-          <WorkoutCard
-            key={w.id}
-            workout={w}
-            editingId={editingId}
-            editData={editData}
-            setEditData={setEditData}
-            saveEdit={saveEdit}
-            cancelEdit={cancelEdit}
-            startEditing={startEditing}
-            updateWorkout={updateWorkout}
-            hasWeeks={hasWeeks}
-            dayIdParam={dayIdParam}
-            weekIdParam={weekIdParam}
-            holdingId={holdingId}
-            progress={progress}
-            handleHoldStart={handleHoldStart}
-            handleHoldEnd={handleHoldEnd}
-            getColor={getColor}
-            estimateWorkoutSeconds={estimateWorkoutSeconds}
-            collapsed={collapsed}
-          />
-        ))}
+        {workouts.map((w) => {
+          const repsArr = w.reps || [];
+          const weightsArr = w.weights && w.weights.length ? w.weights : Array(repsArr.length).fill(0);
+          const totalWeight = weightsArr.reduce((sum, wt) => sum + (wt || 0), 0);
+          const totalReps = repsArr.reduce((sum, r) => sum + (r || 0), 0);
+
+          return (
+            <div key={w.id} className="workout-wrapper">
+              <WorkoutCard
+                workout={w}
+                editingId={editingId}
+                editData={editData}
+                setEditData={setEditData}
+                saveEdit={saveEdit}
+                cancelEdit={cancelEdit}
+                startEditing={startEditing}
+                updateWorkout={updateWorkout}
+                hasWeeks={hasWeeks}
+                dayIdParam={dayIdParam}
+                weekIdParam={weekIdParam}
+                holdingId={holdingId}
+                progress={progress}
+                handleHoldStart={handleHoldStart}
+                handleHoldEnd={handleHoldEnd}
+                getColor={getColor}
+                estimateWorkoutSeconds={estimateWorkoutSeconds}
+                collapsed={collapsed}
+              />
+
+              {/* ✅ Summary moved below the card */}
+              <div className="workout-summary-inline">
+                <span>Total Reps: {totalReps}</span>
+                <span>Total Weight: {totalWeight} kg</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <Button variant="primary" onClick={() => setShowForm(!showForm)}>

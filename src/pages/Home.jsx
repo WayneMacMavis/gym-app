@@ -28,7 +28,8 @@ const Home = () => {
 
     const parsed = Number(val);
     if (!Number.isNaN(parsed) && parsed >= 1 && parsed !== numWeeks) {
-      updateStructure(parsed, numDays);
+      // ✅ Persist workouts when updating structure
+      updateStructure(parsed, numDays, programs);
       setSelectedWeek(0);
       navigate("/");
     }
@@ -41,7 +42,8 @@ const Home = () => {
 
     const parsed = Number(val);
     if (!Number.isNaN(parsed) && parsed >= 1 && parsed !== numDays) {
-      updateStructure(numWeeks, parsed);
+      // ✅ Persist workouts when updating structure
+      updateStructure(numWeeks, parsed, programs);
       setSelectedWeek(0);
       navigate("/");
     }

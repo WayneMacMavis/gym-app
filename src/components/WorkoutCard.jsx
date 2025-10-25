@@ -45,7 +45,7 @@ const WorkoutCard = ({
   const [videoError, setVideoError] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // ✅ Track online/offline state
+  // Track online/offline state
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -66,13 +66,16 @@ const WorkoutCard = ({
   const workoutMinutes = Math.round(estimateWorkoutSeconds(workout) / 60);
   const workoutMeta = workouts.find((w) => w.name === workout.name);
 
+  // Totals
+  const totalWeight = weightsArr.reduce((sum, w) => sum + (w || 0), 0);
+  const totalReps = repsArr.reduce((sum, r) => sum + (r || 0), 0);
+
   const togglePreview = () => {
     setVideoError(false);
     setPreview((prev) => !prev);
   };
 
   const renderMedia = () => {
-    // ✅ If offline or video error, show fallback image
     if (!isOnline || videoError || !workoutMeta?.videoUrl) {
       return workoutMeta?.imageUrl ? (
         <img
@@ -83,7 +86,6 @@ const WorkoutCard = ({
       ) : null;
     }
 
-    // ✅ YouTube case
     if (
       workoutMeta.videoUrl.includes("youtube") ||
       workoutMeta.videoUrl.includes("youtu.be")
@@ -123,7 +125,6 @@ const WorkoutCard = ({
       );
     }
 
-    // ✅ Local MP4 fallback
     return (
       <video
         className="workout-demo"
@@ -149,8 +150,18 @@ const WorkoutCard = ({
           workoutId={workout.id}
         />
       ) : preview ? (
+        // ✅ PREVIEW CARD: video + description only
         <div className="preview-mode">
-          <h3>{capitalizeWords(workout.name)}</h3>
+          <h3 className="workout-title">
+            {capitalizeWords(workout.name)}
+            {workoutMeta?.imageUrl && (
+              <img
+                src={workoutMeta.imageUrl}
+                alt={`${workout.name} target muscles`}
+                className="muscle-icon"
+              />
+            )}
+          </h3>
           {renderMedia()}
           <p className="description">
             {workoutMeta?.description || "No description available."}
@@ -160,21 +171,25 @@ const WorkoutCard = ({
           </Button>
         </div>
       ) : (
+        // ✅ MAIN CARD: details left, actions right
         <>
           <div>
-            <h3>{capitalizeWords(workout.name)}</h3>
+            <h3 className="workout-title">
+              {capitalizeWords(workout.name)}
+              {workoutMeta?.imageUrl && (
+                <img
+                  src={workoutMeta.imageUrl}
+                  alt={`${workout.name} target muscles`}
+                  className="muscle-icon"
+                />
+              )}
+            </h3>
+
             <div className="collapsed-summary">
-              <p>
-                <strong>Weights:</strong>{" "}
-                {weightsArr.length
-                  ? weightsArr.map((w) => `${w}kg`).join(", ")
-                  : "—"}
-              </p>
-              <p>
-                <strong>Sets:</strong>{" "}
-                {workout.sets}: {repsArr.map((r) => `${r} reps`).join(", ")}
-              </p>
+              <p><strong>Total Reps:</strong> {totalReps}</p>
+              <p><strong>Total Weight:</strong> {totalWeight} kg</p>
             </div>
+
             <div className="collapsible-content">
               <div className="sets-weights-header">
                 <div className="header-spacer" />
@@ -210,6 +225,7 @@ const WorkoutCard = ({
                   />
                 </div>
               </div>
+
               <div className="set-list">
                 {repsArr.map((r, i) => (
                   <SetRow
@@ -225,6 +241,7 @@ const WorkoutCard = ({
                   />
                 ))}
               </div>
+
               <p
                 className="workout-time"
                 style={{ color: getColor(workoutMinutes) }}
@@ -233,6 +250,7 @@ const WorkoutCard = ({
               </p>
             </div>
           </div>
+
           <div className="delete-wrapper">
             <div className="top-actions">
               <DeleteButton

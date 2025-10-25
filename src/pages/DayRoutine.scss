@@ -42,6 +42,21 @@
     gap: $spacing-lg;
     margin-bottom: $spacing-xl;
   }
+
+  /* ✅ Inline summary below each card */
+  .workout-summary-inline {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing-xl; // space between reps and weight
+    margin-top: $spacing-sm;
+    font-size: $font-size-small;
+    color: $color-text;
+
+    span {
+      font-weight: 500;
+    }
+  }
 }
 
 /* Center the primary and secondary actions */
@@ -70,4 +85,6 @@
     margin-left: 0;
     text-align: center;
   }
+
+  /* ❌ Removed flex-direction: column override so they stay side-by-side */
 }

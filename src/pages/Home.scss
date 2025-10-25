@@ -6,7 +6,7 @@
   align-items: center;        // ✅ center horizontally
   justify-content: flex-start; // change to center if you want vertical centering too
   gap: $spacing-lg;
-  padding: $spacing-lg;
+  padding: $spacing-md;
   min-height: 100vh;
 
   h2 {
@@ -115,7 +115,7 @@
     padding: $spacing-md;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
-    width: 100%;
+    width: 90%;
 
     h3 {
       margin: 0 0 $spacing-xs 0;
@@ -155,7 +155,6 @@
 /* ✅ Mobile tweaks */
 @media (max-width: 420px) {
   .program-overview {
-    padding: $spacing-md;
     gap: $spacing-md;
   }
 
