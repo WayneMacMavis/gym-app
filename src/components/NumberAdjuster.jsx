@@ -3,31 +3,31 @@
 // Digits + suffix are wrapped in .value-group so they center vertically with arrows.
 
 import React, { useState } from "react";
-import { useProgram } from "../context/ProgramContext"; // ✅ bring in lock state
+import { useProgram } from "../context/ProgramContext";
 import "./NumberAdjuster.scss";
 
 const NumberAdjuster = ({
   value,
   min = 0,
   onChange,
-  suffix,          // unit text shown after the number, before arrows
+  suffix,
   size = "md",
   maxDigits = 2,   // controls reserved width for digits
+  step = 1,        // ✅ default step (can override per use)
 }) => {
   const [shake, setShake] = useState(false);
-  const { locked } = useProgram(); // ✅ consume lock state
+  const { locked } = useProgram();
 
   const increment = () => {
-    if (locked) return; // ✅ block when locked
-    onChange(value + 1);
+    if (locked) return;
+    onChange(parseFloat((value + step).toFixed(2)));
   };
 
   const decrement = () => {
-    if (locked) return; // ✅ block when locked
+    if (locked) return;
     if (value > min) {
-      onChange(value - 1);
+      onChange(parseFloat((value - step).toFixed(2)));
     } else {
-      // Trigger shake + vibration
       setShake(true);
       if (navigator.vibrate) navigator.vibrate(100);
       setTimeout(() => setShake(false), 300);
@@ -39,7 +39,7 @@ const NumberAdjuster = ({
       <div className="value-group">
         <span
           className="digits"
-          style={{ minWidth: `${maxDigits + 0.5}ch` }}
+          style={{ minWidth: `${maxDigits + 0.5}ch` }} // ✅ reserve width
         >
           {value}
         </span>
@@ -51,7 +51,7 @@ const NumberAdjuster = ({
           className={`arrow up ${size}`}
           onClick={increment}
           aria-label="Increase"
-          disabled={locked} // ✅ disable button
+          disabled={locked}
         >
           ▲
         </button>
@@ -60,7 +60,7 @@ const NumberAdjuster = ({
           className={`arrow down ${size} ${shake ? "shake" : ""}`}
           onClick={decrement}
           aria-label="Decrease"
-          disabled={locked} // ✅ disable button
+          disabled={locked}
         >
           ▼
         </button>

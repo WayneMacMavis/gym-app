@@ -31,7 +31,7 @@
     &:hover { background: darken($color-success, 5%); }
   }
 
-  /* 🔧 Updated: variable-based size + flex-shrink fix + progress ring */
+  /* 🔧 Updated: variable-based size + flex-shrink fix */
   &-danger {
     --danger-btn-size: 44px; // default size, can override per context
 
@@ -48,46 +48,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;          // needed for ring positioning
 
     &:hover { background: $color-danger-hover; }
-
-    /* Progress ring */
-    .progress-ring {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: var(--danger-btn-size);
-      height: var(--danger-btn-size);
-      transform: rotate(-90deg); // start at top
-      pointer-events: none;
-    }
-
-    .progress-ring__circle {
-      fill: none;
-      stroke: $color-success;
-      stroke-width: 3;
-      stroke-linecap: round;
-
-      /* Circle radius = half size - stroke */
-      r: calc(var(--danger-btn-size) / 2 - 2px);
-      cx: calc(var(--danger-btn-size) / 2);
-      cy: calc(var(--danger-btn-size) / 2);
-
-      stroke-dasharray: calc(2 * 3.1416 * (var(--danger-btn-size) / 2 - 2px));
-      stroke-dashoffset: calc(
-        (1 - var(--progress, 0)) *
-          (2 * 3.1416 * (var(--danger-btn-size) / 2 - 2px))
-      );
-
-      transition: stroke-dashoffset 0.05s linear;
-    }
   }
 
   &-secondary {
     background: $color-gray-light;
     padding: $spacing-md $spacing-lg;
     font-size: $font-size-base;
+    margin: 0 auto;          // ✅ centers block-level element
+    display: block;          // ✅ required for margin auto to work
 
     &:hover { background: $color-gray-light-hover; }
   }

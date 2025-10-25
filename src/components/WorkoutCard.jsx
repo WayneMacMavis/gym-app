@@ -66,10 +66,6 @@ const WorkoutCard = ({
   const workoutMinutes = Math.round(estimateWorkoutSeconds(workout) / 60);
   const workoutMeta = workouts.find((w) => w.name === workout.name);
 
-  // Totals
-  const totalWeight = weightsArr.reduce((sum, w) => sum + (w || 0), 0);
-  const totalReps = repsArr.reduce((sum, r) => sum + (r || 0), 0);
-
   const togglePreview = () => {
     setVideoError(false);
     setPreview((prev) => !prev);
@@ -150,7 +146,7 @@ const WorkoutCard = ({
           workoutId={workout.id}
         />
       ) : preview ? (
-        // ✅ PREVIEW CARD: video + description only
+        // PREVIEW CARD
         <div className="preview-mode">
           <h3 className="workout-title">
             {capitalizeWords(workout.name)}
@@ -171,7 +167,7 @@ const WorkoutCard = ({
           </Button>
         </div>
       ) : (
-        // ✅ MAIN CARD: details left, actions right
+        // MAIN CARD
         <>
           <div>
             <h3 className="workout-title">
@@ -185,11 +181,21 @@ const WorkoutCard = ({
               )}
             </h3>
 
-            <div className="collapsed-summary">
-              <p><strong>Total Reps:</strong> {totalReps}</p>
-              <p><strong>Total Weight:</strong> {totalWeight} kg</p>
-            </div>
+            {/* Collapsed summary: sets, reps, weights */}
+            {collapsed && (
+              <div className="collapsed-summary">
+                <p>
+                  <strong>Sets:</strong> {workout.sets} –{" "}
+                  {repsArr.map((r, i) => `${r} reps`).join(", ")}
+                </p>
+                <p>
+                  <strong>Weights:</strong>{" "}
+                  {weightsArr.map((w) => `${w}kg`).join(", ")}
+                </p>
+              </div>
+            )}
 
+            {/* Collapsible content: hidden when collapsed */}
             <div className="collapsible-content">
               <div className="sets-weights-header">
                 <div className="header-spacer" />

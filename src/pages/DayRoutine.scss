@@ -46,12 +46,14 @@
   /* ✅ Inline summary below each card */
   .workout-summary-inline {
     display: flex;
+    background: rgba(103, 129, 212, 0.486);
+    height: 30px;
     justify-content: center;
     align-items: center;
     gap: $spacing-xl; // space between reps and weight
-    margin-top: $spacing-sm;
     font-size: $font-size-small;
     color: $color-text;
+    border-radius: $radius-sm;
 
     span {
       font-weight: 500;
@@ -86,5 +88,4 @@
     text-align: center;
   }
 
-  /* ❌ Removed flex-direction: column override so they stay side-by-side */
 }

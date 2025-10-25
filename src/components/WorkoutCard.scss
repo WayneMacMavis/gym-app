@@ -2,10 +2,10 @@
 
 /* Card container and shared grid columns */
 .workout-card {
-  --num-col: 28px;
-  --weights-col: auto;
-  --reps-col: auto;
-  --cols-gap: 4px;
+  --num-col: 1px;     // enough space for row numbers
+  --weights-col: 0.6fr;  // flexible column for weights
+  --reps-col: 0.3fr;     // flexible column for reps
+  --cols-gap: 0px;     // tighter spacing between columns
 
   background: $color-bg-light;
   border-radius: $radius-lg;
@@ -14,6 +14,8 @@
   grid-template-columns: 1fr auto;
   align-items: start;
   box-shadow: $shadow-card;
+  max-width: 100%;       // ✅ prevent overflow
+  box-sizing: border-box;
 
   h3 {
     margin: 0 0 $spacing-sm;
@@ -22,20 +24,24 @@
 
   /* ✅ Title row with inline muscle icon */
   .workout-title {
+    position: relative;
     display: flex;
     align-items: center;
     gap: $spacing-sm;
 
-    .muscle-icon {
-      margin: 5px;
-      width: 80px;
-      height: 62px;
-      border-radius: $radius-sm;
-      border: 1px solid $color-border-light;
-      object-fit: cover;
-      flex-shrink: 0;
-      opacity: 0.8;
-    }
+ .muscle-icon {
+  position: absolute;
+  top: -11%;      // adjust as needed
+  left: 36%;     // adjust as needed
+  width: 90px;
+  height: 46px;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border-light;
+  object-fit: cover;
+  opacity: 0.8;
+  pointer-events: none; // optional: makes it “invisible” to clicks
+}
+
   }
 
   .workout-time {
@@ -54,7 +60,7 @@
   .collapsed-summary {
     font-size: $font-size-small;
     color: $color-text;
-    margin-top: $spacing-xs;
+    margin-top: $spacing-lg;
     opacity: 0;
     height: 0;
     overflow: hidden;
@@ -148,7 +154,6 @@
   align-items: center;
   column-gap: var(--cols-gap);
   margin: $spacing-xs 0 $spacing-sm;
-  margin-left: -6px;
 
   .header-spacer {
     grid-column: 1;
@@ -159,13 +164,16 @@
     font-weight: 600;
     font-size: $font-size-small;
     color: $color-gray-dark;
+    text-align: center;
+    justify-self: center;   // ✅ center in column
   }
 
   .sets-control {
     grid-column: 3;
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: 4px;
+    justify-self: center;   // ✅ center in column
 
     label {
       font-weight: 600;
@@ -199,6 +207,7 @@
       grid-column: 2;
       display: flex;
       align-items: center;
+      justify-content: center; // ✅ aligns under header
       gap: $spacing-xs;
     }
 
@@ -206,6 +215,7 @@
       grid-column: 3;
       display: flex;
       align-items: center;
+      justify-content: center; // ✅ aligns under header
       gap: $spacing-xs;
     }
   }
@@ -249,13 +259,15 @@ button.preview-active {
 /* Mobile tweaks */
 @media (max-width: 420px) {
   .workout-card {
-    padding: 0.8rem;
-    --num-col: 24px;
-    --cols-gap: 2px;
+    padding: 0rem;
+    --num-col: 22px;   // narrower row number column
+    --cols-gap: 20px;   // tighter gap on mobile
+     --weights-col: 0.7fr;  // flexible column for weights
+  --reps-col: 0.2fr;     // flexible column for reps
   }
 
   .sets-weights-header {
-    margin-left: -4px;
+    margin: $spacing-xs 0 $spacing-sm;
   }
 
   .set-list .set-row {
@@ -275,7 +287,6 @@ button.preview-active {
         width: auto;
       }
 
-      /* 👇 Lock Delete button square */
       .delete-button {
         flex: 0 0 44px;
         width: 44px;
