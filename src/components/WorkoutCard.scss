@@ -41,11 +41,11 @@
     .muscle-icon {
       width: 100px;
       height: 80px;
-      border-radius: $radius-sm;
-      border: 1px solid $color-border-light;
+      border-radius: $radius-md;
       object-fit: cover;
-      opacity: 0.8;
+      opacity: 0.7;
       pointer-events: none;
+      background: none;
     }
   }
 
