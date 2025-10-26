@@ -1,11 +1,22 @@
 @use "../styles/variables" as *;
 
+/* =========================================
+   WorkoutCard.scss
+   - Sets left, Weights right
+   - Controlled weights header nudge
+   - Sets label tightened to arrows via margin-right
+   - Full file with actions, preview, media, mobile
+   ========================================= */
+
 /* Card container and shared grid columns */
 .workout-card {
-  --num-col: 1px;     // enough space for row numbers
-  --weights-col: 0.6fr;  // flexible column for weights
-  --reps-col: 0.3fr;     // flexible column for reps
-  --cols-gap: 0px;     // tighter spacing between columns
+  --num-col: 40px;
+  --sets-col: minmax(80px, 1fr);
+  --weights-col: minmax(85px, 1fr);
+  --cols-gap: 2px;
+
+  /* Controlled vertical nudge for Weights header */
+  --weights-header-nudge: 26px;
 
   background: $color-bg-light;
   border-radius: $radius-lg;
@@ -14,7 +25,7 @@
   grid-template-columns: 1fr auto;
   align-items: start;
   box-shadow: $shadow-card;
-  max-width: 100%;       // ✅ prevent overflow
+  max-width: 100%;
   box-sizing: border-box;
 
   h3 {
@@ -22,26 +33,20 @@
     font-size: $font-size-large;
   }
 
-  /* ✅ Title row with inline muscle icon */
   .workout-title {
-    position: relative;
     display: flex;
     align-items: center;
     gap: $spacing-sm;
 
- .muscle-icon {
-  position: absolute;
-  top: -11%;      // adjust as needed
-  left: 36%;     // adjust as needed
-  width: 90px;
-  height: 46px;
-  border-radius: $radius-sm;
-  border: 1px solid $color-border-light;
-  object-fit: cover;
-  opacity: 0.8;
-  pointer-events: none; // optional: makes it “invisible” to clicks
-}
-
+    .muscle-icon {
+      width: 100px;
+      height: 80px;
+      border-radius: $radius-sm;
+      border: 1px solid $color-border-light;
+      object-fit: cover;
+      opacity: 0.8;
+      pointer-events: none;
+    }
   }
 
   .workout-time {
@@ -104,7 +109,7 @@
     gap: $spacing-xs;
 
     button {
-      flex: 0 0 auto; // natural width
+      flex: 0 0 auto;
     }
   }
 
@@ -147,39 +152,60 @@
   transition-delay: 0.1s;
 }
 
-/* Header: number | weights | sets control */
+/* Header: number | sets | weights */
 .sets-weights-header {
   display: grid;
-  grid-template-columns: var(--num-col) var(--weights-col) var(--reps-col);
+  grid-template-columns: var(--num-col) var(--sets-col) var(--weights-col);
   align-items: center;
   column-gap: var(--cols-gap);
   margin: $spacing-xs 0 $spacing-sm;
 
   .header-spacer {
     grid-column: 1;
-  }
-
-  .weights-col-label {
-    grid-column: 2;
-    font-weight: 600;
-    font-size: $font-size-small;
-    color: $color-gray-dark;
     text-align: center;
-    justify-self: center;   // ✅ center in column
+    min-height: var(--header-cell-min-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .sets-control {
-    grid-column: 3;
-    display: inline-flex;
+    grid-column: 2;
+    min-height: var(--header-cell-min-height);
+    display: flex;
     align-items: center;
-    gap: 4px;
-    justify-self: center;   // ✅ center in column
+    justify-content: center;
+
+    /* no gap; use margin-right on label instead */
+    gap: 0;
 
     label {
-      font-weight: 600;
+      margin-right: -10px; /* fine‑tune this value */
+      margin-left: 16px;
+      display: flex;
+      align-items: center;
+      font-weight: 800;
       font-size: $font-size-small;
       color: $color-gray-dark;
+      line-height: 1;
     }
+  }
+
+  .weights-col-label {
+    grid-column: 3;
+    position: relative;
+    top: var(--weights-header-nudge);
+
+    min-height: var(--header-cell-min-height);
+    display: flex;
+    align-items: end;
+    justify-content: center;
+
+    font-weight: 800;
+    font-size: $font-size-small;
+    color: $color-gray-dark;
+    text-align: center;
+    margin: 0;
   }
 }
 
@@ -190,32 +216,31 @@
 
   .set-row {
     display: grid;
-    grid-template-columns: var(--num-col) var(--weights-col) var(--reps-col);
+    grid-template-columns: var(--num-col) var(--sets-col) var(--weights-col);
     align-items: center;
     column-gap: var(--cols-gap);
     margin-bottom: $spacing-xs;
 
     .row-number {
-      grid-column: 1;
-      font-weight: 600;
+      text-align: center;
+      font-weight: 800;
       font-size: $font-size-small;
       color: $color-gray-dark;
-      text-align: center;
-    }
-
-    .weight-info {
-      grid-column: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center; // ✅ aligns under header
-      gap: $spacing-xs;
     }
 
     .set-info {
+      grid-column: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-xs;
+    }
+
+    .weight-info {
       grid-column: 3;
       display: flex;
       align-items: center;
-      justify-content: center; // ✅ aligns under header
+      justify-content: center;
       gap: $spacing-xs;
     }
   }
@@ -260,10 +285,13 @@ button.preview-active {
 @media (max-width: 420px) {
   .workout-card {
     padding: 0rem;
-    --num-col: 22px;   // narrower row number column
-    --cols-gap: 20px;   // tighter gap on mobile
-     --weights-col: 0.7fr;  // flexible column for weights
-  --reps-col: 0.2fr;     // flexible column for reps
+    --num-col: 22px;
+    --sets-col: minmax(70px, 1fr);
+    --weights-col: minmax(75px, 1fr);
+    --cols-gap: 1px;
+
+    --weights-header-nudge: 24px;
+    --header-cell-min-height: 30px;
   }
 
   .sets-weights-header {
@@ -271,7 +299,7 @@ button.preview-active {
   }
 
   .set-list .set-row {
-    grid-template-columns: var(--num-col) var(--weights-col) var(--reps-col);
+    grid-template-columns: var(--num-col) var(--sets-col) var(--weights-col);
     column-gap: var(--cols-gap);
   }
 
@@ -308,12 +336,12 @@ button.preview-active {
   }
 }
 
-/* ----- Unified media rules for preview-mode ----- */
-.preview-mode .video-wrapper  {
+/* Unified media rules for preview-mode */
+.preview-mode .video-wrapper {
   position: relative;
   width: 100%;
   left: 10px;
-  padding-bottom: 56.25%; // 16:9 aspect ratio
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
   height: 0;
   overflow: hidden;
   border-radius: $radius-md;
@@ -335,11 +363,21 @@ button.preview-active {
   }
 }
 
-/* ✅ Explicit fallback image rule */
+/* Explicit fallback image rule */
 .video-fallback {
   width: 104%;
   height: 100%;
   object-fit: cover;
   display: block;
-  background: red; // temporary debug
+  background: red; /* temporary debug */
+}
+
+/* Optional non-YouTube video element */
+.workout-demo {
+  width: 100%;
+  max-width: 640px;
+  border-radius: $radius-md;
+  display: block;
+  background: #000;
+  object-fit: cover;
 }

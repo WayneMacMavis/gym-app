@@ -38,9 +38,6 @@
   /* Autocomplete suggestions — styles provided by @use "../styles/suggestions" */
   .input-with-suggestions {
     position: relative;
-
-    // If you need local overrides, you can add them here, e.g.:
-    // .suggestions { max-height: 250px; }
   }
 
   .set-header {
@@ -83,12 +80,11 @@
         cursor: not-allowed;
       }
 
-      /* Small lock icon to indicate disabled state */
       &::after {
         content: "🔒";
         position: absolute;
         top: 50%;
-        right: -1.5rem; // adjust as needed based on layout
+        right: -1.5rem;
         transform: translateY(-50%);
         font-size: 0.9rem;
         color: #666;
@@ -118,18 +114,19 @@
     }
   }
 
-  .back-btn {
-    background: $color-gray-light;
+  /* ✅ unified cancel button */
+  .cancel-btn {
+    background: $color-primary;
     color: $color-bg-white;
     border: none;
     padding: $spacing-md;
     border-radius: $radius-sm;
     cursor: pointer;
-    font-size: $font-size-small;
+    font-size: $font-size-base;
     width: 100%;
 
     &:hover {
-      background: $color-gray-light-hover;
+      background: $color-danger-hover;
     }
 
     &:disabled {
@@ -152,13 +149,12 @@
       justify-content: flex-end;
 
       .save-btn,
-      .back-btn {
+      .cancel-btn {
         width: auto;
       }
     }
   }
 
-  /* Locked overlay for entire form */
   &.locked::after {
     content: "🔒 Locked";
     position: absolute;
@@ -166,7 +162,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4); // or use a design token if available
+    background: rgba(0, 0, 0, 0.4);
     color: #fff;
     font-weight: 600;
     font-size: 1rem;

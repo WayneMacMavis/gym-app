@@ -1,4 +1,3 @@
-// src/hooks/useSetsRepsWeights.js
 import { useState, useEffect } from "react";
 import { getRule } from "../rules/progressionRules";
 
@@ -67,10 +66,20 @@ export default function useSetsRepsWeights(
   const handleWeightChange = (index, newVal) => {
     setWeights((prev) => {
       const updated = [...prev];
-      updated[index] = Number(newVal);
+      const num = Number(newVal);
+      // ✅ snap to nearest 0.5
+      const snapped = Number.isNaN(num) ? 0 : Math.round(num * 2) / 2;
+      updated[index] = snapped;
       return updated;
     });
   };
 
-  return { sets, reps, weights, handleSetChange, handleRepChange, handleWeightChange };
+  return {
+    sets,
+    reps,
+    weights,
+    handleSetChange,
+    handleRepChange,
+    handleWeightChange,
+  };
 }

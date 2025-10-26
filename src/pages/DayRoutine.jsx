@@ -70,7 +70,7 @@ const DayRoutine = () => {
         addWorkout(dayIdParam, formatted);
       }
 
-      setShowForm(false);
+      setShowForm(false); // close form after adding
     };
   })();
 
@@ -137,11 +137,19 @@ const DayRoutine = () => {
         })}
       </div>
 
-      <Button variant="primary" onClick={() => setShowForm(!showForm)}>
-        {showForm ? "Cancel" : "➕ Add Workout"}
-      </Button>
+      {/* Only show Add button when form is closed */}
+      {!showForm && (
+        <Button variant="primary" onClick={() => setShowForm(true)}>
+          ➕ Add Workout
+        </Button>
+      )}
 
-      {showForm && <AddWorkoutForm onAddWorkout={handleAddWorkout} />}
+      {showForm && (
+        <AddWorkoutForm
+          onAddWorkout={handleAddWorkout}
+          onCancel={() => setShowForm(false)} // Cancel inside form closes it
+        />
+      )}
 
       <Button variant="secondary" onClick={() => navigate("/")}>
         ← Back to Overview

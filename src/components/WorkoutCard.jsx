@@ -150,13 +150,7 @@ const WorkoutCard = ({
         <div className="preview-mode">
           <h3 className="workout-title">
             {capitalizeWords(workout.name)}
-            {workoutMeta?.imageUrl && (
-              <img
-                src={workoutMeta.imageUrl}
-                alt={`${workout.name} target muscles`}
-                className="muscle-icon"
-              />
-            )}
+            {/* 👇 Removed the muscle icon here so it won't show in preview */}
           </h3>
           {renderMedia()}
           <p className="description">
@@ -172,7 +166,7 @@ const WorkoutCard = ({
           <div>
             <h3 className="workout-title">
               {capitalizeWords(workout.name)}
-              {workoutMeta?.imageUrl && (
+              {!collapsed && workoutMeta?.imageUrl && (
                 <img
                   src={workoutMeta.imageUrl}
                   alt={`${workout.name} target muscles`}

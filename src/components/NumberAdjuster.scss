@@ -1,33 +1,40 @@
 @use "../styles/variables" as *;
 
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(-3px); }
+  50%  { transform: translateX(3px); }
+  75%  { transform: translateX(-3px); }
   100% { transform: translateX(0); }
 }
 
 .number-adjuster {
-  display: inline-flex;
+  display: flex;              // ✅ fill grid cell
+  width: 100%;                // ✅ stretch to column width
+  justify-content: center;    // ✅ center under header
   align-items: center;
   gap: $spacing-xs;
+  line-height: 1;
+  white-space: nowrap;
 
-  /* Group digits + suffix together */
   .value-group {
     display: inline-flex;
-    align-items: center; // 👈 centers digits + suffix vertically
+    align-items: center;
     gap: 0.25rem;
   }
 
   .digits {
-    font-weight: 600;
+    display: inline-block;
     text-align: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums; // ✅ equal-width digits
+    min-width: 3ch;                     // ✅ fallback; overridden inline via maxDigits
   }
 
   .unit {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: $color-gray-dark;
+    line-height: 1;
   }
 
   .arrows {
@@ -44,8 +51,9 @@
       padding: 0;
       color: inherit;
       margin: -3px;
+      line-height: 1;
 
-      &.up { color: $arrow-up-color; }
+      &.up   { color: $arrow-up-color; }
       &.down { color: $arrow-down-color; }
 
       &.sm { font-size: $arrow-size-sm; }
@@ -63,7 +71,6 @@
     }
   }
 
-  /* ✅ Locked state */
   &.locked {
     opacity: 0.6;
 
@@ -74,7 +81,7 @@
 
     .arrow {
       cursor: not-allowed;
-      pointer-events: none; // block clicks
+      pointer-events: none;
     }
   }
 }

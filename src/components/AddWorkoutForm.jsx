@@ -1,17 +1,13 @@
-// src/components/AddWorkoutForm.jsx
-// Form for adding a workout with autocomplete suggestions.
-// Suggestions come from searchWorkouts(), which returns objects { name, category }.
-
 import React, { useState, useEffect } from "react";
 import { capitalizeWords } from "../utils/format";
 import { searchWorkouts } from "../utils/searchWorkouts";
 import useSetsRepsWeights from "../hooks/useSetsRepsWeights";
 import SetRowInput from "./SetRowInput";
 import { formatWorkout } from "../utils/workouts";
-import { useProgram } from "../context/ProgramContext"; // ✅ lock state
+import { useProgram } from "../context/ProgramContext";
 import "./AddWorkoutForm.scss";
 
-const AddWorkoutForm = ({ onAddWorkout }) => {
+const AddWorkoutForm = ({ onAddWorkout, onCancel }) => {
   const {
     sets,
     reps,
@@ -21,7 +17,7 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
     handleWeightChange,
   } = useSetsRepsWeights(3, [12, 10, 8], [0, 0, 0], "");
 
-  const { locked } = useProgram(); // ✅ consume lock state
+  const { locked } = useProgram();
 
   const [name, setName] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -42,8 +38,7 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
       try {
         const results = await searchWorkouts(val);
         setSuggestions(results);
-      } catch (err) {
-        console.error("Error fetching workouts:", err);
+      } catch {
         setSuggestions([]);
       }
     } else {
@@ -56,18 +51,16 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
     setSuggestions([]);
   };
 
+  // ✅ normalize helpers
+  const normalizeDecimal = (val) => {
+    if (typeof val !== "string") return val;
+    return val.replace(",", "."); // treat comma as dot
+  };
+  const roundToHalf = (val) => Math.round(val * 2) / 2;
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (locked) {
-      console.warn("Program is locked. Cannot add workouts.");
-      return;
-    }
-
-    if (submitted) {
-      console.warn("Duplicate submission blocked");
-      return;
-    }
+    if (locked || submitted) return;
 
     setSubmitted(true);
 
@@ -89,10 +82,7 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={`add-form ${locked ? "locked" : ""}`} // ✅ add locked class
-    >
+    <form onSubmit={handleSubmit} className={`add-form ${locked ? "locked" : ""}`}>
       <div className="input-with-suggestions">
         <label>
           Workout name
@@ -145,11 +135,15 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
               next[idx] = val;
               return next;
             });
-            const num = Number(val);
             if (normalize) {
-              handleRepChange(idx, Number.isNaN(num) ? 0 : num);
-            } else if (!Number.isNaN(num)) {
-              handleRepChange(idx, num);
+              const num = Number(val);
+              const clean = Number.isNaN(num) ? 0 : Math.max(0, Math.round(num));
+              handleRepChange(idx, clean);
+              setRepInputs((prev) => {
+                const next = [...prev];
+                next[idx] = String(clean);
+                return next;
+              });
             }
           }}
           onWeightChange={(idx, val, normalize = false) => {
@@ -159,14 +153,19 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
               next[idx] = val;
               return next;
             });
-            const num = Number(val);
             if (normalize) {
-              handleWeightChange(idx, Number.isNaN(num) ? 0 : num);
-            } else if (!Number.isNaN(num)) {
-              handleWeightChange(idx, num);
+              const cleaned = normalizeDecimal(val);
+              const num = Number(cleaned);
+              const snapped = Number.isNaN(num) ? 0 : Math.max(0, roundToHalf(num));
+              handleWeightChange(idx, snapped);
+              setWeightInputs((prev) => {
+                const next = [...prev];
+                next[idx] = String(snapped);
+                return next;
+              });
             }
           }}
-          disabled={locked} // ✅ pass lock state down
+          disabled={locked}
         />
       ))}
 
@@ -174,8 +173,8 @@ const AddWorkoutForm = ({ onAddWorkout }) => {
         <button type="submit" className="save-btn" disabled={locked}>
           Save
         </button>
-        <button type="button" className="back-btn">
-          Back
+        <button type="button" className="cancel-btn" onClick={onCancel}>
+          Cancel
         </button>
       </div>
     </form>

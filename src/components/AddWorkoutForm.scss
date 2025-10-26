@@ -9,16 +9,16 @@
   padding: $spacing-lg;
   border-radius: $radius-md;
   margin-bottom: $spacing-xl;
-  max-width: 100%; /* ✅ prevent form from exceeding viewport */
+  max-width: 100%;
   box-sizing: border-box;
-  position: relative; /* ✅ allows overlay positioning */
+  position: relative;
 
   input {
     padding: $spacing-md;
     border: 1px solid $color-border;
     border-radius: $radius-sm;
     font-size: $font-size-base;
-    box-sizing: border-box; /* ✅ ensures padding doesn’t push width */
+    box-sizing: border-box;
 
     &:disabled {
       background: $color-bg-disabled;
@@ -41,7 +41,7 @@
 
   .set-header {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* ✅ always two columns */
+    grid-template-columns: 1fr 1fr;
     gap: $spacing-sm;
     font-size: $font-size-small;
     font-weight: 600;
@@ -54,15 +54,16 @@
   }
 
   .set-row {
+    position: relative; // ✅ ensures lock icon positions correctly
     display: grid;
-    grid-template-columns: 1fr 1fr; /* ✅ always two columns */
+    grid-template-columns: 1fr 1fr;
     gap: $spacing-sm;
     width: 100%;
 
     input {
       background: $color-bg-white;
-      width: 100%; /* ✅ inputs respect their grid cell */
-      min-width: 0; /* ✅ prevents overflow on narrow screens */
+      width: 100%;
+      min-width: 0;
 
       &:disabled {
         background: $color-bg-disabled;
@@ -72,18 +73,17 @@
     }
 
     &.locked {
-      opacity: 0.6; /* ✅ visually dim the row when locked */
+      opacity: 0.6;
 
       input {
-        cursor: not-allowed; /* ✅ blocked cursor */
+        cursor: not-allowed;
       }
 
-      /* ✅ small lock icon to indicate disabled state */
       &::after {
         content: "🔒";
         position: absolute;
         top: 50%;
-        right: -1.5rem; /* adjust if needed */
+        right: -1.5rem;
         transform: translateY(-50%);
         font-size: 0.9rem;
         color: #666;
@@ -113,18 +113,20 @@
     }
   }
 
-  .back-btn {
-    background: $color-gray-light;
-    color: $color-bg-white;
-    border: none;
+  .cancel-btn {
+    background: $color-primary;
+    color: $color-white;
+    border: 1px solid $color-gray-light;
     padding: $spacing-md;
     border-radius: $radius-sm;
     cursor: pointer;
     font-size: $font-size-small;
     width: 100%;
+    z-index: 1;
 
     &:hover {
       background: $color-gray-light-hover;
+      color: $color-bg-white;
     }
 
     &:disabled {
@@ -136,25 +138,26 @@
 
   .form-actions {
     display: flex;
-    flex-direction: column; /* ✅ stack vertically on mobile */
+    flex-direction: column;
     gap: $spacing-sm;
     margin-top: $spacing-md;
+
+    .save-btn { order: 1; }
+    .cancel-btn { order: 2; }
   }
 
-  /* On larger screens, switch back to row layout for actions */
   @media (min-width: 768px) {
     .form-actions {
       flex-direction: row;
       justify-content: flex-end;
 
       .save-btn,
-      .back-btn {
+      .cancel-btn {
         width: auto;
       }
     }
   }
 
-  /* ✅ Locked state overlay for entire form */
   &.locked::after {
     content: "🔒 Locked";
     position: absolute;
@@ -162,7 +165,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4); /* use a token if you have one */
+    background: rgba(0, 0, 0, 0.4);
     color: #fff;
     font-weight: 600;
     font-size: 1rem;
@@ -170,6 +173,6 @@
     align-items: center;
     justify-content: center;
     border-radius: $radius-md;
-    pointer-events: none; /* overlay is visual only */
+    pointer-events: none;
   }
 }

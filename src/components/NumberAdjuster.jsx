@@ -1,8 +1,8 @@
 // src/components/NumberAdjuster.jsx
-// A numeric stepper with up/down arrows. Supports optional suffix (kg, reps, etc).
-// Digits + suffix are wrapped in .value-group so they center vertically with arrows.
+// Forces half-step increments for weights when suffix === "kg". Sets/reps default to 1.
+// Moves exactly one grid step up/down from the current value, independent of prior rounding.
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useProgram } from "../context/ProgramContext";
 import "./NumberAdjuster.scss";
 
@@ -12,21 +12,46 @@ const NumberAdjuster = ({
   onChange,
   suffix,
   size = "md",
-  maxDigits = 2,   // controls reserved width for digits
-  step = 1,        // ✅ default step (can override per use)
+  maxDigits = 2,
+  step, // optional override
 }) => {
   const [shake, setShake] = useState(false);
   const { locked } = useProgram();
 
+  // Infer step: explicit prop wins, else 0.5 for kg, else 1
+  const computedStep = useMemo(() => {
+    if (typeof step === "number" && !Number.isNaN(step)) return step;
+    return suffix === "kg" ? 0.5 : 1;
+  }, [step, suffix]);
+
+  // Coerce value to number safely
+  const numericValue = useMemo(() => {
+    const v = typeof value === "string" ? value.replace(",", ".") : value;
+    const n = Number(v);
+    return Number.isNaN(n) ? 0 : n;
+  }, [value]);
+
+  // Move exactly one grid step, independent of prior rounding artifacts
+  const stepUp = (current, s) => {
+    const k = Math.floor(current / s) + 1;
+    return k * s;
+  };
+  const stepDown = (current, s) => {
+    const k = Math.ceil(current / s) - 1;
+    return k * s;
+  };
+
   const increment = () => {
     if (locked) return;
-    onChange(parseFloat((value + step).toFixed(2)));
+    const next = stepUp(numericValue, computedStep);
+    onChange(Number(next.toFixed(2)));
   };
 
   const decrement = () => {
     if (locked) return;
-    if (value > min) {
-      onChange(parseFloat((value - step).toFixed(2)));
+    const next = stepDown(numericValue, computedStep);
+    if (next >= min) {
+      onChange(Number(next.toFixed(2)));
     } else {
       setShake(true);
       if (navigator.vibrate) navigator.vibrate(100);
@@ -39,9 +64,12 @@ const NumberAdjuster = ({
       <div className="value-group">
         <span
           className="digits"
-          style={{ minWidth: `${maxDigits + 0.5}ch` }} // ✅ reserve width
+          style={{
+            minWidth: `${maxDigits}ch`,
+            fontVariantNumeric: "tabular-nums",
+          }}
         >
-          {value}
+          {numericValue}
         </span>
         {suffix && <span className="unit">{suffix}</span>}
       </div>

@@ -1,24 +1,31 @@
 // src/hooks/useDayEstimates.js
 
 // Estimate total seconds for a single workout
+// Rule: each set = 60s, each rest between sets = 60s
 const estimateWorkoutSeconds = (workout) => {
-  let total = 0;
   const sets = workout.sets || 0;
-  const reps = workout.reps || [];
-  for (let i = 0; i < sets; i++) {
-    const r = parseInt(reps[i], 10) || 0;
-    total += r;
-    if (i < sets - 1) total += 30; // rest between sets
+  if (sets === 0) return 0;
+
+  // time for sets
+  let total = sets * 60;
+
+  // rest between sets (only between, not after last)
+  if (sets > 1) {
+    total += (sets - 1) * 60;
   }
+
   return total;
 };
 
 // Estimate total minutes for a day of workouts
+// Rule: add 120s rest between workouts
 const estimateDayMinutes = (workouts) => {
   let total = 0;
   workouts.forEach((w, wi) => {
     total += estimateWorkoutSeconds(w);
-    if (wi < workouts.length - 1) total += 60; // rest between workouts
+    if (wi < workouts.length - 1) {
+      total += 120; // 2 minutes between workouts
+    }
   });
   return Math.round(total / 60);
 };
