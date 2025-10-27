@@ -39,13 +39,15 @@
     gap: $spacing-sm;
 
     .muscle-icon {
-      width: 100px;
-      height: 80px;
+      width: 150px;
+      height: 90px;
+      margin-top: 10px;
+      margin-left: 10px;
       border-radius: $radius-md;
-      object-fit: cover;
-      opacity: 0.7;
+      object-fit: fill;
       pointer-events: none;
       background: none;
+      border-radius: 30px;
     }
   }
 
@@ -249,7 +251,29 @@
 /* Preview mode */
 .preview-mode {
   padding: $spacing-md;
-  text-align: left;
+
+.video-wrapper {
+  position: relative;
+  width: calc(100% + 16px); // cancel out 8px padding on both sides
+  margin: 0 -8px;           // pull it flush with card edges
+  padding-bottom: 56.25%;
+  height: 0;
+}
+
+
+.video-wrapper iframe,
+.video-wrapper video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
+
 
   h3 {
     margin-bottom: $spacing-sm;
@@ -260,13 +284,15 @@
     position: relative;
     font-size: $font-size-base;
     text-align: center;
-    left: 10px;
     margin-bottom: $spacing-sm;
     color: $color-text;
   }
 
+
   button {
-    margin-top: $spacing-sm;
+    display: block;
+    margin-top: $spacing-md;
+    margin: auto;
   }
 }
 
@@ -367,9 +393,8 @@ button.preview-active {
 .video-fallback {
   width: 104%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   display: block;
-  background: red; /* temporary debug */
 }
 
 /* Optional non-YouTube video element */

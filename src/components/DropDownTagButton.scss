@@ -1,0 +1,56 @@
+.dropdown-tag-button {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    translate: 0 calc(-1 * var(--btn-h, 0px));
+    transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+
+    .drop-button {
+      padding: 10px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+
+      &:hover {
+        background: #0056b3;
+      }
+    }
+
+    .arrow {
+      background: #333;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      transition: background 0.2s ease, transform 0.3s ease;
+
+      &:hover {
+        background: #555;
+      }
+    }
+  }
+
+  &.open .button-group {
+    translate: 0 0;
+
+    .arrow {
+      transform: rotate(180deg); // flip arrow when open
+    }
+  }
+}

@@ -7,19 +7,8 @@ import Button from "./Button/Button";
 import { capitalizeWords } from "../utils/format";
 import { adjustRepsForSets } from "../hooks/useSetsRepsWeights";
 import { workouts } from "../data/workouts";
+import WorkoutMedia from "./WorkoutMedia"; // 👈 using shared media component
 import "./WorkoutCard.scss";
-
-// Helper: convert YouTube watch/short links into embed with autoplay/mute/loop
-const getYouTubeEmbedUrl = (url, start, end) => {
-  if (!url) return null;
-  const idMatch = url.match(/(?:v=|\.be\/)([a-zA-Z0-9_-]{11})/);
-  const videoId = idMatch ? idMatch[1] : null;
-  if (!videoId) return url;
-  let embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&loop=1&playlist=${videoId}`;
-  if (start) embedUrl += `&start=${start}`;
-  if (end) embedUrl += `&end=${end}`;
-  return embedUrl;
-};
 
 const WorkoutCard = ({
   workout,
@@ -42,10 +31,8 @@ const WorkoutCard = ({
   collapsed,
 }) => {
   const [preview, setPreview] = useState(false);
-  const [videoError, setVideoError] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // Track online/offline state
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -66,74 +53,7 @@ const WorkoutCard = ({
   const workoutMinutes = Math.round(estimateWorkoutSeconds(workout) / 60);
   const workoutMeta = workouts.find((w) => w.name === workout.name);
 
-  const togglePreview = () => {
-    setVideoError(false);
-    setPreview((prev) => !prev);
-  };
-
-  const renderMedia = () => {
-    if (!isOnline || videoError || !workoutMeta?.videoUrl) {
-      return workoutMeta?.imageUrl ? (
-        <img
-          src={workoutMeta.imageUrl}
-          alt={`${workout.name} fallback`}
-          className="video-fallback"
-        />
-      ) : null;
-    }
-
-    if (
-      workoutMeta.videoUrl.includes("youtube") ||
-      workoutMeta.videoUrl.includes("youtu.be")
-    ) {
-      const idMatch = workoutMeta.videoUrl.match(
-        /(?:v=|\.be\/)([a-zA-Z0-9_-]{11})/
-      );
-      const videoId = idMatch ? idMatch[1] : null;
-      if (!videoId) return null;
-
-      const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-
-      return (
-        <div className="video-wrapper">
-          {preview ? (
-            <iframe
-              src={getYouTubeEmbedUrl(
-                workoutMeta.videoUrl,
-                workoutMeta.videoStart,
-                workoutMeta.videoEnd
-              )}
-              title={`${workout.name} demo`}
-              frameBorder="0"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              onError={() => setVideoError(true)}
-            />
-          ) : (
-            <img
-              src={thumbUrl}
-              alt={`${workout.name} thumbnail`}
-              className="video-fallback"
-              onError={() => setVideoError(true)}
-            />
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <video
-        className="workout-demo"
-        src={workoutMeta.videoUrl}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        onError={() => setVideoError(true)}
-      />
-    );
-  };
+  const togglePreview = () => setPreview((prev) => !prev);
 
   return (
     <div className={`workout-card ${collapsed ? "collapsed" : ""}`}>
@@ -148,14 +68,28 @@ const WorkoutCard = ({
       ) : preview ? (
         // PREVIEW CARD
         <div className="preview-mode">
-          <h3 className="workout-title">
-            {capitalizeWords(workout.name)}
-            {/* 👇 Removed the muscle icon here so it won't show in preview */}
-          </h3>
-          {renderMedia()}
-          <p className="description">
-            {workoutMeta?.description || "No description available."}
-          </p>
+          <h3 className="workout-title">{capitalizeWords(workout.name)}</h3>
+
+          {collapsed ? (
+            // Collapsed preview: only description
+            <p className="description">
+              {workoutMeta?.description || "No description available."}
+            </p>
+          ) : (
+            // Expanded preview: media + description
+            <>
+              <WorkoutMedia
+                workoutMeta={workoutMeta}
+                workoutName={workout.name}
+                collapsed={collapsed}
+                isOnline={isOnline}
+              />
+              <p className="description">
+                {workoutMeta?.description || "No description available."}
+              </p>
+            </>
+          )}
+
           <Button variant="secondary" onClick={togglePreview}>
             Back to Workout
           </Button>
@@ -175,7 +109,7 @@ const WorkoutCard = ({
               )}
             </h3>
 
-            {/* Collapsed summary: sets, reps, weights */}
+            {/* Collapsed summary */}
             {collapsed && (
               <div className="collapsed-summary">
                 <p>
@@ -189,7 +123,7 @@ const WorkoutCard = ({
               </div>
             )}
 
-            {/* Collapsible content: hidden when collapsed */}
+            {/* Collapsible content */}
             <div className="collapsible-content">
               <div className="sets-weights-header">
                 <div className="header-spacer" />

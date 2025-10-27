@@ -10,6 +10,9 @@ import { formatWorkout } from "../utils/workouts";
 import Button from "../components/Button/Button";
 import { useProgram } from "../context/ProgramContext";
 
+// ✅ Import your new DropDownTagButton
+import DropDownTagButton from "../components/DropDownTagButton";
+
 const DayRoutine = () => {
   const { programs, addWorkout, deleteWorkout, updateWorkout } = useProgram();
   const params = useParams();
@@ -76,6 +79,12 @@ const DayRoutine = () => {
 
   return (
     <div className="day-routine">
+      {/* 🔽 Floating tag + drop-down button at top center */}
+      <DropDownTagButton
+        label="Special Action"
+        onClick={() => console.log("DropDown Button Clicked!")}
+      />
+
       <h2>
         {hasWeeks
           ? `Week ${weekIdParam + 1}, Day ${dayIdParam}`
