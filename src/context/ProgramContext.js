@@ -1,4 +1,3 @@
-// src/context/ProgramContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { loadProgram, saveProgram } from "../utils/storage";
 
@@ -9,14 +8,27 @@ export const ProgramProvider = ({ children }) => {
   const [numDays, setNumDays] = useState(3);
 
   const [programs, setPrograms] = useState(() => {
-    const initial = loadProgram(); // ✅ loads full array from storage
-    const firstWeek = initial[0] || {};
-    setNumWeeks(initial.length || 1);
+    const initial = loadProgram();
+
+    // ✅ Normalize and reset progress on load
+    const normalized = (initial || []).map((week) => {
+      const newWeek = {};
+      Object.keys(week || {}).forEach((dayKey) => {
+        newWeek[dayKey] = (week[dayKey] || []).map((wo) => ({
+          ...wo,
+          completedSets: 0,   // always reset on load
+          completed: false,   // always reset on load
+        }));
+      });
+      return newWeek;
+    });
+
+    const firstWeek = normalized[0] || {};
+    setNumWeeks(normalized.length || 1);
     setNumDays(Object.keys(firstWeek).length || 3);
-    return initial;
+    return normalized;
   });
 
-  // ✅ Lock state persisted in localStorage
   const [locked, setLocked] = useState(() => {
     try {
       const saved = localStorage.getItem("programLocked");
@@ -28,7 +40,7 @@ export const ProgramProvider = ({ children }) => {
 
   useEffect(() => {
     if (Array.isArray(programs) && programs.length > 0) {
-      saveProgram(programs); // ✅ saves full array
+      saveProgram(programs);
     }
   }, [programs]);
 
@@ -36,9 +48,8 @@ export const ProgramProvider = ({ children }) => {
     localStorage.setItem("programLocked", JSON.stringify(locked));
   }, [locked]);
 
-  // ✅ Update structure but preserve existing workouts
   const updateStructure = (weeks, days, prevProgramsOverride) => {
-    if (locked) return; // prevent changes when locked
+    if (locked) return;
     setNumWeeks(weeks);
     setNumDays(days);
 
@@ -51,8 +62,12 @@ export const ProgramProvider = ({ children }) => {
         const newWeek = {};
 
         for (let d = 1; d <= days; d++) {
-          // ✅ Preserve existing workouts if available
-          newWeek[d] = prevWeek[d] || [];
+          const workouts = prevWeek[d] || [];
+          newWeek[d] = workouts.map((wo) => ({
+            ...wo,
+            completedSets: 0,
+            completed: false,
+          }));
         }
 
         newPrograms.push(newWeek);
@@ -63,7 +78,6 @@ export const ProgramProvider = ({ children }) => {
     });
   };
 
-  // ✅ Workouts remain editable regardless of lock
   const addWorkout = (dayNumber, workout, weekIndex = 0) => {
     setPrograms((prev) => {
       const updated = [...prev];
@@ -80,7 +94,14 @@ export const ProgramProvider = ({ children }) => {
         return prev;
       }
 
-      week[dayKey] = [...week[dayKey], workout];
+      // ✅ Ensure new workouts start clean
+      const normalizedWorkout = {
+        ...workout,
+        completedSets: 0,
+        completed: false,
+      };
+
+      week[dayKey] = [...week[dayKey], normalizedWorkout];
       updated[weekIndex] = week;
       saveProgram(updated);
       return updated;
@@ -111,8 +132,41 @@ export const ProgramProvider = ({ children }) => {
 
       if (Array.isArray(week[dayKey])) {
         week[dayKey] = week[dayKey].map((w) =>
-          w.id === updatedWorkout.id ? updatedWorkout : w
+          w.id === updatedWorkout.id
+            ? {
+                ...updatedWorkout,
+                completedSets: 0,   // reset on update
+                completed: false,
+              }
+            : w
         );
+        updated[weekIndex] = week;
+        saveProgram(updated);
+      }
+
+      return updated;
+    });
+  };
+
+  // ✅ Update progress during a workout
+  const updateProgress = (weekIndex, dayNumber, workoutIndex, setNumber) => {
+    setPrograms((prev) => {
+      const updated = [...prev];
+      const week = updated[weekIndex] || {};
+      const dayKey = String(dayNumber);
+      const workouts = week[dayKey] || [];
+      const workout = workouts[workoutIndex];
+
+      if (workout) {
+        const completed = workout.completedSets || 0;
+        workout.completedSets = Math.max(completed, setNumber);
+
+        if (workout.completedSets >= workout.sets) {
+          workout.completed = true;
+        }
+
+        workouts[workoutIndex] = workout;
+        week[dayKey] = workouts;
         updated[weekIndex] = week;
         saveProgram(updated);
       }
@@ -132,8 +186,9 @@ export const ProgramProvider = ({ children }) => {
         addWorkout,
         deleteWorkout,
         updateWorkout,
+        updateProgress,
         locked,
-        setLocked, // ✅ expose lock state
+        setLocked,
       }}
     >
       {children}

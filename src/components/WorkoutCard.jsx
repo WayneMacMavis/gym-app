@@ -7,7 +7,8 @@ import Button from "./Button/Button";
 import { capitalizeWords } from "../utils/format";
 import { adjustRepsForSets } from "../hooks/useSetsRepsWeights";
 import { workouts } from "../data/workouts";
-import WorkoutMedia from "./WorkoutMedia"; // 👈 using shared media component
+import WorkoutMedia from "./WorkoutMedia";
+import { useProgram } from "../context/ProgramContext"; // ✅ import context
 import "./WorkoutCard.scss";
 
 const WorkoutCard = ({
@@ -32,6 +33,7 @@ const WorkoutCard = ({
 }) => {
   const [preview, setPreview] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const { locked } = useProgram(); // ✅ get lock state
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -56,7 +58,11 @@ const WorkoutCard = ({
   const togglePreview = () => setPreview((prev) => !prev);
 
   return (
-    <div className={`workout-card ${collapsed ? "collapsed" : ""}`}>
+    <div
+      className={`workout-card ${collapsed ? "collapsed" : ""} ${
+        workout.completed ? "done" : ""
+      }`}
+    >
       {editingId === workout.id ? (
         <EditWorkoutForm
           editData={editData}
@@ -69,14 +75,11 @@ const WorkoutCard = ({
         // PREVIEW CARD
         <div className="preview-mode">
           <h3 className="workout-title">{capitalizeWords(workout.name)}</h3>
-
           {collapsed ? (
-            // Collapsed preview: only description
             <p className="description">
               {workoutMeta?.description || "No description available."}
             </p>
           ) : (
-            // Expanded preview: media + description
             <>
               <WorkoutMedia
                 workoutMeta={workoutMeta}
@@ -89,7 +92,6 @@ const WorkoutCard = ({
               </p>
             </>
           )}
-
           <Button variant="secondary" onClick={togglePreview}>
             Back to Workout
           </Button>
@@ -109,7 +111,6 @@ const WorkoutCard = ({
               )}
             </h3>
 
-            {/* Collapsed summary */}
             {collapsed && (
               <div className="collapsed-summary">
                 <p>
@@ -123,7 +124,6 @@ const WorkoutCard = ({
               </div>
             )}
 
-            {/* Collapsible content */}
             <div className="collapsible-content">
               <div className="sets-weights-header">
                 <div className="header-spacer" />
@@ -133,6 +133,7 @@ const WorkoutCard = ({
                   <NumberAdjuster
                     value={Number(workout.sets)}
                     min={1}
+                    disabled={locked} // ✅ disable when locked
                     onChange={(nextSets) => {
                       const nextReps = adjustRepsForSets(
                         workout.name,
@@ -172,6 +173,8 @@ const WorkoutCard = ({
                     hasWeeks={hasWeeks}
                     dayIdParam={dayIdParam}
                     weekIdParam={weekIdParam}
+                    disabled={locked} // ✅ disable editing sets
+                    completed={i < (workout.completedSets || 0)} // ✅ mark progress
                   />
                 ))}
               </div>
@@ -193,8 +196,13 @@ const WorkoutCard = ({
                 progress={progress}
                 handleHoldStart={handleHoldStart}
                 handleHoldEnd={handleHoldEnd}
+                disabled={locked} // ✅ disable delete
               />
-              <Button variant="primary" onClick={() => startEditing(workout)}>
+              <Button
+                variant="primary"
+                onClick={() => startEditing(workout)}
+                disabled={locked} // ✅ disable edit
+              >
                 Edit
               </Button>
             </div>

@@ -10,7 +10,7 @@ import { formatWorkout } from "../utils/workouts";
 import Button from "../components/Button/Button";
 import { useProgram } from "../context/ProgramContext";
 
-// ✅ Import your new DropDownTagButton
+// ✅ Import your DropDownTagButton with timer
 import DropDownTagButton from "../components/DropDownTagButton";
 
 const DayRoutine = () => {
@@ -42,7 +42,14 @@ const DayRoutine = () => {
   );
 
   const { estimateWorkoutSeconds, estimateDayMinutes, getColor } = useDayEstimates();
+
+  // ✅ Total time in minutes (for display)
   const totalMinutes = workouts.length ? estimateDayMinutes(workouts) : null;
+
+  // ✅ Total time in seconds (for timer)
+  const totalSeconds = workouts.length
+    ? workouts.reduce((sum, w) => sum + estimateWorkoutSeconds(w), 0)
+    : 0;
 
   const {
     editingId,
@@ -81,8 +88,9 @@ const DayRoutine = () => {
     <div className="day-routine">
       {/* 🔽 Floating tag + drop-down button at top center */}
       <DropDownTagButton
-        label="Special Action"
-        onClick={() => console.log("DropDown Button Clicked!")}
+        label="Start Workout"
+        totalSeconds={totalSeconds}
+        onClick={() => console.log("Workout Timer Started")}
       />
 
       <h2>

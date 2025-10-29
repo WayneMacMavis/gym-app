@@ -14,8 +14,11 @@ const SetRow = ({
   hasWeeks,
   dayIdParam,
   weekIdParam,
+  disabled = false,   // ✅ new prop
+  completed = false,  // ✅ new prop
 }) => {
   const handleRepChange = (newRep) => {
+    if (disabled) return; // prevent edits when locked
     const updated = {
       ...workout,
       reps: workout.reps.map((r, i) => (i === index ? newRep : r)),
@@ -28,6 +31,7 @@ const SetRow = ({
   };
 
   const handleWeightChange = (newWeight) => {
+    if (disabled) return; // prevent edits when locked
     const updated = {
       ...workout,
       weights: workout.weights.map((w, i) => (i === index ? newWeight : w)),
@@ -40,32 +44,34 @@ const SetRow = ({
   };
 
   return (
-    <div className="set-row">
+    <div className={`set-row ${completed ? "completed" : ""}`}>
       <div className="row-number">{index + 1}</div>
 
-      {/* Weight column (grid col 2) */}
+      {/* Weight column */}
       <div className="weight-info">
         <NumberAdjuster
           value={weight}
           min={0}
-          step={0.5}          // ✅ now increments by 0.5 instead of 2.5
+          step={0.5}
           suffix="kg"
           maxDigits={5}
           size="md"
           onChange={handleWeightChange}
+          disabled={disabled} // ✅ lock editing
         />
       </div>
 
-      {/* Reps column (grid col 3) */}
+      {/* Reps column */}
       <div className="set-info">
         <NumberAdjuster
           value={rep}
           min={1}
-          step={1}            // ✅ reps still increment by 1
+          step={1}
           suffix="reps"
           maxDigits={3}
           size="md"
           onChange={handleRepChange}
+          disabled={disabled} // ✅ lock editing
         />
       </div>
     </div>

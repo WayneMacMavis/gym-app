@@ -1,6 +1,17 @@
+/* DropDownTagButton.scss
+ * - Top-centered button group with dropdown arrow
+ * - Floating, draggable timer badge
+ * - Phase-based color cues (work, rest, betweenWorkouts)
+ * - Mobile-friendly sizing and safe-area awareness
+ */
+
+:root {
+  --btn-h: 0px; /* set by JS to align arrow slide */
+}
+
 .dropdown-tag-button {
   position: fixed;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -12,33 +23,43 @@
     position: relative;
     left: 50%;
     transform: translateX(-50%);
-    translate: 0 calc(-1 * var(--btn-h, 0px));
+    translate: 0 calc(-1 * var(--btn-h, 0px)); /* slide up when closed */
     transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 
     .drop-button {
-      padding: 10px 16px;
+      padding: 12px 18px;
       font-size: 16px;
       border: none;
-      border-radius: 4px;
-      background: #007bff;
+      border-radius: 10px 10px 0 0;
+      background: #252525;
       color: #fff;
       cursor: pointer;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+      -webkit-tap-highlight-color: transparent;
 
       &:hover {
         background: #0056b3;
+      }
+
+      /* Inline phase label next to timer text */
+      .phase-inline {
+        margin-left: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 0.2px;
       }
     }
 
     .arrow {
       background: #333;
       color: #fff;
-      padding: 4px 10px;
-      border-radius: 3px;
+      padding: 6px 12px;
+      border-radius: 0 0 10px 10px;
       cursor: pointer;
       font-size: 14px;
       line-height: 1;
-      transition: background 0.2s ease, transform 0.3s ease;
+      transition: background 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
 
       &:hover {
         background: #555;
@@ -50,7 +71,139 @@
     translate: 0 0;
 
     .arrow {
-      transform: rotate(180deg); // flip arrow when open
+      animation: arrowFlipOpen 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
     }
+  }
+
+  &:not(.open) .button-group .arrow {
+    animation: arrowFlipClose 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+  }
+}
+
+/* Floating timer badge */
+.floating-timer {
+  position: fixed;
+  top: 20px;   /* JS sets exact position; these are fallbacks */
+  left: 20px;
+  background: #007bff;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+  touch-action: none; /* prevent scroll while dragging */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  -webkit-tap-highlight-color: transparent;
+
+  .floating-time {
+    font-weight: 800;
+    font-size: 16px;
+  }
+
+  /* Phase label inside floating badge */
+  .floating-phase {
+    font-size: 12px;
+    color: #333;
+    background: rgba(255, 255, 255, 0.88);
+    padding: 3px 8px;
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.2px;
+    line-height: 1.2;
+  }
+}
+
+.floating-timer.draggable {
+  cursor: grab;
+}
+
+.floating-timer.draggable:active {
+  cursor: grabbing;
+}
+
+/* Phase color cues for badge */
+.floating-timer.work {
+  background: #28a745; /* green */
+}
+.floating-timer.rest {
+  background: #fd7e14; /* orange */
+}
+.floating-timer.betweenWorkouts {
+  background: #17a2b8; /* teal */
+}
+
+/* Phase color cues for inline label */
+.phase-inline.work {
+  color: #28a745;
+}
+.phase-inline.rest {
+  color: #fd7e14;
+}
+.phase-inline.betweenWorkouts {
+  color: #17a2b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Keyframes for opening (down) */
+@keyframes arrowFlipOpen {
+  0%   { transform: rotate(0deg) scale(1); }
+  60%  { transform: rotate(200deg) scale(1.1); }
+  80%  { transform: rotate(175deg) scale(0.95); }
+  100% { transform: rotate(180deg) scale(1); }
+}
+
+/* Keyframes for closing (up) */
+@keyframes arrowFlipClose {
+  0%   { transform: rotate(180deg) scale(1); }
+  60%  { transform: rotate(-20deg) scale(1.1); }
+  80%  { transform: rotate(5deg) scale(0.95); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+/* Mobile-friendly tweaks */
+@media (max-width: 480px) {
+  .dropdown-tag-button .button-group .drop-button {
+    font-size: 14px;
+    padding: 12px 18px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .dropdown-tag-button .button-group .arrow {
+    padding: 8px 14px;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .floating-timer {
+    font-size: 13px;
+    padding: 7px 10px;
+    border-radius: 14px;
+
+    .floating-time {
+      font-size: 15px;
+    }
+
+    .floating-phase {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+  }
+}
+
+/* Support safe areas on iOS */
+@supports(padding: env(safe-area-inset-top)) {
+  .dropdown-tag-button {
+    padding-top: env(safe-area-inset-top);
   }
 }

@@ -8,6 +8,7 @@
   column-gap: var(--cols-gap);
   padding: $spacing-sm 0;
   border-bottom: 1px solid $color-border-light;
+  position: relative;
 
   > * {
     grid-row: 1;
@@ -41,5 +42,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  /* ✅ Completed set styling */
+  &.completed {
+    background: rgba($color-success, 0.08); // light green background
+
+    .row-number {
+      color: $color-success;
+      font-weight: 700;
+    }
+
+    &::after {
+      content: "✓";
+      position: absolute;
+      right: 0.5rem;
+      font-size: 0.9rem;
+      color: $color-success;
+      font-weight: bold;
+    }
+  }
+
+  /* ✅ Disabled state (when locked) */
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+
+    .row-number {
+      color: $color-gray;
+    }
   }
 }
