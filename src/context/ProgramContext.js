@@ -10,14 +10,14 @@ export const ProgramProvider = ({ children }) => {
   const [programs, setPrograms] = useState(() => {
     const initial = loadProgram();
 
-    // ✅ Normalize and reset progress on load
+    // ✅ Normalize on load (preserve progress if present)
     const normalized = (initial || []).map((week) => {
       const newWeek = {};
       Object.keys(week || {}).forEach((dayKey) => {
         newWeek[dayKey] = (week[dayKey] || []).map((wo) => ({
           ...wo,
-          completedSets: 0,   // always reset on load
-          completed: false,   // always reset on load
+          completedSets: wo.completedSets ?? 0,
+          completed: wo.completed ?? false,
         }));
       });
       return newWeek;
@@ -29,6 +29,7 @@ export const ProgramProvider = ({ children }) => {
     return normalized;
   });
 
+  // ✅ Persist locked state
   const [locked, setLocked] = useState(() => {
     try {
       const saved = localStorage.getItem("programLocked");
@@ -65,8 +66,8 @@ export const ProgramProvider = ({ children }) => {
           const workouts = prevWeek[d] || [];
           newWeek[d] = workouts.map((wo) => ({
             ...wo,
-            completedSets: 0,
-            completed: false,
+            completedSets: wo.completedSets ?? 0,
+            completed: wo.completed ?? false,
           }));
         }
 
@@ -94,7 +95,6 @@ export const ProgramProvider = ({ children }) => {
         return prev;
       }
 
-      // ✅ Ensure new workouts start clean
       const normalizedWorkout = {
         ...workout,
         completedSets: 0,
@@ -135,8 +135,8 @@ export const ProgramProvider = ({ children }) => {
           w.id === updatedWorkout.id
             ? {
                 ...updatedWorkout,
-                completedSets: 0,   // reset on update
-                completed: false,
+                completedSets: updatedWorkout.completedSets ?? 0,
+                completed: updatedWorkout.completed ?? false,
               }
             : w
         );
@@ -148,7 +148,6 @@ export const ProgramProvider = ({ children }) => {
     });
   };
 
-  // ✅ Update progress during a workout
   const updateProgress = (weekIndex, dayNumber, workoutIndex, setNumber) => {
     setPrograms((prev) => {
       const updated = [...prev];

@@ -1,7 +1,8 @@
 /* DropDownTagButton.scss
  * - Top-centered button group with dropdown arrow
- * - Floating, draggable timer badge
- * - Phase-based color cues (work, rest, betweenWorkouts)
+ * - Dropdown panel anchored under the button (no full overlay)
+ * - Floating, draggable timer badge (time stacked over status)
+ * - Phase-based color cues
  * - Mobile-friendly sizing and safe-area awareness
  */
 
@@ -20,15 +21,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
+    position: relative; /* anchor dropdown-content here */
     left: 50%;
     transform: translateX(-50%);
     translate: 0 calc(-1 * var(--btn-h, 0px)); /* slide up when closed */
     transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: translate;
 
     .drop-button {
       padding: 12px 18px;
       font-size: 16px;
+      line-height: 1.2;
       border: none;
       border-radius: 10px 10px 0 0;
       background: #252525;
@@ -36,12 +39,13 @@
       cursor: pointer;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
       -webkit-tap-highlight-color: transparent;
+      max-width: 92vw;
+      white-space: nowrap;          /* compact when closed */
+      overflow: hidden;
+      text-overflow: ellipsis;
 
-      &:hover {
-        background: #0056b3;
-      }
+      &:hover { background: #0056b3; }
 
-      /* Inline phase label next to timer text */
       .phase-inline {
         margin-left: 8px;
         font-weight: 600;
@@ -61,26 +65,67 @@
       transition: background 0.2s ease;
       -webkit-tap-highlight-color: transparent;
 
-      &:hover {
-        background: #555;
-      }
+      &:hover { background: #555; }
+    }
+
+    .dropdown-content {
+      position: absolute;       /* anchor under the group */
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 240px;
+      max-width: 92vw;
+      background: #1f1f1f;
+      color: #fff;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      overflow: hidden;
+      z-index: 1001;            /* above button but below floating timer */
     }
   }
 
   &.open .button-group {
     translate: 0 0;
 
-    .arrow {
-      animation: arrowFlipOpen 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    .drop-button {
+      white-space: normal; /* allow wrapping when open */
     }
   }
 
-  &:not(.open) .button-group .arrow {
-    animation: arrowFlipClose 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+  /* Hide height-growing extras when closed */
+  &:not(.open) .button-group {
+    .drop-button .phase-inline { display: none; }
   }
 }
 
-/* Floating timer badge */
+/* Workout list row (ticks aligned right, no overlap) */
+.workout-row {
+  display: flex;
+  justify-content: space-between; /* text left, tick right */
+  align-items: center;
+  padding: 10px 14px;
+  gap: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+
+  .workout-name {
+    font-size: 15px;
+    line-height: 1.3;
+    color: #eaeaea;
+  }
+
+  .tick {
+    flex-shrink: 0;
+    margin-left: 8px;
+    font-size: 18px; /* mobile friendly */
+    line-height: 1;
+    color: #28a745;  /* green */
+  }
+}
+.workout-row:first-child {
+  border-top: none;
+}
+
+/* Floating timer badge (stack time on top, status below) */
 .floating-timer {
   position: fixed;
   top: 20px;   /* JS sets exact position; these are fallbacks */
@@ -88,87 +133,54 @@
   background: #007bff;
   color: #fff;
   font-weight: 700;
-  font-size: 14px;
-  padding: 8px 12px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  z-index: 9999;
+  z-index: 1100; /* above dropdown */
   animation: fadeIn 0.3s ease;
   touch-action: none; /* prevent scroll while dragging */
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* stack vertically */
   align-items: center;
-  gap: 4px;
+  gap: 6px;               /* space between time and status */
   -webkit-tap-highlight-color: transparent;
 
   .floating-time {
     font-weight: 800;
-    font-size: 16px;
-  }
-
-  /* Phase label inside floating badge */
-  .floating-phase {
-    font-size: 12px;
-    color: #333;
-    background: rgba(255, 255, 255, 0.88);
-    padding: 3px 8px;
-    border-radius: 8px;
-    backdrop-filter: blur(4px);
-    letter-spacing: 0.2px;
+    font-size: 20px;
     line-height: 1.2;
   }
+
+  .floating-phase {
+    font-size: 14px;
+    color: #333;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 10px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 90%;
+    letter-spacing: 0.2px;
+    line-height: 1.25;
+  }
 }
 
-.floating-timer.draggable {
-  cursor: grab;
-}
-
-.floating-timer.draggable:active {
-  cursor: grabbing;
-}
+.floating-timer.draggable { cursor: grab; }
+.floating-timer.draggable:active { cursor: grabbing; }
 
 /* Phase color cues for badge */
-.floating-timer.work {
-  background: #28a745; /* green */
-}
-.floating-timer.rest {
-  background: #fd7e14; /* orange */
-}
-.floating-timer.betweenWorkouts {
-  background: #17a2b8; /* teal */
-}
+.floating-timer.work { background: #28a745; }           /* green */
+.floating-timer.rest { background: #fd7e14; }           /* orange */
+.floating-timer.betweenWorkouts { background: #17a2b8; }/* teal */
 
-/* Phase color cues for inline label */
-.phase-inline.work {
-  color: #28a745;
-}
-.phase-inline.rest {
-  color: #fd7e14;
-}
-.phase-inline.betweenWorkouts {
-  color: #17a2b8;
-}
+/* Phase color cues for inline label in the dropdown button */
+.phase-inline.work { color: #28a745; }
+.phase-inline.rest { color: #fd7e14; }
+.phase-inline.betweenWorkouts { color: #17a2b8; }
 
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.92); }
   to   { opacity: 1; transform: scale(1); }
-}
-
-/* Keyframes for opening (down) */
-@keyframes arrowFlipOpen {
-  0%   { transform: rotate(0deg) scale(1); }
-  60%  { transform: rotate(200deg) scale(1.1); }
-  80%  { transform: rotate(175deg) scale(0.95); }
-  100% { transform: rotate(180deg) scale(1); }
-}
-
-/* Keyframes for closing (up) */
-@keyframes arrowFlipClose {
-  0%   { transform: rotate(180deg) scale(1); }
-  60%  { transform: rotate(-20deg) scale(1.1); }
-  80%  { transform: rotate(5deg) scale(0.95); }
-  100% { transform: rotate(0deg) scale(1); }
 }
 
 /* Mobile-friendly tweaks */
@@ -184,20 +196,23 @@
     border-radius: 0 0 12px 12px;
   }
 
+  .dropdown-tag-button .button-group .dropdown-content {
+    min-width: 220px;
+    max-width: 94vw;
+  }
+
   .floating-timer {
-    font-size: 13px;
-    padding: 7px 10px;
-    border-radius: 14px;
+    padding: 8px 12px;
 
-    .floating-time {
-      font-size: 15px;
-    }
+    .floating-time { font-size: 19px; }
+    .floating-phase { font-size: 13px; }
+  }
 
-    .floating-phase {
-      font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 8px;
-    }
+  .workout-row {
+    padding: 10px 12px;
+
+    .workout-name { font-size: 14.5px; }
+    .tick { font-size: 18px; margin-left: 12px; }
   }
 }
 

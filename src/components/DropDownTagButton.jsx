@@ -11,13 +11,35 @@ import "./DropDownTagButton.scss";
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
+// --- Wake Lock helpers ---
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ("wakeLock" in navigator) {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => {
+        console.log("Wake lock released");
+      });
+      console.log("Wake lock active");
+    }
+  } catch (err) {
+    console.error(`${err.name}, ${err.message}`);
+  }
+}
+function releaseWakeLock() {
+  if (wakeLock) {
+    wakeLock.release();
+    wakeLock = null;
+  }
+}
+
 const DropDownTagButton = ({
   label = "Start Workout",
   weekIndex = 0,
   dayNumber = 1,
   onClick,
 }) => {
-  const { programs, updateProgress, setLocked } = useProgram();
+  const { programs, updateProgress, locked, setLocked } = useProgram();
   const { totalSeconds } = useDayEstimates(weekIndex, dayNumber);
 
   const workouts = useMemo(() => {
@@ -25,13 +47,13 @@ const DropDownTagButton = ({
   }, [programs, weekIndex, dayNumber]);
 
   const [open, setOpen] = useState(false);
-  const [running, setRunning] = useState(false);
+  const [running, setRunning] = useState(locked);
   const [elapsed, setElapsed] = useState(0);
+  const [startTimestamp, setStartTimestamp] = useState(null);
 
   const [currentWorkoutIndex, setCurrentWorkoutIndex] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
   const [phase, setPhase] = useState("work");
-  const phaseElapsedRef = useRef(0);
 
   const [pos, setPos] = useState({ x: 20, y: 80 });
   const [dragging, setDragging] = useState(false);
@@ -39,85 +61,136 @@ const DropDownTagButton = ({
 
   const groupRef = useRef(null);
   const btnRef = useRef(null);
-  const intervalRef = useRef(null);
 
+  // Restore startTimestamp on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("workoutStart");
+    if (saved) {
+      setStartTimestamp(Number(saved));
+      setLocked(true);
+    }
+  }, [setLocked]);
+
+  // Sync running with locked
+  useEffect(() => {
+    setRunning(locked);
+  }, [locked]);
+
+  // Update CSS var for button height whenever content changes
   useLayoutEffect(() => {
     if (!btnRef.current || !groupRef.current) return;
-    const btnH = btnRef.current.offsetHeight;
+    const btnH = Math.ceil(btnRef.current.getBoundingClientRect().height);
     groupRef.current.style.setProperty("--btn-h", `${btnH}px`);
-  }, [label]);
+  }, [label, running, elapsed, phase, currentWorkoutIndex, currentSet]);
 
   const handleButtonClick = () => {
-    if (!running) {
+    if (!locked) {
+      const now = Date.now();
+      setStartTimestamp(now);
+      localStorage.setItem("workoutStart", now.toString());
+
       setElapsed(0);
-      setPhase("work");
       setCurrentWorkoutIndex(0);
       setCurrentSet(1);
-      phaseElapsedRef.current = 0;
-      setRunning(true);
-      setLocked(true); // ✅ lock program editing
+      setPhase("work");
+
+      setLocked(true);
+      requestWakeLock();
       onClick?.();
     } else {
-      setRunning(false);
-      clearInterval(intervalRef.current);
-      setLocked(false); // ✅ unlock when stopped
+      setLocked(false);
+      localStorage.removeItem("workoutStart");
+      releaseWakeLock();
     }
   };
 
   const handleArrowClick = () => setOpen((p) => !p);
 
+  // Re-request wake lock if tab regains focus
   useEffect(() => {
-    if (!running) return;
-    intervalRef.current = setInterval(() => {
-      setElapsed((prev) => {
-        if (prev >= totalSeconds) {
-          clearInterval(intervalRef.current);
-          setLocked(false); // unlock at end
-          return totalSeconds;
-        }
-        return prev + 1;
-      });
-
-      const nextPhaseElapsed = phaseElapsedRef.current + 1;
-      let limit = phase === "work" ? 60 : phase === "rest" ? 60 : 120;
-
-      if (nextPhaseElapsed >= limit) {
-        if (phase === "work") {
-          const currentWorkout = workouts[currentWorkoutIndex];
-          if (currentSet < (currentWorkout?.sets || 1)) {
-            updateProgress(weekIndex, dayNumber, currentWorkoutIndex, currentSet);
-            setCurrentSet((s) => s + 1);
-            setPhase("rest");
-          } else {
-            updateProgress(weekIndex, dayNumber, currentWorkoutIndex, currentSet);
-            if (currentWorkoutIndex < workouts.length - 1) {
-              setCurrentWorkoutIndex((i) => i + 1);
-              setCurrentSet(1);
-              setPhase("betweenWorkouts");
-            } else {
-              setRunning(false);
-              clearInterval(intervalRef.current);
-              setLocked(false); // unlock when finished
-            }
-          }
-        } else if (phase === "rest") {
-          setPhase("work");
-        } else if (phase === "betweenWorkouts") {
-          setPhase("work");
-        }
-        phaseElapsedRef.current = 0;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && locked) {
+        requestWakeLock();
       } else {
-        phaseElapsedRef.current = nextPhaseElapsed;
+        releaseWakeLock();
       }
-    }, 1000);
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [locked]);
 
-    return () => clearInterval(intervalRef.current);
+  // Timer effect: elapsed and phase catch-up
+  useEffect(() => {
+    if (!running || !startTimestamp) return;
+
+    const tick = () => {
+      const now = Date.now();
+      const seconds = Math.floor((now - startTimestamp) / 1000);
+
+      if (seconds >= totalSeconds) {
+        setElapsed(totalSeconds);
+        setLocked(false);
+        localStorage.removeItem("workoutStart");
+        releaseWakeLock();
+        return;
+      }
+
+      setElapsed(seconds);
+
+      // Phase catch-up logic
+      let remaining = seconds;
+      let wIndex = 0;
+      let setNum = 1;
+      let currentPhase = "work";
+
+      while (remaining > 0 && wIndex < workouts.length) {
+        const currentWorkout = workouts[wIndex];
+        const setLimit = currentWorkout?.sets || 1;
+
+        if (currentPhase === "work") {
+          if (remaining >= 60) {
+            remaining -= 60;
+            updateProgress(weekIndex, dayNumber, wIndex, setNum);
+            if (setNum < setLimit) {
+              setNum++;
+              currentPhase = "rest";
+            } else {
+              if (wIndex < workouts.length - 1) {
+                wIndex++;
+                setNum = 1;
+                currentPhase = "betweenWorkouts";
+              } else {
+                break;
+              }
+            }
+          } else break;
+        } else if (currentPhase === "rest") {
+          if (remaining >= 60) {
+            remaining -= 60;
+            currentPhase = "work";
+          } else break;
+        } else if (currentPhase === "betweenWorkouts") {
+          if (remaining >= 120) {
+            remaining -= 120;
+            currentPhase = "work";
+          } else break;
+        }
+      }
+
+      setCurrentWorkoutIndex(wIndex);
+      setCurrentSet(setNum);
+      setPhase(currentPhase);
+    };
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
   }, [
     running,
+    startTimestamp,
     totalSeconds,
-    phase,
-    currentSet,
-    currentWorkoutIndex,
     workouts,
     updateProgress,
     weekIndex,
@@ -125,9 +198,9 @@ const DropDownTagButton = ({
     setLocked,
   ]);
 
+  // Dragging logic
   useEffect(() => {
     if (!dragging) return;
-
     const onMove = (e) => {
       let clientX, clientY;
       if (e.touches && e.touches.length > 0) {
@@ -137,26 +210,20 @@ const DropDownTagButton = ({
         clientX = e.clientX;
         clientY = e.clientY;
       }
-
       const newX = clientX - dragOffset.current.x;
       const newY = clientY - dragOffset.current.y;
-
       const badgeWidth = 80;
       const badgeHeight = 40;
-
       setPos({
         x: clamp(newX, 0, window.innerWidth - badgeWidth),
         y: clamp(newY, 0, window.innerHeight - badgeHeight),
       });
     };
-
     const onUp = () => setDragging(false);
-
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     window.addEventListener("touchmove", onMove, { passive: false });
     window.addEventListener("touchend", onUp);
-
     return () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
@@ -194,8 +261,7 @@ const DropDownTagButton = ({
                 ({minutes}:{seconds})
                 {statusLabel && (
                   <span className={`phase-inline ${phase}`}>
-                    {" "}
-                    — {statusLabel}
+                    {" "}— {statusLabel}
                   </span>
                 )}
               </>

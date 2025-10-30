@@ -17,6 +17,7 @@ const DayRoutine = () => {
   const { programs, addWorkout, deleteWorkout, updateWorkout } = useProgram();
   const params = useParams();
   const navigate = useNavigate();
+  const { locked, setLocked } = useProgram();
 
   // ✅ Ensure weekIdParam is a number index, dayIdParam is a string key
   const weekIdParam = params.weekId ? parseInt(params.weekId, 10) - 1 : 0;
@@ -87,11 +88,11 @@ const DayRoutine = () => {
   return (
     <div className="day-routine">
       {/* 🔽 Floating tag + drop-down button at top center */}
-      <DropDownTagButton
-        label="Start Workout"
-        totalSeconds={totalSeconds}
-        onClick={() => console.log("Workout Timer Started")}
-      />
+     <DropDownTagButton
+  label={locked ? "Stop Workout" : "Start Workout"}   // ✅ dynamic label
+  totalSeconds={totalSeconds}
+  onClick={() => setLocked(!locked)}                  // ✅ toggle persisted state
+/>
 
       <h2>
         {hasWeeks
