@@ -1,8 +1,7 @@
 /* DropDownTagButton.scss
  * - Top-centered button group with dropdown arrow
- * - Dropdown panel anchored under the button (no full overlay)
  * - Floating, draggable timer badge (time stacked over status)
- * - Phase-based color cues
+ * - Phase-based color cues (work, rest, betweenWorkouts)
  * - Mobile-friendly sizing and safe-area awareness
  */
 
@@ -21,7 +20,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative; /* anchor dropdown-content here */
+    position: relative;
     left: 50%;
     transform: translateX(-50%);
     translate: 0 calc(-1 * var(--btn-h, 0px)); /* slide up when closed */
@@ -33,7 +32,7 @@
       font-size: 16px;
       line-height: 1.2;
       border: none;
-      border-radius: 10px 10px 0 0;
+      border-radius: 0 0 10px 10px;
       background: #252525;
       color: #fff;
       cursor: pointer;
@@ -58,7 +57,7 @@
       background: #333;
       color: #fff;
       padding: 6px 12px;
-      border-radius: 0 0 10px 10px;
+      border-radius: 3px 3px 3px 3px;
       cursor: pointer;
       font-size: 14px;
       line-height: 1;
@@ -66,21 +65,6 @@
       -webkit-tap-highlight-color: transparent;
 
       &:hover { background: #555; }
-    }
-
-    .dropdown-content {
-      position: absolute;       /* anchor under the group */
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      min-width: 240px;
-      max-width: 92vw;
-      background: #1f1f1f;
-      color: #fff;
-      border-radius: 0 0 12px 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-      overflow: hidden;
-      z-index: 1001;            /* above button but below floating timer */
     }
   }
 
@@ -90,11 +74,30 @@
     .drop-button {
       white-space: normal; /* allow wrapping when open */
     }
+
+    .arrow {
+      animation: arrowFlipOpen 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    }
   }
 
   /* Hide height-growing extras when closed */
   &:not(.open) .button-group {
     .drop-button .phase-inline { display: none; }
+  }
+
+  &:not(.open) .button-group .arrow {
+    animation: arrowFlipClose 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+  }
+
+  /* Dropdown content area for workout rows */
+  .dropdown-content {
+    width: 92vw;
+    max-width: 480px;
+    background: #1f1f1f;
+    color: #fff;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+    overflow: hidden;
   }
 }
 
@@ -136,7 +139,7 @@
   padding: 10px 14px;
   border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  z-index: 1100; /* above dropdown */
+  z-index: 9999;
   animation: fadeIn 0.3s ease;
   touch-action: none; /* prevent scroll while dragging */
   display: flex;
@@ -183,6 +186,22 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* Keyframes for opening (down) */
+@keyframes arrowFlipOpen {
+  0%   { transform: rotate(0deg) scale(1); }
+  60%  { transform: rotate(200deg) scale(1.1); }
+  80%  { transform: rotate(175deg) scale(0.95); }
+  100% { transform: rotate(180deg) scale(1); }
+}
+
+/* Keyframes for closing (up) */
+@keyframes arrowFlipClose {
+  0%   { transform: rotate(180deg) scale(1); }
+  60%  { transform: rotate(-20deg) scale(1.1); }
+  80%  { transform: rotate(5deg) scale(0.95); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
 /* Mobile-friendly tweaks */
 @media (max-width: 480px) {
   .dropdown-tag-button .button-group .drop-button {
@@ -196,16 +215,22 @@
     border-radius: 0 0 12px 12px;
   }
 
-  .dropdown-tag-button .button-group .dropdown-content {
-    min-width: 220px;
-    max-width: 94vw;
+  .dropdown-tag-button .dropdown-content {
+    width: 94vw;
+    max-width: none;
   }
 
   .floating-timer {
     padding: 8px 12px;
+    border-radius: 14px;
 
     .floating-time { font-size: 19px; }
-    .floating-phase { font-size: 13px; }
+    .floating-phase {
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      max-width: 92%;
+    }
   }
 
   .workout-row {
