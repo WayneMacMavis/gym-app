@@ -1,8 +1,8 @@
-/* DropDownTagButton.scss
- * - Top-centered button group with dropdown arrow
- * - Floating, draggable timer badge (time stacked over status)
- * - Phase-based color cues (work, rest, betweenWorkouts)
- * - Mobile-friendly sizing and safe-area awareness
+/* src/components/DropDownTagButton.scss
+ * - Fixed top-center button group
+ * - Mobile: time centered on line 1, status on line 2 inside button
+ * - Floating timer unchanged
+ * - Phase-based colors + completion pulse + confetti
  */
 
 :root {
@@ -28,28 +28,78 @@
     will-change: translate;
 
     .drop-button {
+      position: relative;
       padding: 12px 18px;
       font-size: 16px;
       line-height: 1.2;
       border: none;
       border-radius: 0 0 10px 10px;
-      background: #252525;
       color: #fff;
       cursor: pointer;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
       -webkit-tap-highlight-color: transparent;
       max-width: 92vw;
-      white-space: nowrap;          /* compact when closed */
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
 
-      &:hover { background: #0056b3; }
+      /* Phase backgrounds */
+      &.work { background: #0f766e; }            /* teal-700 */
+      &.rest { background: #334155; }            /* slate-700 */
+      &.betweenWorkouts { background: #6b7280; } /* gray-600 */
 
-      .phase-inline {
-        margin-left: 8px;
+      &:hover { filter: brightness(1.05); }
+
+      /* Inline content layout (desktop default = inline) */
+      .button-content {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .time-line {
+        font-weight: 800;
+      }
+      .status-line {
         font-weight: 600;
         font-size: 14px;
         letter-spacing: 0.2px;
+
+        &.work { color: #a7f3d0; }            /* mint on work */
+        &.rest { color: #fcd34d; }            /* amber on rest */
+        &.betweenWorkouts { color: #e5e7eb; } /* light gray */
+      }
+
+      /* Completion flash styling */
+      &.completed {
+        background: #2a7a4b; /* green-700 */
+        color: #fff;
+        animation: completePulse 0.6s ease-in-out 3;
+      }
+
+      /* Confetti burst container */
+      .confetti {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+
+        span {
+          position: absolute;
+          width: 6px;
+          height: 10px;
+          top: 0;
+          left: 0;
+          transform: translateX(-50%);
+          border-radius: 1px;
+          /* Color wheel across the 12 pieces */
+          background: hsl(calc(360 * var(--i) / 12), 80%, 60%);
+          animation: confetti-fall 900ms ease-out forwards;
+          animation-delay: calc(var(--i) * 40ms);
+          /* Scatter using per-index offsets (deterministic) */
+          --spread: calc((var(--i) - 6) * 7px);
+        }
       }
     }
 
@@ -57,7 +107,7 @@
       background: #333;
       color: #fff;
       padding: 6px 12px;
-      border-radius: 3px 3px 3px 3px;
+      border-radius: 3px;
       cursor: pointer;
       font-size: 14px;
       line-height: 1;
@@ -71,25 +121,15 @@
   &.open .button-group {
     translate: 0 0;
 
-    .drop-button {
-      white-space: normal; /* allow wrapping when open */
-    }
-
-    .arrow {
-      animation: arrowFlipOpen 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
-    }
+    .drop-button { white-space: normal; }
+    .arrow { animation: arrowFlipOpen 0.45s cubic-bezier(0.68,-0.55,0.27,1.55) forwards; }
   }
 
-  /* Hide height-growing extras when closed */
-  &:not(.open) .button-group {
-    .drop-button .phase-inline { display: none; }
-  }
-
+  &:not(.open) .button-group .drop-button .status-line { display: none; }
   &:not(.open) .button-group .arrow {
-    animation: arrowFlipClose 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    animation: arrowFlipClose 0.45s cubic-bezier(0.68,-0.55,0.27,1.55) forwards;
   }
 
-  /* Dropdown content area for workout rows */
   .dropdown-content {
     width: 92vw;
     max-width: 480px;
@@ -104,7 +144,7 @@
 /* Workout list row (ticks aligned right, no overlap) */
 .workout-row {
   display: flex;
-  justify-content: space-between; /* text left, tick right */
+  justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
   gap: 10px;
@@ -119,21 +159,19 @@
   .tick {
     flex-shrink: 0;
     margin-left: 8px;
-    font-size: 18px; /* mobile friendly */
+    font-size: 18px;
     line-height: 1;
-    color: #28a745;  /* green */
+    color: #28a745;
   }
 }
-.workout-row:first-child {
-  border-top: none;
-}
+.workout-row:first-child { border-top: none; }
 
-/* Floating timer badge (stack time on top, status below) */
+/* Floating timer badge (unchanged layout) */
 .floating-timer {
   position: fixed;
-  top: 20px;   /* JS sets exact position; these are fallbacks */
+  top: 20px;
   left: 20px;
-  background: #007bff;
+  background: #111827; /* gray-900 */
   color: #fff;
   font-weight: 700;
   padding: 10px 14px;
@@ -141,22 +179,34 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   z-index: 9999;
   animation: fadeIn 0.3s ease;
-  touch-action: none; /* prevent scroll while dragging */
+  touch-action: none;
   display: flex;
-  flex-direction: column; /* stack vertically */
+  flex-direction: column;
   align-items: center;
-  gap: 6px;               /* space between time and status */
+  gap: 6px;
   -webkit-tap-highlight-color: transparent;
+
+  /* Phase borders for subtle cue */
+  &.work { border: 1px solid #0f766e; }
+  &.rest { border: 1px solid #334155; }
+  &.betweenWorkouts { border: 1px solid #6b7280; }
 
   .floating-time {
     font-weight: 800;
     font-size: 20px;
     line-height: 1.2;
+
+    .total-estimate {
+      font-weight: 600;
+      font-size: 14px;
+      margin-left: 4px;
+      opacity: 0.85;
+    }
   }
 
   .floating-phase {
     font-size: 14px;
-    color: #333;
+    color: #111;
     background: rgba(255, 255, 255, 0.9);
     padding: 4px 10px;
     border-radius: 8px;
@@ -170,49 +220,62 @@
 .floating-timer.draggable { cursor: grab; }
 .floating-timer.draggable:active { cursor: grabbing; }
 
-/* Phase color cues for badge */
-.floating-timer.work { background: #28a745; }           /* green */
-.floating-timer.rest { background: #fd7e14; }           /* orange */
-.floating-timer.betweenWorkouts { background: #17a2b8; }/* teal */
-
-/* Phase color cues for inline label in the dropdown button */
-.phase-inline.work { color: #28a745; }
-.phase-inline.rest { color: #fd7e14; }
-.phase-inline.betweenWorkouts { color: #17a2b8; }
-
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.92); }
   to   { opacity: 1; transform: scale(1); }
 }
-
-/* Keyframes for opening (down) */
 @keyframes arrowFlipOpen {
-  0%   { transform: rotate(0deg) scale(1); }
-  60%  { transform: rotate(200deg) scale(1.1); }
-  80%  { transform: rotate(175deg) scale(0.95); }
+  0% { transform: rotate(0deg) scale(1); }
+  60% { transform: rotate(200deg) scale(1.1); }
+  80% { transform: rotate(175deg) scale(0.95); }
   100% { transform: rotate(180deg) scale(1); }
 }
-
-/* Keyframes for closing (up) */
 @keyframes arrowFlipClose {
-  0%   { transform: rotate(180deg) scale(1); }
-  60%  { transform: rotate(-20deg) scale(1.1); }
-  80%  { transform: rotate(5deg) scale(0.95); }
+  0% { transform: rotate(180deg) scale(1); }
+  60% { transform: rotate(-20deg) scale(1.1); }
+  80% { transform: rotate(5deg) scale(0.95); }
   100% { transform: rotate(0deg) scale(1); }
 }
+@keyframes completePulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(42,122,75,0.6); }
+  50% { transform: scale(1.05); box-shadow: 0 0 24px 6px rgba(42,122,75,0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(42,122,75,0); }
+}
+@keyframes confetti-fall {
+  0% { opacity: 1; transform: translate(calc(-50% + var(--spread)), -4px) rotate(0deg); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--spread)), 80px) rotate(360deg); }
+}
 
-/* Mobile-friendly tweaks */
+/* Mobile-friendly tweaks (stack time + status inside button) */
 @media (max-width: 480px) {
   .dropdown-tag-button .button-group .drop-button {
     font-size: 14px;
     padding: 12px 18px;
-    border-radius: 12px 12px 0 0;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .dropdown-tag-button .button-group .drop-button .button-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2px;
+  }
+
+  .dropdown-tag-button .button-group .drop-button .time-line {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .dropdown-tag-button .button-group .drop-button .status-line {
+    font-size: 13.5px;
+    font-weight: 600;
+    opacity: 0.95;
   }
 
   .dropdown-tag-button .button-group .arrow {
-    padding: 8px 14px;
-    border-radius: 0 0 12px 12px;
+    padding: 6px 12px;
+    border-radius: 4px;
   }
 
   .dropdown-tag-button .dropdown-content {
@@ -241,7 +304,7 @@
   }
 }
 
-/* Support safe areas on iOS */
+/* Safe area support */
 @supports(padding: env(safe-area-inset-top)) {
   .dropdown-tag-button {
     padding-top: env(safe-area-inset-top);

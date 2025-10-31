@@ -1,3 +1,4 @@
+// src/pages/DayRoutine.jsx
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./DayRoutine.scss";
@@ -9,8 +10,6 @@ import { useWorkoutEditor } from "../hooks/useWorkoutEditor";
 import { formatWorkout } from "../utils/workouts";
 import Button from "../components/Button/Button";
 import { useProgram } from "../context/ProgramContext";
-
-// ✅ Import your DropDownTagButton with timer
 import DropDownTagButton from "../components/DropDownTagButton";
 
 const DayRoutine = () => {
@@ -19,7 +18,6 @@ const DayRoutine = () => {
   const navigate = useNavigate();
   const { locked, setLocked } = useProgram();
 
-  // ✅ Ensure weekIdParam is a number index, dayIdParam is a string key
   const weekIdParam = params.weekId ? parseInt(params.weekId, 10) - 1 : 0;
   const dayIdParam = params.dayId ? String(parseInt(params.dayId, 10)) : "1";
 
@@ -42,15 +40,12 @@ const DayRoutine = () => {
     2000
   );
 
-  const { estimateWorkoutSeconds, estimateDayMinutes, getColor } = useDayEstimates();
-
-  // ✅ Total time in minutes (for display)
-  const totalMinutes = workouts.length ? estimateDayMinutes(workouts) : null;
-
-  // ✅ Total time in seconds (for timer)
-  const totalSeconds = workouts.length
-    ? workouts.reduce((sum, w) => sum + estimateWorkoutSeconds(w), 0)
-    : 0;
+  // ✅ Only destructure what you need
+  const {
+    estimateWorkoutSeconds,
+    getColor,
+    totalMinutes,
+  } = useDayEstimates(weekIdParam, dayIdParam);
 
   const {
     editingId,
@@ -61,38 +56,33 @@ const DayRoutine = () => {
     cancelEdit,
   } = useWorkoutEditor(updateWorkout, dayIdParam, weekIdParam, hasWeeks);
 
-  // ✅ Debounced add logic to prevent duplicates
   const handleAddWorkout = (() => {
     let lastId = null;
-
     return (workout) => {
       const formatted = formatWorkout(workout);
-
       if (formatted.id === lastId) {
         console.warn("Duplicate add prevented:", formatted.id);
         return;
       }
-
       lastId = formatted.id;
-
       if (hasWeeks) {
         addWorkout(dayIdParam, formatted, weekIdParam);
       } else {
         addWorkout(dayIdParam, formatted);
       }
-
-      setShowForm(false); // close form after adding
+      setShowForm(false);
     };
   })();
 
   return (
     <div className="day-routine">
-      {/* 🔽 Floating tag + drop-down button at top center */}
-     <DropDownTagButton
-  label={locked ? "Stop Workout" : "Start Workout"}   // ✅ dynamic label
-  totalSeconds={totalSeconds}
-  onClick={() => setLocked(!locked)}                  // ✅ toggle persisted state
-/>
+      <DropDownTagButton
+        label={locked ? "Stop Workout" : "Start Workout"}
+        weekIndex={weekIdParam}
+        dayNumber={dayIdParam}
+        totalMinutes={totalMinutes}   // ✅ pass totalMinutes down
+        onClick={() => setLocked(!locked)}
+      />
 
       <h2>
         {hasWeeks
@@ -100,7 +90,7 @@ const DayRoutine = () => {
           : `Day ${dayIdParam} Routine`}
       </h2>
 
-      {totalMinutes && (
+      {totalMinutes > 0 && (
         <p className="day-total-time" style={{ color: getColor(totalMinutes) }}>
           Estimated total: ~{totalMinutes} min
         </p>
@@ -145,7 +135,6 @@ const DayRoutine = () => {
                 collapsed={collapsed}
               />
 
-              {/* ✅ Summary moved below the card */}
               <div className="workout-summary-inline">
                 <span>Total Reps: {totalReps}</span>
                 <span>Total Weight: {totalWeight} kg</span>
@@ -155,7 +144,6 @@ const DayRoutine = () => {
         })}
       </div>
 
-      {/* Only show Add button when form is closed */}
       {!showForm && (
         <Button variant="primary" onClick={() => setShowForm(true)}>
           ➕ Add Workout
@@ -165,7 +153,7 @@ const DayRoutine = () => {
       {showForm && (
         <AddWorkoutForm
           onAddWorkout={handleAddWorkout}
-          onCancel={() => setShowForm(false)} // Cancel inside form closes it
+          onCancel={() => setShowForm(false)}
         />
       )}
 

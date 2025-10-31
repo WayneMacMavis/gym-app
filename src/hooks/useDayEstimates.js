@@ -1,25 +1,21 @@
 // src/hooks/useDayEstimates.js
+import { useMemo } from "react";
+import { useProgram } from "../context/ProgramContext";
 
 // Estimate total seconds for a single workout
-// Rule: each set = 60s, each rest between sets = 60s
 const estimateWorkoutSeconds = (workout) => {
   const sets = workout.sets || 0;
   if (sets === 0) return 0;
 
-  // time for sets
-  let total = sets * 60;
-
-  // rest between sets (only between, not after last)
+  let total = sets * 60; // each set = 60s
   if (sets > 1) {
-    total += (sets - 1) * 60;
+    total += (sets - 1) * 60; // rest between sets
   }
-
   return total;
 };
 
-// Estimate total minutes for a day of workouts
-// Rule: add 120s rest between workouts
-const estimateDayMinutes = (workouts) => {
+// Estimate total seconds for a day of workouts
+const estimateDaySeconds = (workouts) => {
   let total = 0;
   workouts.forEach((w, wi) => {
     total += estimateWorkoutSeconds(w);
@@ -27,7 +23,12 @@ const estimateDayMinutes = (workouts) => {
       total += 120; // 2 minutes between workouts
     }
   });
-  return Math.round(total / 60);
+  return total;
+};
+
+// Estimate total minutes for a day of workouts
+const estimateDayMinutes = (workouts) => {
+  return Math.round(estimateDaySeconds(workouts) / 60);
 };
 
 // Color coding based on duration
@@ -37,6 +38,24 @@ const getColor = (minutes) => {
   return "#c0392b";                      // red
 };
 
-export const useDayEstimates = () => {
-  return { estimateWorkoutSeconds, estimateDayMinutes, getColor };
+// Hook: compute totals for a given week/day
+export const useDayEstimates = (weekIndex, dayNumber) => {
+  const { programs } = useProgram();
+
+  // ✅ Memoize workouts so dependency arrays are stable
+  const workouts = useMemo(
+    () => programs?.[weekIndex]?.[dayNumber] || [],
+    [programs, weekIndex, dayNumber]
+  );
+
+  const totalSeconds = useMemo(() => estimateDaySeconds(workouts), [workouts]);
+  const totalMinutes = useMemo(() => estimateDayMinutes(workouts), [workouts]);
+
+  return {
+    totalSeconds,
+    totalMinutes,
+    getColor,
+    estimateWorkoutSeconds,
+    estimateDayMinutes, // keep old API alive for DayRoutine
+  };
 };

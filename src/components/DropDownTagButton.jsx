@@ -1,9 +1,16 @@
+// src/components/DropDownTagButton.jsx
+// - Mobile button layout: time centered on line 1, status on line 2
+// - Fixed phase logic so "next" does not skip a workout
+// - Completion flash + optional confetti
+// - Floating timer unchanged
+
 import React, {
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
   useMemo,
+  useCallback,
 } from "react";
 import { useProgram } from "../context/ProgramContext";
 import { useDayEstimates } from "../hooks/useDayEstimates";
@@ -11,7 +18,7 @@ import "./DropDownTagButton.scss";
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-// --- Wake Lock helpers ---
+// Wake Lock helpers
 let wakeLock = null;
 async function requestWakeLock() {
   try {
@@ -20,7 +27,6 @@ async function requestWakeLock() {
       wakeLock.addEventListener("release", () => {
         console.log("Wake lock released");
       });
-      console.log("Wake lock active");
     }
   } catch (err) {
     console.error(`${err.name}, ${err.message}`);
@@ -37,14 +43,16 @@ const DropDownTagButton = ({
   label = "Start Workout",
   weekIndex = 0,
   dayNumber = 1,
+  totalMinutes, // optional, used in floating badge
   onClick,
 }) => {
   const { programs, updateProgress, locked, setLocked } = useProgram();
   const { totalSeconds } = useDayEstimates(weekIndex, dayNumber);
 
-  const workouts = useMemo(() => {
-    return programs?.[weekIndex]?.[dayNumber] || [];
-  }, [programs, weekIndex, dayNumber]);
+  const workouts = useMemo(
+    () => programs?.[weekIndex]?.[dayNumber] || [],
+    [programs, weekIndex, dayNumber]
+  );
 
   const [open, setOpen] = useState(false);
   const [running, setRunning] = useState(locked);
@@ -62,7 +70,9 @@ const DropDownTagButton = ({
   const groupRef = useRef(null);
   const btnRef = useRef(null);
 
-  // Restore startTimestamp on mount
+  const [completed, setCompleted] = useState(false);
+
+  // Restore session
   useEffect(() => {
     const saved = localStorage.getItem("workoutStart");
     if (saved) {
@@ -76,13 +86,29 @@ const DropDownTagButton = ({
     setRunning(locked);
   }, [locked]);
 
-  // Update CSS var for button height whenever content changes
+  // Keep arrow slide aligned to button height
   useLayoutEffect(() => {
     if (!btnRef.current || !groupRef.current) return;
     const btnH = Math.ceil(btnRef.current.getBoundingClientRect().height);
     groupRef.current.style.setProperty("--btn-h", `${btnH}px`);
-  }, [label, running, elapsed, phase, currentWorkoutIndex, currentSet]);
+  }, [label, running, elapsed, phase, currentWorkoutIndex, currentSet, completed]);
 
+  // Stop workflow
+  const stopWorkout = useCallback(() => {
+    setLocked(false);
+    localStorage.removeItem("workoutStart");
+    releaseWakeLock();
+    setElapsed(0);
+    setCurrentWorkoutIndex(0);
+    setCurrentSet(1);
+    setPhase("work");
+
+    setCompleted(true);
+    const t = setTimeout(() => setCompleted(false), 2000);
+    return () => clearTimeout(t);
+  }, [setLocked]);
+
+  // Button click
   const handleButtonClick = () => {
     if (!locked) {
       const now = Date.now();
@@ -98,15 +124,13 @@ const DropDownTagButton = ({
       requestWakeLock();
       onClick?.();
     } else {
-      setLocked(false);
-      localStorage.removeItem("workoutStart");
-      releaseWakeLock();
+      stopWorkout();
     }
   };
 
   const handleArrowClick = () => setOpen((p) => !p);
 
-  // Re-request wake lock if tab regains focus
+  // Visibility wake lock
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible" && locked) {
@@ -121,25 +145,25 @@ const DropDownTagButton = ({
     };
   }, [locked]);
 
-  // Timer effect: elapsed and phase catch-up
+  // Timer + phase state machine (fixed skip bug)
   useEffect(() => {
     if (!running || !startTimestamp) return;
 
-    const tick = () => {
+    const id = setInterval(tick, 1000);
+
+    function tick() {
       const now = Date.now();
       const seconds = Math.floor((now - startTimestamp) / 1000);
 
-      if (seconds >= totalSeconds) {
+      if (Number.isFinite(totalSeconds) && seconds >= totalSeconds) {
         setElapsed(totalSeconds);
-        setLocked(false);
-        localStorage.removeItem("workoutStart");
-        releaseWakeLock();
+        clearInterval(id);
+        stopWorkout();
         return;
       }
 
       setElapsed(seconds);
 
-      // Phase catch-up logic
       let remaining = seconds;
       let wIndex = 0;
       let setNum = 1;
@@ -158,7 +182,6 @@ const DropDownTagButton = ({
               currentPhase = "rest";
             } else {
               if (wIndex < workouts.length - 1) {
-                wIndex++;
                 setNum = 1;
                 currentPhase = "betweenWorkouts";
               } else {
@@ -174,6 +197,7 @@ const DropDownTagButton = ({
         } else if (currentPhase === "betweenWorkouts") {
           if (remaining >= 120) {
             remaining -= 120;
+            wIndex++; // advance to the next workout after between-workouts rest
             currentPhase = "work";
           } else break;
         }
@@ -182,23 +206,14 @@ const DropDownTagButton = ({
       setCurrentWorkoutIndex(wIndex);
       setCurrentSet(setNum);
       setPhase(currentPhase);
-    };
+    }
 
+    // initial tick to sync
     tick();
-    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [
-    running,
-    startTimestamp,
-    totalSeconds,
-    workouts,
-    updateProgress,
-    weekIndex,
-    dayNumber,
-    setLocked,
-  ]);
+  }, [running, startTimestamp, totalSeconds, workouts, updateProgress, weekIndex, dayNumber, stopWorkout]);
 
-  // Dragging logic
+  // Dragging for floating timer
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e) => {
@@ -252,24 +267,40 @@ const DropDownTagButton = ({
         <div ref={groupRef} className="button-group">
           <button
             ref={btnRef}
-            className={`drop-button ${phase}`}
+            className={`drop-button ${phase} ${completed ? "completed" : ""}`}
             onClick={handleButtonClick}
           >
-            {!running && label}
-            {running && (
+            {completed && (
               <>
-                ({minutes}:{seconds})
-                {statusLabel && (
-                  <span className={`phase-inline ${phase}`}>
-                    {" "}— {statusLabel}
-                  </span>
-                )}
+                Workout Complete!
+                <div className="confetti">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <span key={i} style={{ "--i": i }} />
+                  ))}
+                </div>
               </>
             )}
+
+            {!running && !completed && label}
+
+            {running && (
+              <div className="button-content">
+                <div className="time-line">
+                  {minutes}:{seconds}
+                </div>
+                {statusLabel && (
+                  <div className={`status-line ${phase}`}>{statusLabel}</div>
+                )}
+              </div>
+            )}
           </button>
+
           <div className="arrow" onClick={handleArrowClick} aria-label="toggle">
             ▼
           </div>
+
+          {/* If you render dropdown content, keep it here */}
+          {/* <div className="dropdown-content"> ... </div> */}
         </div>
       </div>
 
@@ -296,6 +327,9 @@ const DropDownTagButton = ({
         >
           <div className="floating-time">
             {minutes}:{seconds}
+            {typeof totalMinutes === "number" && totalMinutes > 0 && (
+              <span className="total-estimate"> / {totalMinutes}m</span>
+            )}
           </div>
           {statusLabel && (
             <div className={`floating-phase ${phase}`}>{statusLabel}</div>
