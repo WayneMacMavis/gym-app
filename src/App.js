@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import DayRoutine from "./pages/DayRoutine";
+import HistoryPage from "./pages/HistoryPage";
 import { ProgramProvider } from "./context/ProgramContext"; // ✅ new context provider
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
             path="/day/:dayId"
             element={<Navigate to="/week/1/day/:dayId" replace />}
           />
+          <Route path="/history" element={<HistoryPage />} />
         </Routes>
       </Router>
     </ProgramProvider>

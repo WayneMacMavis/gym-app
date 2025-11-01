@@ -2,20 +2,17 @@
 
 /* =========================================
    WorkoutCard.scss
-   - Sets left, Weights right
-   - Controlled weights header nudge
-   - Sets label tightened to arrows via margin-right
-   - Full file with actions, preview, media, mobile
+   - Responsive layout for title, image, actions
+   - Mobile-first stacking, desktop grid
+   - Edge-to-edge video on mobile (centered)
+   - Long-press delete button + toast feedback
    ========================================= */
 
-/* Card container and shared grid columns */
 .workout-card {
   --num-col: 40px;
   --sets-col: minmax(80px, 1fr);
   --weights-col: minmax(85px, 1fr);
   --cols-gap: 2px;
-
-  /* Controlled vertical nudge for Weights header */
   --weights-header-nudge: 26px;
 
   background: $color-bg-light;
@@ -29,9 +26,10 @@
   box-sizing: border-box;
 
   h3 {
-    width: 90px;
     margin: 0 0 $spacing-sm;
     font-size: $font-size-large;
+    width: auto;
+    flex: 1;
   }
 
   .workout-title {
@@ -45,10 +43,8 @@
       margin-top: 10px;
       margin-left: 10px;
       border-radius: $radius-md;
-      object-fit: fill;
+      object-fit: cover;
       pointer-events: none;
-      background: none;
-      border-radius: 30px;
     }
   }
 
@@ -136,6 +132,47 @@
   }
 }
 
+/* Long-press delete button */
+.delete-btn {
+  position: relative;
+  border: none;
+  border-radius: $radius-md;
+  padding: .4rem .7rem;
+  font-size: .85rem;
+  cursor: pointer;
+  background: #fef2f2;
+  color: #b91c1c;
+  overflow: hidden;
+  transition: background .2s ease, transform .1s ease;
+
+  &:hover:not(:disabled) {
+    background: #fee2e2;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(185, 28, 28, 0.2);
+    width: 0%;
+    animation: fillProgress 2s linear forwards;
+    z-index: -1;
+  }
+}
+
+/* Progress animation for long-press */
+@keyframes fillProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
 /* Collapsed animations */
 .workout-card.collapsed .top-actions {
   opacity: 0;
@@ -174,23 +211,17 @@
 
   .sets-control {
     grid-column: 2;
-    min-height: var(--header-cell-min-height);
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* no gap; use margin-right on label instead */
     gap: 0;
 
     label {
-      margin-right: -10px; /* fine‑tune this value */
+      margin-right: -10px;
       margin-left: 16px;
-      display: flex;
-      align-items: center;
       font-weight: 800;
       font-size: $font-size-small;
       color: $color-gray-dark;
-      line-height: 1;
     }
   }
 
@@ -198,25 +229,17 @@
     grid-column: 3;
     position: relative;
     top: var(--weights-header-nudge);
-
-    min-height: var(--header-cell-min-height);
     display: flex;
     align-items: end;
     justify-content: center;
-
     font-weight: 800;
     font-size: $font-size-small;
     color: $color-gray-dark;
-    text-align: center;
-    margin: 0;
   }
 }
 
 /* Rows list wrapper */
 .set-list {
-  margin: 0;
-  padding: 0;
-
   .set-row {
     display: grid;
     grid-template-columns: var(--num-col) var(--sets-col) var(--weights-col);
@@ -231,16 +254,8 @@
       color: $color-gray-dark;
     }
 
-    .set-info {
-      grid-column: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: $spacing-xs;
-    }
-
+    .set-info,
     .weight-info {
-      grid-column: 3;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -253,48 +268,47 @@
 .preview-mode {
   padding: $spacing-md;
 
-.video-wrapper {
-  position: relative;
-  width: calc(100% + 16px); // cancel out 8px padding on both sides
-  margin: 0 -8px;           // pull it flush with card edges
-  padding-bottom: 56.25%;
-  height: 0;
-}
-
-
-.video-wrapper iframe,
-.video-wrapper video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-
-
-
-
-
   h3 {
     margin-bottom: $spacing-sm;
     font-size: $font-size-large;
   }
 
   .description {
-    position: relative;
     font-size: $font-size-base;
     text-align: center;
     margin-bottom: $spacing-sm;
     color: $color-text;
   }
 
-
   button {
     display: block;
-    margin-top: $spacing-md;
-    margin: auto;
+    margin: $spacing-md auto 0;
   }
+}
+
+/* Unified video wrapper */
+.preview-mode .video-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 0 auto $spacing-sm;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  overflow: hidden;
+  border-radius: $radius-md;
+  background: #000;
+}
+
+.preview-mode .video-wrapper iframe,
+.preview-mode .video-wrapper video,
+.preview-mode .video-wrapper .video-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+  border-radius: $radius-md;
+  display: block;
 }
 
 /* Highlight Preview button when active */
@@ -308,102 +322,103 @@ button.preview-active {
   }
 }
 
+/* Toast / Snackbar */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: .6rem 1.2rem;
+  border-radius: $radius-md;
+  font-size: .9rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  animation: fadeInOut 2.5s ease forwards;
+  z-index: 1000;
+  color: #fff;
+
+  &.success { background: #16a34a; } // green
+  &.cancel  { background: #ca8a04; } // amber
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translate(-50%, 20px); }
+  10%  { opacity: 1; transform: translate(-50%, 0); }
+  90%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 20px); }
+}
+
 /* Mobile tweaks */
-@media (max-width: 420px) {
+@media (max-width: 600px) {
   .workout-card {
-    padding: 0rem;
-    --num-col: 22px;
-    --sets-col: minmax(70px, 1fr);
-    --weights-col: minmax(75px, 1fr);
-    --cols-gap: 1px;
-
-    --weights-header-nudge: 24px;
-    --header-cell-min-height: 30px;
+    grid-template-columns: 1fr;
+    padding: $spacing-md;
   }
 
-  .sets-weights-header {
-    margin: $spacing-xs 0 $spacing-sm;
-  }
+  .workout-title {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 
-  .set-list .set-row {
-    grid-template-columns: var(--num-col) var(--sets-col) var(--weights-col);
-    column-gap: var(--cols-gap);
+    .muscle-icon {
+      margin: $spacing-xs 0 0;
+      width: 100px;
+      height: auto;
+    }
   }
 
   .delete-wrapper {
-    align-items: stretch;
+    flex-direction: row;
+    justify-content: center;
+    gap: $spacing-sm;
 
     .top-actions {
-      flex-direction: row;
-      gap: $spacing-xs;
+      flex: 1;
+      justify-content: center;
 
       button {
-        flex: 0 0 auto;
-        width: auto;
-      }
-
-      .delete-button {
-        flex: 0 0 44px;
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
-        min-height: 44px;
-        max-width: 44px;
-        max-height: 44px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        flex: 1;
       }
     }
 
     .preview-btn {
-      width: 100%;
+      flex: 1;
+      max-width: none;
     }
   }
-}
 
-/* Unified media rules for preview-mode */
-.preview-mode .video-wrapper {
-  position: relative;
-  width: 100%;
-  left: 10px;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  height: 0;
-  overflow: hidden;
-  border-radius: $radius-md;
-  margin-bottom: $spacing-sm;
-  object-fit: cover;
-  background: #000;
-
-  iframe,
-  video,
-  .video-thumb {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border: 0;
-    border-radius: $radius-md;
-    display: block;
+  /* ✅ Edge-to-edge video on mobile, perfectly centered */
+  .preview-mode .video-wrapper {
+    width: calc(100% + (2 * #{$spacing-md}));
+    margin-left: -$spacing-md;
+    margin-right: -$spacing-md;
+    border-radius: 0;
   }
 }
 
-/* Explicit fallback image rule */
-.video-fallback {
-  width: 104%;
-  height: 100%;
-  object-fit: fill;
-  display: block;
+@media (min-width: 601px) {
+  /* ✅ Centered, capped video on larger screens */
+  .preview-mode .video-wrapper {
+    max-width: 640px;
+    border-radius: $radius-md;
+  }
 }
 
-/* Optional non-YouTube video element */
-.workout-demo {
-  width: 100%;
-  max-width: 640px;
-  border-radius: $radius-md;
-  display: block;
-  background: #000;
-  object-fit: cover;
+@media (max-width: 420px) {
+  .workout-card {
+    --num-col: 22px;
+    --sets-col: minmax(70px, 1fr);
+    --weights-col: minmax(75px, 1fr);
+    --cols-gap: 1px;
+    --weights-header-nudge: 24px;
+    --header-cell-min-height: 30px;
+  }
+
+  .delete-wrapper {
+    flex-direction: column;
+
+    .top-actions {
+      flex-direction: row;
+      gap: $spacing-xs;
+    }
+  }
 }

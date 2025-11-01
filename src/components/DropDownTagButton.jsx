@@ -1,6 +1,6 @@
 // src/components/DropDownTagButton.jsx
 // - Mobile button layout: time centered on line 1, status on line 2
-// - Fixed phase logic so "next" does not skip a workout
+// - Phase logic cycles workouts without tick/progress logic
 // - Completion flash + optional confetti
 // - Floating timer unchanged
 
@@ -46,7 +46,8 @@ const DropDownTagButton = ({
   totalMinutes, // optional, used in floating badge
   onClick,
 }) => {
-  const { programs, updateProgress, locked, setLocked } = useProgram();
+  // Pull in history save action from context
+  const { programs, locked, setLocked, saveDayToHistory } = useProgram();
   const { totalSeconds } = useDayEstimates(weekIndex, dayNumber);
 
   const workouts = useMemo(
@@ -72,6 +73,9 @@ const DropDownTagButton = ({
 
   const [completed, setCompleted] = useState(false);
 
+  // ✅ Guard to prevent multiple stop/save calls
+  const stoppingRef = useRef(false);
+
   // Restore session
   useEffect(() => {
     const saved = localStorage.getItem("workoutStart");
@@ -93,8 +97,14 @@ const DropDownTagButton = ({
     groupRef.current.style.setProperty("--btn-h", `${btnH}px`);
   }, [label, running, elapsed, phase, currentWorkoutIndex, currentSet, completed]);
 
-  // Stop workflow
+  // Stop workflow (guarded)
   const stopWorkout = useCallback(() => {
+    if (stoppingRef.current) {
+      console.log("stopWorkout skipped: already stopping");
+      return;
+    }
+    stoppingRef.current = true;
+
     setLocked(false);
     localStorage.removeItem("workoutStart");
     releaseWakeLock();
@@ -103,10 +113,19 @@ const DropDownTagButton = ({
     setCurrentSet(1);
     setPhase("work");
 
+    // Save this day’s workouts into history
+    saveDayToHistory(weekIndex, dayNumber);
+
     setCompleted(true);
-    const t = setTimeout(() => setCompleted(false), 2000);
-    return () => clearTimeout(t);
-  }, [setLocked]);
+    const t = setTimeout(() => {
+      setCompleted(false);
+      stoppingRef.current = false;
+    }, 2000);
+    return () => {
+      clearTimeout(t);
+      stoppingRef.current = false;
+    };
+  }, [setLocked, saveDayToHistory, weekIndex, dayNumber]);
 
   // Button click
   const handleButtonClick = () => {
@@ -145,7 +164,7 @@ const DropDownTagButton = ({
     };
   }, [locked]);
 
-  // Timer + phase state machine (fixed skip bug)
+  // Timer + phase state machine (no tick/progress updates)
   useEffect(() => {
     if (!running || !startTimestamp) return;
 
@@ -164,6 +183,7 @@ const DropDownTagButton = ({
 
       setElapsed(seconds);
 
+      // Simple simulation that advances through phases without updating external progress
       let remaining = seconds;
       let wIndex = 0;
       let setNum = 1;
@@ -176,7 +196,6 @@ const DropDownTagButton = ({
         if (currentPhase === "work") {
           if (remaining >= 60) {
             remaining -= 60;
-            updateProgress(weekIndex, dayNumber, wIndex, setNum);
             if (setNum < setLimit) {
               setNum++;
               currentPhase = "rest";
@@ -197,7 +216,7 @@ const DropDownTagButton = ({
         } else if (currentPhase === "betweenWorkouts") {
           if (remaining >= 120) {
             remaining -= 120;
-            wIndex++; // advance to the next workout after between-workouts rest
+            wIndex++;
             currentPhase = "work";
           } else break;
         }
@@ -211,7 +230,7 @@ const DropDownTagButton = ({
     // initial tick to sync
     tick();
     return () => clearInterval(id);
-  }, [running, startTimestamp, totalSeconds, workouts, updateProgress, weekIndex, dayNumber, stopWorkout]);
+  }, [running, startTimestamp, totalSeconds, workouts, stopWorkout]);
 
   // Dragging for floating timer
   useEffect(() => {

@@ -1,7 +1,12 @@
+// src/context/ProgramContext.js
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { loadProgram, saveProgram } from "../utils/storage";
 
 const ProgramContext = createContext();
+
+// ✅ Helper: always use string day keys
+const getDayKey = (d) => String(d);
 
 export const ProgramProvider = ({ children }) => {
   const [numWeeks, setNumWeeks] = useState(1);
@@ -10,7 +15,6 @@ export const ProgramProvider = ({ children }) => {
   const [programs, setPrograms] = useState(() => {
     const initial = loadProgram();
 
-    // ✅ Normalize on load (preserve progress if present)
     const normalized = (initial || []).map((week) => {
       const newWeek = {};
       Object.keys(week || {}).forEach((dayKey) => {
@@ -29,7 +33,6 @@ export const ProgramProvider = ({ children }) => {
     return normalized;
   });
 
-  // ✅ Persist locked state
   const [locked, setLocked] = useState(() => {
     try {
       const saved = localStorage.getItem("programLocked");
@@ -38,6 +41,32 @@ export const ProgramProvider = ({ children }) => {
       return false;
     }
   });
+
+  const [history, setHistory] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("workoutHistory")) || [];
+    } catch {
+      return [];
+    }
+  });
+
+  // ✅ Deduplicate history whenever it changes
+  useEffect(() => {
+    if (!Array.isArray(history)) return;
+
+    const seen = new Set();
+    const deduped = history.filter((entry) => {
+      if (seen.has(entry.id)) return false;
+      seen.add(entry.id);
+      return true;
+    });
+
+    if (deduped.length !== history.length) {
+      console.log("Deduplicated history:", history.length, "→", deduped.length);
+      setHistory(deduped);
+      localStorage.setItem("workoutHistory", JSON.stringify(deduped));
+    }
+  }, [history]); // 👈 include history here
 
   useEffect(() => {
     if (Array.isArray(programs) && programs.length > 0) {
@@ -48,6 +77,67 @@ export const ProgramProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("programLocked", JSON.stringify(locked));
   }, [locked]);
+
+  // ✅ Save a day’s workouts into history (replace last if same day/workouts)
+  const saveDayToHistory = (weekIndex, dayNumber) => {
+    const week = programs[weekIndex] || {};
+    const dayKey = getDayKey(dayNumber);
+    const workouts = week[dayKey] || [];
+
+    const date = new Date().toISOString().split("T")[0];
+    const ids = workouts.map((w) => w.id).join(",");
+
+    const entry = {
+      id: Date.now(),
+      date,
+      workouts: workouts.map((w) => ({ ...w })),
+    };
+
+    setHistory((prev) => {
+      const last = prev[prev.length - 1];
+      const lastIds = last ? (last.workouts || []).map((w) => w.id).join(",") : null;
+
+      let updated;
+      if (last && last.date === date && lastIds === ids) {
+        // replace last entry with the new snapshot
+        updated = [...prev.slice(0, -1), entry];
+      } else {
+        updated = [...prev, entry];
+      }
+
+      localStorage.setItem("workoutHistory", JSON.stringify(updated));
+      return updated;
+    });
+
+    console.log("saveDayToHistory saved", entry.id);
+  };
+
+  // ✅ Delete a history entry by id
+  const deleteHistoryEntry = (id) => {
+    setHistory((prev) => {
+      const updated = prev.filter((entry) => entry.id !== id);
+      localStorage.setItem("workoutHistory", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const recallDayFromHistory = (entry, weekIndex = 0, dayNumber = 1) => {
+    setPrograms((prev) => {
+      const updated = [...prev];
+      const week = updated[weekIndex] || {};
+      const dayKey = getDayKey(dayNumber);
+
+      week[dayKey] = (entry.workouts || []).map((wo) => ({
+        ...wo,
+        completedSets: wo.completedSets ?? 0,
+        completed: wo.completed ?? false,
+      }));
+
+      updated[weekIndex] = week;
+      saveProgram(updated);
+      return updated;
+    });
+  };
 
   const updateStructure = (weeks, days, prevProgramsOverride) => {
     if (locked) return;
@@ -63,8 +153,9 @@ export const ProgramProvider = ({ children }) => {
         const newWeek = {};
 
         for (let d = 1; d <= days; d++) {
-          const workouts = prevWeek[d] || [];
-          newWeek[d] = workouts.map((wo) => ({
+          const dayKey = getDayKey(d);
+          const workouts = prevWeek[dayKey] || [];
+          newWeek[dayKey] = workouts.map((wo) => ({
             ...wo,
             completedSets: wo.completedSets ?? 0,
             completed: wo.completed ?? false,
@@ -83,7 +174,7 @@ export const ProgramProvider = ({ children }) => {
     setPrograms((prev) => {
       const updated = [...prev];
       const week = updated[weekIndex] || {};
-      const dayKey = String(dayNumber);
+      const dayKey = getDayKey(dayNumber);
 
       if (!Array.isArray(week[dayKey])) {
         week[dayKey] = [];
@@ -112,7 +203,7 @@ export const ProgramProvider = ({ children }) => {
     setPrograms((prev) => {
       const updated = [...prev];
       const week = updated[weekIndex] || {};
-      const dayKey = String(dayNumber);
+      const dayKey = getDayKey(dayNumber);
 
       if (Array.isArray(week[dayKey])) {
         week[dayKey] = week[dayKey].filter((w) => w.id !== workoutId);
@@ -128,7 +219,7 @@ export const ProgramProvider = ({ children }) => {
     setPrograms((prev) => {
       const updated = [...prev];
       const week = updated[weekIndex] || {};
-      const dayKey = String(dayNumber);
+      const dayKey = getDayKey(dayNumber);
 
       if (Array.isArray(week[dayKey])) {
         week[dayKey] = week[dayKey].map((w) =>
@@ -152,7 +243,7 @@ export const ProgramProvider = ({ children }) => {
     setPrograms((prev) => {
       const updated = [...prev];
       const week = updated[weekIndex] || {};
-      const dayKey = String(dayNumber);
+      const dayKey = getDayKey(dayNumber);
       const workouts = week[dayKey] || [];
       const workout = workouts[workoutIndex];
 
@@ -188,6 +279,10 @@ export const ProgramProvider = ({ children }) => {
         updateProgress,
         locked,
         setLocked,
+        history,
+        saveDayToHistory,
+        recallDayFromHistory,
+        deleteHistoryEntry, // ✅ exposed for HistoryPage
       }}
     >
       {children}
