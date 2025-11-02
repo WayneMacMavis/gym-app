@@ -12,12 +12,12 @@ $color-danger-hover: #d32f2f;
 
 // Neutral colors
 $color-white: #ffffff;
-$color-black: #e6e3e3;
+$color-black: #000000;
 
 $color-gray-dark: #555555;
 $color-gray: #666666;
-$color-gray-light: #e2e2e2;
-$color-gray-light-hover: #e2e3e4;
+$color-gray-light: #e0e0e0;
+$color-gray-light-hover: #636e72;
 $color-border: #cccccc;
 $color-border-light: #eeeeee;
 
@@ -33,8 +33,8 @@ $color-bg-tag: #e0f7e9;    // tag background
 $color-tag-text: #2a7a4b;  // green tag text
 
 // Text
-$color-text-dark: #ececec; // darkest text
-$color-text: #ebebeb;      // standard text
+$color-text-dark: #222222; // darkest text
+$color-text: #333333;      // standard text
 
 // Accent (used for highlights like Preview button)
 $color-accent: #ff9800;        // orange accent
