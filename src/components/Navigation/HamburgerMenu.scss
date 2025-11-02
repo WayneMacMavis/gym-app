@@ -1,0 +1,162 @@
+.hamburger-container {
+  position: relative;
+  z-index: 1000;
+}
+
+/* Burger button */
+.burger {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1100;
+  overflow: visible;
+}
+
+.burger span {
+  position: absolute;
+  left: 50%;
+  width: 24px;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transform-origin: 50% 50%;
+  transition: transform 0.35s cubic-bezier(0.77, 0, 0.175, 1),
+              opacity 0.25s ease;
+}
+
+.burger span:nth-child(1) { top: 12px; }
+.burger span:nth-child(2) { top: 19px; }
+.burger span:nth-child(3) { top: 26px; }
+
+.burger.open span:nth-child(1) {
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.burger.open span:nth-child(2) { opacity: 0; }
+.burger.open span:nth-child(3) {
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.burger:not(.open):hover span:nth-child(1) {
+  transform: translateX(-50%) translateY(-0.5px);
+}
+.burger:not(.open):hover span:nth-child(3) {
+  transform: translateX(-50%) translateY(0.5px);
+}
+
+/* Slide-out nav */
+.side-nav {
+  position: fixed;
+  top: 0;
+  left: -160px;
+  height: 100vh;
+  width: 160px;
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+  padding-top: 4rem;
+  transition: left 0.35s cubic-bezier(0.77, 0, 0.175, 1);
+  z-index: 1050;
+}
+
+.side-nav.open { left: 0; }
+
+.side-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.side-nav li { margin: 0.5rem 0; }
+
+.side-nav a {
+  position: relative;
+  display: block;
+  padding: 0.6rem 1rem;
+  text-decoration: none;
+  font-weight: 600;
+  color: #222;
+  border-radius: 6px;
+  opacity: 0; /* start hidden */
+  transform: translate(-10px, -15px); /* slide in from left & above */
+  transition: color 0.2s ease;
+}
+
+/* Hover color */
+.side-nav a:hover {
+  color: #000;
+}
+
+/* Sliding underline effect with fade */
+.side-nav a::after {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  bottom: 4px;
+  height: 2px;
+  width: 0;
+  opacity: 0; /* start invisible */
+  background: #111;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+/* Hover underline */
+.side-nav a:hover::after {
+  width: calc(100% - 2rem);
+  opacity: 1;
+}
+
+/* Active link underline stays visible */
+.side-nav a.active {
+  color: #111;
+}
+.side-nav a.active::after {
+  width: calc(100% - 2rem);
+  opacity: 1;
+}
+
+/* ✅ Staggered fade + slide + drop with bounce easing */
+.side-nav.open li:nth-child(1) a {
+  opacity: 1;
+  transform: translate(0, 0);
+  transition: opacity 0.5s ease 0.05s,
+              transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s;
+}
+.side-nav.open li:nth-child(1) a::after {
+  transition-delay: 0.15s;
+}
+
+.side-nav.open li:nth-child(2) a {
+  opacity: 1;
+  transform: translate(0, 0);
+  transition: opacity 0.5s ease 0.15s,
+              transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s;
+}
+.side-nav.open li:nth-child(2) a::after {
+  transition-delay: 0.25s;
+}
+
+.side-nav.open li:nth-child(3) a {
+  opacity: 1;
+  transform: translate(0, 0);
+  transition: opacity 0.5s ease 0.25s,
+              transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s;
+}
+.side-nav.open li:nth-child(3) a::after {
+  transition-delay: 0.35s;
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 1040;
+}

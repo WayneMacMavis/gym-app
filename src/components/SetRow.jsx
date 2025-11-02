@@ -1,6 +1,3 @@
-// src/components/SetRow.jsx
-// Renders a single row for weights + reps with NumberAdjusters, aligned to SCSS grid.
-
 import React from "react";
 import NumberAdjuster from "./NumberAdjuster";
 import "./SetRow.scss";
@@ -14,11 +11,11 @@ const SetRow = ({
   hasWeeks,
   dayIdParam,
   weekIdParam,
-  disabled = false,   // ✅ new prop
-  completed = false,  // ✅ new prop
+  disabled = false,
+  completed = false,
 }) => {
   const handleRepChange = (newRep) => {
-    if (disabled) return; // prevent edits when locked
+    if (disabled) return;
     const updated = {
       ...workout,
       reps: workout.reps.map((r, i) => (i === index ? newRep : r)),
@@ -31,7 +28,7 @@ const SetRow = ({
   };
 
   const handleWeightChange = (newWeight) => {
-    if (disabled) return; // prevent edits when locked
+    if (disabled) return;
     const updated = {
       ...workout,
       weights: workout.weights.map((w, i) => (i === index ? newWeight : w)),
@@ -47,21 +44,7 @@ const SetRow = ({
     <div className={`set-row ${completed ? "completed" : ""}`}>
       <div className="row-number">{index + 1}</div>
 
-      {/* Weight column */}
-      <div className="weight-info">
-        <NumberAdjuster
-          value={weight}
-          min={0}
-          step={0.5}
-          suffix="kg"
-          maxDigits={5}
-          size="md"
-          onChange={handleWeightChange}
-          disabled={disabled} // ✅ lock editing
-        />
-      </div>
-
-      {/* Reps column */}
+      {/* ✅ Reps column (left, under Sets) */}
       <div className="set-info">
         <NumberAdjuster
           value={rep}
@@ -71,7 +54,21 @@ const SetRow = ({
           maxDigits={3}
           size="md"
           onChange={handleRepChange}
-          disabled={disabled} // ✅ lock editing
+          disabled={disabled}
+        />
+      </div>
+
+      {/* ✅ Weight column (right, under Weights) */}
+      <div className="weight-info">
+        <NumberAdjuster
+          value={weight}
+          min={0}
+          step={0.5}
+          suffix="kg"
+          maxDigits={5}
+          size="md"
+          onChange={handleWeightChange}
+          disabled={disabled}
         />
       </div>
     </div>

@@ -3,7 +3,7 @@
 /* Each row shares the same grid template as the header */
 .set-row {
   display: grid;
-  grid-template-columns: var(--num-col) var(--weights-col) var(--reps-col);
+  grid-template-columns: var(--num-col) var(--reps-col) var(--weights-col);
   align-items: center;
   column-gap: var(--cols-gap);
   padding: $spacing-sm 0;
@@ -30,23 +30,25 @@
     line-height: 1;
   }
 
-  .weight-info {
+  /* ✅ Reps column now under Sets */
+  .set-info {
     grid-column: 2;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .set-info {
+  /* ✅ Weights column now under Weights */
+  .weight-info {
     grid-column: 3;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  /* ✅ Completed set styling */
+  /* Completed set styling */
   &.completed {
-    background: rgba($color-success, 0.08); // light green background
+    background: rgba($color-success, 0.08);
 
     .row-number {
       color: $color-success;
@@ -63,7 +65,7 @@
     }
   }
 
-  /* ✅ Disabled state (when locked) */
+  /* Disabled state (when locked) */
   &.disabled {
     opacity: 0.6;
     pointer-events: none;

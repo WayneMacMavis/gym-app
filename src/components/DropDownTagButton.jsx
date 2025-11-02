@@ -2,7 +2,7 @@
 // - Mobile button layout: time centered on line 1, status on line 2
 // - Phase logic cycles workouts without tick/progress logic
 // - Completion flash + optional confetti
-// - Floating timer unchanged
+// - Floating timer with close button, visible only after start and when dropdown is closed
 
 import React, {
   useEffect,
@@ -46,7 +46,6 @@ const DropDownTagButton = ({
   totalMinutes, // optional, used in floating badge
   onClick,
 }) => {
-  // Pull in history save action from context
   const { programs, locked, setLocked, saveDayToHistory } = useProgram();
   const { totalSeconds } = useDayEstimates(weekIndex, dayNumber);
 
@@ -72,8 +71,9 @@ const DropDownTagButton = ({
   const btnRef = useRef(null);
 
   const [completed, setCompleted] = useState(false);
+  const [visible, setVisible] = useState(true);   // manual close
+  const [started, setStarted] = useState(false);  // show badge only after start
 
-  // ✅ Guard to prevent multiple stop/save calls
   const stoppingRef = useRef(false);
 
   // Restore session
@@ -82,6 +82,7 @@ const DropDownTagButton = ({
     if (saved) {
       setStartTimestamp(Number(saved));
       setLocked(true);
+      setStarted(true);
     }
   }, [setLocked]);
 
@@ -99,10 +100,7 @@ const DropDownTagButton = ({
 
   // Stop workflow (guarded)
   const stopWorkout = useCallback(() => {
-    if (stoppingRef.current) {
-      console.log("stopWorkout skipped: already stopping");
-      return;
-    }
+    if (stoppingRef.current) return;
     stoppingRef.current = true;
 
     setLocked(false);
@@ -141,6 +139,8 @@ const DropDownTagButton = ({
 
       setLocked(true);
       requestWakeLock();
+      setVisible(true);  // show badge by default after start
+      setStarted(true);  // mark workout as started (badge gating)
       onClick?.();
     } else {
       stopWorkout();
@@ -323,9 +323,9 @@ const DropDownTagButton = ({
         </div>
       </div>
 
-      {running && (
+      {running && started && visible && !open && (
         <div
-          className={`floating-timer draggable ${phase}`}
+          className={`floating-timer draggable ${phase} fade`}
           style={{ left: pos.x, top: pos.y }}
           onMouseDown={(e) => {
             setDragging(true);
@@ -344,12 +344,22 @@ const DropDownTagButton = ({
             }
           }}
         >
+          <button
+            className="badge-close"
+            onClick={() => setVisible(false)}
+            aria-label="Close floating timer"
+            title="Hide timer"
+          >
+            ✕
+          </button>
+
           <div className="floating-time">
             {minutes}:{seconds}
             {typeof totalMinutes === "number" && totalMinutes > 0 && (
               <span className="total-estimate"> / {totalMinutes}m</span>
             )}
           </div>
+
           {statusLabel && (
             <div className={`floating-phase ${phase}`}>{statusLabel}</div>
           )}
