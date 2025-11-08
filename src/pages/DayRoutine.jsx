@@ -13,39 +13,40 @@ import { useProgram } from "../context/ProgramContext";
 import DropDownTagButton from "../components/DropDownTagButton";
 
 const DayRoutine = () => {
-  const { programs, addWorkout, deleteWorkout, updateWorkout } = useProgram();
+  const {
+    programs,
+    addWorkoutForward,
+    deleteWorkoutForward,
+    updateWorkoutForward,
+    updateProgressForward,
+    locked,
+    setLocked,
+  } = useProgram();
+
   const params = useParams();
   const navigate = useNavigate();
-  const { locked, setLocked } = useProgram();
 
   const weekIdParam = params.weekId ? parseInt(params.weekId, 10) - 1 : 0;
   const dayIdParam = params.dayId ? String(parseInt(params.dayId, 10)) : "1";
 
   const hasWeeks = Array.isArray(programs) && programs.length > 0;
-  const workouts = hasWeeks
-    ? (programs[weekIdParam]?.[dayIdParam] || [])
-    : [];
+  const workouts = hasWeeks ? (programs[weekIdParam]?.[dayIdParam] || []) : [];
 
   const [showForm, setShowForm] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
+  // IMPORTANT: always call the forward delete; don't gate with hasWeeks
   const { holdingId, progress, handleHoldStart, handleHoldEnd } = useHoldToDelete(
     (id) => {
-      if (hasWeeks) {
-        deleteWorkout(dayIdParam, id, weekIdParam);
-      } else {
-        deleteWorkout(dayIdParam, id);
-      }
+      deleteWorkoutForward(weekIdParam, dayIdParam, id);
     },
     2000
   );
 
-  // ✅ Only destructure what you need
-  const {
-    estimateWorkoutSeconds,
-    getColor,
-    totalMinutes,
-  } = useDayEstimates(weekIdParam, dayIdParam);
+  const { estimateWorkoutSeconds, getColor, totalMinutes } = useDayEstimates(
+    weekIdParam,
+    dayIdParam
+  );
 
   const {
     editingId,
@@ -54,7 +55,7 @@ const DayRoutine = () => {
     startEditing,
     saveEdit,
     cancelEdit,
-  } = useWorkoutEditor(updateWorkout, dayIdParam, weekIdParam, hasWeeks);
+  } = useWorkoutEditor(updateWorkoutForward, dayIdParam, weekIdParam, hasWeeks);
 
   const handleAddWorkout = (() => {
     let lastId = null;
@@ -65,11 +66,7 @@ const DayRoutine = () => {
         return;
       }
       lastId = formatted.id;
-      if (hasWeeks) {
-        addWorkout(dayIdParam, formatted, weekIdParam);
-      } else {
-        addWorkout(dayIdParam, formatted);
-      }
+      addWorkoutForward(weekIdParam, dayIdParam, formatted);
       setShowForm(false);
     };
   })();
@@ -80,15 +77,11 @@ const DayRoutine = () => {
         label={locked ? "Stop Workout" : "Start Workout"}
         weekIndex={weekIdParam}
         dayNumber={dayIdParam}
-        totalMinutes={totalMinutes}   // ✅ pass totalMinutes down
+        totalMinutes={totalMinutes}
         onClick={() => setLocked(!locked)}
       />
 
-      <h2>
-        {hasWeeks
-          ? `Week ${weekIdParam + 1}, Day ${dayIdParam}`
-          : `Day ${dayIdParam} Routine`}
-      </h2>
+      <h2>{`Week ${weekIdParam + 1}, Day ${dayIdParam}`}</h2>
 
       {totalMinutes > 0 && (
         <p className="day-total-time" style={{ color: getColor(totalMinutes) }}>
@@ -97,10 +90,7 @@ const DayRoutine = () => {
       )}
 
       {workouts.length > 0 && (
-        <Button
-          variant="secondary"
-          onClick={() => setCollapsed((prev) => !prev)}
-        >
+        <Button variant="secondary" onClick={() => setCollapsed((prev) => !prev)}>
           {collapsed ? "Expand All" : "Collapse All"}
         </Button>
       )}
@@ -108,7 +98,8 @@ const DayRoutine = () => {
       <div className="workout-list">
         {workouts.map((w) => {
           const repsArr = w.reps || [];
-          const weightsArr = w.weights && w.weights.length ? w.weights : Array(repsArr.length).fill(0);
+          const weightsArr =
+            w.weights && w.weights.length ? w.weights : Array(repsArr.length).fill(0);
           const totalWeight = weightsArr.reduce((sum, wt) => sum + (wt || 0), 0);
           const totalReps = repsArr.reduce((sum, r) => sum + (r || 0), 0);
 
@@ -122,7 +113,15 @@ const DayRoutine = () => {
                 saveEdit={saveEdit}
                 cancelEdit={cancelEdit}
                 startEditing={startEditing}
-                updateWorkout={updateWorkout}
+                updateWorkout={updateWorkoutForward}
+                // PASS BOTH: hold-to-delete uses the hook, card buttons can use this
+                deleteWorkout={(workoutId) =>
+                  deleteWorkoutForward(weekIdParam, dayIdParam, workoutId)
+                }
+                // forward progress adjuster
+                updateProgress={(workoutId, setNumber) =>
+                  updateProgressForward(weekIdParam, dayIdParam, workoutId, setNumber)
+                }
                 hasWeeks={hasWeeks}
                 dayIdParam={dayIdParam}
                 weekIdParam={weekIdParam}

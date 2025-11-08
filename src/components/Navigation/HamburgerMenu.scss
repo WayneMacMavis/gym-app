@@ -76,82 +76,166 @@
 
 .side-nav li { margin: 0.5rem 0; }
 
+/* Normalize font rendering */
+.side-nav a,
+.side-nav .dropdown-toggle,
+.side-nav .week-toggle,
+.side-nav .day-link {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* Top-level links: Overview, History, Progress */
 .side-nav a {
   position: relative;
-  display: block;
+  display: flex;              /* flex for icon + text */
+  align-items: center;        /* vertical centering */
   padding: 0.6rem 1rem;
-  text-decoration: none;
-  font-weight: 600;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 1rem;
   color: #222;
+  text-decoration: none;
+  cursor: pointer;
   border-radius: 6px;
-  opacity: 0; /* start hidden */
-  transform: translate(-10px, -15px); /* slide in from left & above */
-  transition: color 0.2s ease;
+  text-align: left;
+  opacity: 0;
+  transform: translate(-10px, -15px);
 }
 
-/* Hover color */
-.side-nav a:hover {
+/* Routine toggle: lighter to visually match links */
+.side-nav .dropdown-toggle {
+  all: unset;
+  position: relative;
+  display: flex;              /* flex for icon + text */
+  align-items: center;
+  padding: 0.6rem 1rem;
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 1rem;
+  color: #222;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: left;
+  opacity: 0;
+  transform: translate(-10px, -15px);
+}
+
+/* Icon styling */
+.nav-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;          /* larger for mobile tap targets */
+  line-height: 1;
+  flex-shrink: 0;             /* prevent squish */
+}
+
+/* Hover micro-interactions */
+.side-nav a:hover,
+.side-nav .dropdown-toggle:hover,
+.side-nav .week-toggle:hover,
+.side-nav .day-link:hover {
   color: #000;
+  transform: scale(1.05);
 }
 
-/* Sliding underline effect with fade */
-.side-nav a::after {
+/* Underline draw effect */
+.side-nav a::after,
+.side-nav .dropdown-toggle::after,
+.side-nav .week-toggle::after,
+.side-nav .day-link::after {
   content: "";
   position: absolute;
   left: 1rem;
   bottom: 4px;
   height: 2px;
-  width: 0;
-  opacity: 0; /* start invisible */
+  width: 100px;
   background: #111;
-  transition: width 0.3s ease, opacity 0.3s ease;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  opacity: 0;
 }
 
-/* Hover underline */
-.side-nav a:hover::after {
-  width: calc(100% - 2rem);
-  opacity: 1;
-}
-
-/* Active link underline stays visible */
-.side-nav a.active {
-  color: #111;
-}
+.side-nav a:hover::after,
+.side-nav .dropdown-toggle:hover::after,
+.side-nav .week-toggle:hover::after,
+.side-nav .day-link:hover::after,
 .side-nav a.active::after {
-  width: calc(100% - 2rem);
+  transform: scaleX(1);
   opacity: 1;
 }
 
-/* ✅ Staggered fade + slide + drop with bounce easing */
-.side-nav.open li:nth-child(1) a {
-  opacity: 1;
-  transform: translate(0, 0);
-  transition: opacity 0.5s ease 0.05s,
-              transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s;
-}
-.side-nav.open li:nth-child(1) a::after {
-  transition-delay: 0.15s;
-}
-
-.side-nav.open li:nth-child(2) a {
-  opacity: 1;
-  transform: translate(0, 0);
-  transition: opacity 0.5s ease 0.15s,
-              transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s;
-}
-.side-nav.open li:nth-child(2) a::after {
-  transition-delay: 0.25s;
+/* --- Staggered fade + slide for ALL top-level items --- */
+@for $i from 1 through 10 {
+  .side-nav.open li:nth-child(#{$i}) > * {
+    opacity: 1;
+    transform: translate(0, 0);
+    transition: opacity 0.5s ease #{0.05s * $i},
+                transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) #{0.05s * $i};
+  }
 }
 
-.side-nav.open li:nth-child(3) a {
+/* Nested lists */
+.dropdown-list,
+.dropdown-sublist {
+  list-style: none;
+  padding-left: 0.5rem;
+  margin: 0.25rem 0 0.25rem 0.5rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.35s ease;
+  opacity: 0;
+}
+
+.dropdown-list.open {
+  max-height: calc(100vh - 200px);
   opacity: 1;
-  transform: translate(0, 0);
-  transition: opacity 0.5s ease 0.25s,
-              transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.side-nav.open li:nth-child(3) a::after {
-  transition-delay: 0.35s;
+
+.dropdown-sublist.open {
+  max-height: 500px;
+  opacity: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* Week toggle */
+.side-nav .week-toggle {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1.5rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.side-nav .week-toggle:hover { color: #000; }
+
+/* Day link */
+.side-nav .day-link {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0.4rem 1.8rem;
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: #555;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.side-nav .day-link:hover { color: #000; }
 
 /* Overlay */
 .overlay {
@@ -159,4 +243,26 @@
   inset: 0;
   background: rgba(0,0,0,0.3);
   z-index: 1040;
+}
+
+/* --- Staggered animations for nested items --- */
+.dropdown-list.open li,
+.dropdown-sublist.open li {
+  opacity: 0;
+  transform: translateY(-5px);
+  animation: fadeSlideIn 0.4s forwards;
+}
+
+@for $i from 1 through 52 {
+  .dropdown-list.open li:nth-child(#{$i}),
+  .dropdown-sublist.open li:nth-child(#{$i}) {
+    animation-delay: $i * 0.1s;
+  }
+}
+
+@keyframes fadeSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

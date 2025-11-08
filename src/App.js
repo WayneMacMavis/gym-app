@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Home from "./pages/Home";
 import DayRoutine from "./pages/DayRoutine";
 import HistoryPage from "./pages/HistoryPage";
+import ProgressGraphs from "./pages/ProgressGraphs";
 import { ProgramProvider } from "./context/ProgramContext";
 import HamburgerMenu from "./components/Navigation/HamburgerMenu"; // ✅ import
 
@@ -24,6 +25,7 @@ function App() {
           />
 
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/progress" element={<ProgressGraphs />} />
         </Routes>
       </Router>
     </ProgramProvider>

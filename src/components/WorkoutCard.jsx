@@ -5,7 +5,7 @@ import EditWorkoutForm from "./EditWorkoutForm";
 import NumberAdjuster from "./NumberAdjuster";
 import SetRow from "./SetRow";
 import Button from "./Button/Button";
-import HoldToDeleteButton from "./Button/HoldToDeleteButton"; // ✅ new reusable button
+import HoldToDeleteButton from "./Button/HoldToDeleteButton";
 import { capitalizeWords } from "../utils/format";
 import { adjustRepsForSets } from "../hooks/useSetsRepsWeights";
 import { workouts } from "../data/workouts";
@@ -21,7 +21,6 @@ const WorkoutCard = ({
   saveEdit,
   cancelEdit,
   startEditing,
-  updateWorkout,
   hasWeeks,
   dayIdParam,
   weekIdParam,
@@ -31,7 +30,14 @@ const WorkoutCard = ({
 }) => {
   const [preview, setPreview] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const { locked, deleteWorkout } = useProgram();
+
+  // ✅ use forward helpers directly
+  const {
+    locked,
+    updateWorkoutForward,
+    deleteWorkoutForward,
+    updateProgressForward,
+  } = useProgram();
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -149,11 +155,8 @@ const WorkoutCard = ({
                         reps: nextReps,
                         weights: nextWeights,
                       };
-                      if (hasWeeks) {
-                        updateWorkout(dayIdParam, updated, weekIdParam);
-                      } else {
-                        updateWorkout(dayIdParam, updated);
-                      }
+                      // ✅ Correct call: (weekIndex, dayNumber, updatedWorkout)
+                      updateWorkoutForward(weekIdParam, dayIdParam, updated);
                     }}
                   />
                 </div>
@@ -167,7 +170,12 @@ const WorkoutCard = ({
                     rep={r}
                     weight={weightsArr[i]}
                     workout={workout}
-                    updateWorkout={updateWorkout}
+                    updateWorkout={(dayNumber, updatedWorkout, weekIndex) =>
+                      updateWorkoutForward(weekIndex, dayNumber, updatedWorkout)
+                    }
+                    updateProgress={(workoutId, setNumber) =>
+                      updateProgressForward(weekIdParam, dayIdParam, workoutId, setNumber)
+                    }
                     hasWeeks={hasWeeks}
                     dayIdParam={dayIdParam}
                     weekIdParam={weekIdParam}
@@ -190,9 +198,7 @@ const WorkoutCard = ({
             <div className="top-actions">
               <HoldToDeleteButton
                 onConfirm={() =>
-                  hasWeeks
-                    ? deleteWorkout(dayIdParam, workout.id, weekIdParam)
-                    : deleteWorkout(dayIdParam, workout.id)
+                  deleteWorkoutForward(weekIdParam, dayIdParam, workout.id)
                 }
                 disabled={locked}
                 confirmMessage="Workout deleted ✅"

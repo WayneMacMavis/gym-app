@@ -62,11 +62,10 @@ export const ProgramProvider = ({ children }) => {
     });
 
     if (deduped.length !== history.length) {
-      console.log("Deduplicated history:", history.length, "→", deduped.length);
       setHistory(deduped);
       localStorage.setItem("workoutHistory", JSON.stringify(deduped));
     }
-  }, [history]); // 👈 include history here
+  }, [history]);
 
   useEffect(() => {
     if (Array.isArray(programs) && programs.length > 0) {
@@ -78,7 +77,7 @@ export const ProgramProvider = ({ children }) => {
     localStorage.setItem("programLocked", JSON.stringify(locked));
   }, [locked]);
 
-  // ✅ Save a day’s workouts into history (replace last if same day/workouts)
+  // ✅ Save a day’s workouts into history
   const saveDayToHistory = (weekIndex, dayNumber) => {
     const week = programs[weekIndex] || {};
     const dayKey = getDayKey(dayNumber);
@@ -90,6 +89,8 @@ export const ProgramProvider = ({ children }) => {
     const entry = {
       id: Date.now(),
       date,
+      weekIndex,
+      dayNumber,
       workouts: workouts.map((w) => ({ ...w })),
     };
 
@@ -99,7 +100,6 @@ export const ProgramProvider = ({ children }) => {
 
       let updated;
       if (last && last.date === date && lastIds === ids) {
-        // replace last entry with the new snapshot
         updated = [...prev.slice(0, -1), entry];
       } else {
         updated = [...prev, entry];
@@ -108,11 +108,8 @@ export const ProgramProvider = ({ children }) => {
       localStorage.setItem("workoutHistory", JSON.stringify(updated));
       return updated;
     });
-
-    console.log("saveDayToHistory saved", entry.id);
   };
 
-  // ✅ Delete a history entry by id
   const deleteHistoryEntry = (id) => {
     setHistory((prev) => {
       const updated = prev.filter((entry) => entry.id !== id);
@@ -121,19 +118,24 @@ export const ProgramProvider = ({ children }) => {
     });
   };
 
-  const recallDayFromHistory = (entry, weekIndex = 0, dayNumber = 1) => {
+  // 🔧 Forward‑aware recall
+  const recallDayFromHistory = (entry, startWeekIndex = 0, dayNumber = 1) => {
     setPrograms((prev) => {
-      const updated = [...prev];
-      const week = updated[weekIndex] || {};
-      const dayKey = getDayKey(dayNumber);
+      const updated = prev.map((week, wIndex) => {
+        if (wIndex < startWeekIndex) return week; // skip earlier weeks
 
-      week[dayKey] = (entry.workouts || []).map((wo) => ({
-        ...wo,
-        completedSets: wo.completedSets ?? 0,
-        completed: wo.completed ?? false,
-      }));
+        const dayKey = getDayKey(dayNumber);
 
-      updated[weekIndex] = week;
+        return {
+          ...week,
+          [dayKey]: (entry.workouts || []).map((wo) => ({
+            ...wo,
+            completedSets: wo.completedSets ?? 0,
+            completed: wo.completed ?? false,
+          })),
+        };
+      });
+
       saveProgram(updated);
       return updated;
     });
@@ -170,97 +172,105 @@ export const ProgramProvider = ({ children }) => {
     });
   };
 
-  const addWorkout = (dayNumber, workout, weekIndex = 0) => {
+  // 🔧 Forward‑propagation helpers
+  const addWorkoutForward = (startWeekIndex, dayNumber, workout) => {
     setPrograms((prev) => {
-      const updated = [...prev];
-      const week = updated[weekIndex] || {};
-      const dayKey = getDayKey(dayNumber);
+      const updated = prev.map((week, wIndex) => {
+        if (wIndex < startWeekIndex) return week;
 
-      if (!Array.isArray(week[dayKey])) {
-        week[dayKey] = [];
-      }
+        const dayKey = getDayKey(dayNumber);
+        const workouts = week[dayKey] || [];
 
-      const alreadyExists = week[dayKey].some((w) => w.id === workout.id);
-      if (alreadyExists) {
-        console.warn("Workout already exists:", workout.id);
-        return prev;
-      }
+        if (workouts.some((w) => w.id === workout.id)) return week;
 
-      const normalizedWorkout = {
-        ...workout,
-        completedSets: 0,
-        completed: false,
-      };
+        const normalizedWorkout = {
+          ...workout,
+          completedSets: 0,
+          completed: false,
+        };
 
-      week[dayKey] = [...week[dayKey], normalizedWorkout];
-      updated[weekIndex] = week;
+        return {
+          ...week,
+          [dayKey]: [...workouts, normalizedWorkout],
+        };
+      });
+
       saveProgram(updated);
       return updated;
     });
   };
 
-  const deleteWorkout = (dayNumber, workoutId, weekIndex = 0) => {
+  const updateWorkoutForward = (startWeekIndex, dayNumber, updatedWorkout) => {
     setPrograms((prev) => {
-      const updated = [...prev];
-      const week = updated[weekIndex] || {};
-      const dayKey = getDayKey(dayNumber);
+      const updated = prev.map((week, wIndex) => {
+        if (wIndex < startWeekIndex) return week;
 
-      if (Array.isArray(week[dayKey])) {
-        week[dayKey] = week[dayKey].filter((w) => w.id !== workoutId);
-        updated[weekIndex] = week;
-        saveProgram(updated);
-      }
+        const dayKey = getDayKey(dayNumber);
+        const workouts = week[dayKey] || [];
 
+        return {
+          ...week,
+          [dayKey]: workouts.map((w) =>
+            w.id === updatedWorkout.id
+              ? {
+                  ...updatedWorkout,
+                  completedSets: updatedWorkout.completedSets ?? 0,
+                  completed: updatedWorkout.completed ?? false,
+                }
+              : w
+          ),
+        };
+      });
+
+      saveProgram(updated);
       return updated;
     });
   };
 
-  const updateWorkout = (dayNumber, updatedWorkout, weekIndex = 0) => {
+  const deleteWorkoutForward = (startWeekIndex, dayNumber, workoutId) => {
     setPrograms((prev) => {
-      const updated = [...prev];
-      const week = updated[weekIndex] || {};
-      const dayKey = getDayKey(dayNumber);
+      const updated = prev.map((week, wIndex) => {
+        if (wIndex < startWeekIndex) return week;
 
-      if (Array.isArray(week[dayKey])) {
-        week[dayKey] = week[dayKey].map((w) =>
-          w.id === updatedWorkout.id
-            ? {
-                ...updatedWorkout,
-                completedSets: updatedWorkout.completedSets ?? 0,
-                completed: updatedWorkout.completed ?? false,
-              }
-            : w
-        );
-        updated[weekIndex] = week;
-        saveProgram(updated);
-      }
+        const dayKey = getDayKey(dayNumber);
+        const workouts = week[dayKey] || [];
 
+        return {
+          ...week,
+          [dayKey]: workouts.filter((w) => w.id !== workoutId),
+        };
+      });
+
+      saveProgram(updated);
       return updated;
     });
   };
 
-  const updateProgress = (weekIndex, dayNumber, workoutIndex, setNumber) => {
+  const updateProgressForward = (startWeekIndex, dayNumber, workoutId, setNumber) => {
     setPrograms((prev) => {
-      const updated = [...prev];
-      const week = updated[weekIndex] || {};
-      const dayKey = getDayKey(dayNumber);
-      const workouts = week[dayKey] || [];
-      const workout = workouts[workoutIndex];
+      const updated = prev.map((week, wIndex) => {
+        if (wIndex < startWeekIndex) return week;
 
-      if (workout) {
-        const completed = workout.completedSets || 0;
-        workout.completedSets = Math.max(completed, setNumber);
+        const dayKey = getDayKey(dayNumber);
+        const workouts = week[dayKey] || [];
 
-        if (workout.completedSets >= workout.sets) {
-          workout.completed = true;
-        }
+        const newWorkouts = workouts.map((w) => {
+          if (w.id !== workoutId) return w;
 
-        workouts[workoutIndex] = workout;
-        week[dayKey] = workouts;
-        updated[weekIndex] = week;
-        saveProgram(updated);
-      }
+          const completed = w.completedSets || 0;
+          const updatedSets = Math.max(completed, setNumber);
 
+          return {
+            ...w,
+            completedSets: updatedSets,
+            completed: updatedSets >= w.sets,
+          };
+        });
+
+        return { ...week, [dayKey]: newWorkouts };
+      });
+
+      saveProgram(updated);
       return updated;
     });
   };
@@ -273,16 +283,21 @@ export const ProgramProvider = ({ children }) => {
         numWeeks,
         numDays,
         updateStructure,
-        addWorkout,
-        deleteWorkout,
-        updateWorkout,
-        updateProgress,
+
+        // Forward helpers
+        addWorkoutForward,
+        updateWorkoutForward,
+        deleteWorkoutForward,
+        updateProgressForward,
+
+        // ✅ Forward‑aware recall
+        recallDayFromHistory,
+
         locked,
         setLocked,
         history,
         saveDayToHistory,
-        recallDayFromHistory,
-        deleteHistoryEntry, // ✅ exposed for HistoryPage
+        deleteHistoryEntry,
       }}
     >
       {children}

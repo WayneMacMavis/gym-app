@@ -1,11 +1,35 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+// src/components/HamburgerMenu.js
+
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useProgram } from "../../context/ProgramContext";
+import { FiHome, FiList, FiClock, FiTrendingUp } from "react-icons/fi"; // ✅ icons
 import "./HamburgerMenu.scss";
 
 const HamburgerMenu = () => {
   const [open, setOpen] = useState(false);
+  const [routineOpen, setRoutineOpen] = useState(false);
+  const [weekOpen, setWeekOpen] = useState(null);
+  const navigate = useNavigate();
+  const { programs, numDays } = useProgram();
 
-  const closeMenu = () => setOpen(false);
+  useEffect(() => {
+    if (!open) {
+      setRoutineOpen(false);
+      setWeekOpen(null);
+    }
+  }, [open]);
+
+  const closeMenu = () => {
+    setOpen(false);
+    setRoutineOpen(false);
+    setWeekOpen(null);
+  };
+
+  const handleDayClick = (week, day) => {
+    navigate(`/week/${week}/day/${day}`);
+    closeMenu();
+  };
 
   return (
     <div className="hamburger-container">
@@ -30,25 +54,72 @@ const HamburgerMenu = () => {
               className={({ isActive }) => (isActive ? "active" : "")}
               onClick={closeMenu}
             >
-              Overview
+              <FiHome className="nav-icon" /> Overview
             </NavLink>
           </li>
+
+          {/* Routine dropdown */}
           <li>
-            <NavLink
-              to="/week/1/day/1"
-              className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={closeMenu}
+            <button
+              className="dropdown-toggle"
+              onClick={() => setRoutineOpen(!routineOpen)}
             >
-              Routine
-            </NavLink>
+              <FiList className="nav-icon" /> Routine {routineOpen ? "▲" : "▼"}
+            </button>
+
+            <ul className={`dropdown-list ${routineOpen ? "open" : ""}`}>
+              {programs.map((week, w) => {
+                const weekNum = w + 1;
+                const isOpen = weekOpen === weekNum;
+                return (
+                  <li key={weekNum}>
+                    <button
+                      className="week-toggle"
+                      onClick={() =>
+                        setWeekOpen(isOpen ? null : weekNum)
+                      }
+                    >
+                      Week {weekNum} {isOpen ? "▲" : "▼"}
+                    </button>
+
+                    <ul className={`dropdown-sublist ${isOpen ? "open" : ""}`}>
+                      {Array.from({ length: numDays }, (_, d) => {
+                        const dayNum = d + 1;
+                        return (
+                          <li key={`w${weekNum}d${dayNum}`}>
+                            <button
+                              className="day-link"
+                              onClick={() => handleDayClick(weekNum, dayNum)}
+                            >
+                              Day {dayNum}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                );
+              })}
+            </ul>
           </li>
+
           <li>
             <NavLink
               to="/history"
               className={({ isActive }) => (isActive ? "active" : "")}
               onClick={closeMenu}
             >
-              History
+              <FiClock className="nav-icon" /> History
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink
+              to="/progress"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={closeMenu}
+            >
+              <FiTrendingUp className="nav-icon" /> Progress
             </NavLink>
           </li>
         </ul>

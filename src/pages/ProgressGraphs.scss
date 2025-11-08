@@ -1,0 +1,30 @@
+/* Mobile-first safe zone for all page content */
+.page-content {
+  padding-top: 6rem;   /* clears burger height + breathing room */
+  padding-left: 1rem;/* clears burger width + breathing room */
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.page-content h2 {
+  margin: 0 0 1rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #222;
+}
+
+/* ProgressGraphs.scss */
+
+.workout-graph {
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 800px;   /* optional cap for desktop */
+  height: 300px;      /* fixed height for stability */
+  position: relative; /* Chart.js uses absolute positioning internally */
+}
+
+.workout-graph canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
