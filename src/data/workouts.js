@@ -55,6 +55,13 @@ export const workouts = [
     snippet: "Set seat height so handles align with mid‑chest.",
     videoUrl: "/assets/videos/chest-press-machine.mp4"
   },
+   {
+    name: "Pectoral Fly Machine",
+    category: "Chest",
+    description: "A guided machine press providing stability and controlled load.",
+    snippet: "Set seat height so handles align with mid‑chest.",
+    videoUrl: "/assets/videos/chest-press-machine.mp4"
+  },
   {
     name: "Push-Up",
     category: "Chest",
@@ -186,7 +193,14 @@ export const workouts = [
     videoUrl: "/assets/videos/front-raise.mp4"
   },
   {
-    name: "Rear Delt Fly",
+    name: "Rear Deltoid Fly",
+    category: "Shoulders",
+    description: "Bent‑over fly focusing on rear delts and scapular retraction.",
+    snippet: "Push elbows out and squeeze between shoulder blades.",
+    videoUrl: "/assets/videos/rear-delt-fly.mp4"
+  },
+  {
+    name: "Rear Deltoid Fly Machine",
     category: "Shoulders",
     description: "Bent‑over fly focusing on rear delts and scapular retraction.",
     snippet: "Push elbows out and squeeze between shoulder blades.",
