@@ -1,15 +1,17 @@
 // src/pages/Home.jsx
 // Program overview page with lock toggle aligned to inputs.
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useProgram } from "../context/ProgramContext";
+import MonthlyFooter from "../components/MonthlyFooter"; // ⬅️ footer import
+import { estimateDayMinutes } from "../hooks/useDayEstimates"; // ⬅️ helper import
 import "./Home.scss";
 
 const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { programs, numWeeks, numDays, updateStructure, locked, setLocked } =
+  const { programs, numWeeks, numDays, updateStructure, locked, setLocked, history } =
     useProgram();
 
   const [selectedWeek, setSelectedWeek] = useState(0);
@@ -28,7 +30,6 @@ const Home = () => {
 
     const parsed = Number(val);
     if (!Number.isNaN(parsed) && parsed >= 1 && parsed !== numWeeks) {
-      // ✅ Persist workouts when updating structure
       updateStructure(parsed, numDays, programs);
       setSelectedWeek(0);
       navigate("/");
@@ -42,7 +43,6 @@ const Home = () => {
 
     const parsed = Number(val);
     if (!Number.isNaN(parsed) && parsed >= 1 && parsed !== numDays) {
-      // ✅ Persist workouts when updating structure
       updateStructure(numWeeks, parsed, programs);
       setSelectedWeek(0);
       navigate("/");
@@ -54,6 +54,37 @@ const Home = () => {
   const currentDay = weekDayMatch ? parseInt(weekDayMatch[2], 10) : null;
 
   const weekData = programs[selectedWeek] || [];
+
+  // ⬅️ Monthly totals aggregation with ISO month keys
+  const monthlyTotals = useMemo(() => {
+    const grouped = {};
+    (history || []).forEach((entry) => {
+      const d = new Date(entry.date);
+      // Use ISO format YYYY-MM-01 for reliable sorting
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+
+      if (!grouped[monthKey]) {
+        grouped[monthKey] = { sets: 0, reps: 0, weight: 0, duration: 0 };
+      }
+
+      (entry.workouts || []).forEach((w) => {
+        if (!w) return;
+        grouped[monthKey].sets += w.sets || 0;
+        grouped[monthKey].reps += (w.reps || []).reduce((sum, r) => sum + r, 0);
+        grouped[monthKey].weight += (w.weights || []).reduce((sum, wt) => sum + wt, 0);
+      });
+
+      // ✅ calculate duration from workouts using helper
+      grouped[monthKey].duration += estimateDayMinutes(entry.workouts || []);
+    });
+
+    // Return both ISO key and a display label
+    return Object.keys(grouped).map((monthKey) => {
+      const d = new Date(monthKey);
+      const label = d.toLocaleString("en-US", { month: "short", year: "numeric" });
+      return { month: label, ...grouped[monthKey], sortKey: monthKey };
+    });
+  }, [history]);
 
   return (
     <div className="program-overview">
@@ -92,29 +123,17 @@ const Home = () => {
         >
           {locked ? (
             // Closed lock
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           ) : (
             // Open lock
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 9.9-1" />
             </svg>
@@ -154,9 +173,7 @@ const Home = () => {
                 <h3>Day {dayNumber}</h3>
                 <p className="workout-count">
                   {workouts.length > 0
-                    ? `${workouts.length} workout${
-                        workouts.length !== 1 ? "s" : ""
-                      }`
+                    ? `${workouts.length} workout${workouts.length !== 1 ? "s" : ""}`
                     : "No workouts yet"}
                 </p>
                 {isActive && <span className="tag">Current</span>}
@@ -164,6 +181,9 @@ const Home = () => {
             );
           })}
       </div>
+
+      {/* ⬅️ Footer with monthly totals */}
+      <MonthlyFooter monthlyTotals={monthlyTotals} />
     </div>
   );
 };

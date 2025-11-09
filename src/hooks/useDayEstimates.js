@@ -59,3 +59,6 @@ export const useDayEstimates = (weekIndex, dayNumber) => {
     estimateDayMinutes, // keep old API alive for DayRoutine
   };
 };
+
+// ✅ Export helper for use in MonthlyFooter aggregation
+export { estimateDayMinutes };

@@ -50,14 +50,17 @@ export const ProgramProvider = ({ children }) => {
     }
   });
 
-  // ✅ Deduplicate history whenever it changes
+  // ✅ Deduplicate history by semantic key, not just entry.id
   useEffect(() => {
     if (!Array.isArray(history)) return;
 
     const seen = new Set();
     const deduped = history.filter((entry) => {
-      if (seen.has(entry.id)) return false;
-      seen.add(entry.id);
+      const key = `${entry.date}-${entry.weekIndex}-${entry.dayNumber}-${(entry.workouts || [])
+        .map((w) => w.id)
+        .join(",")}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
 
@@ -77,7 +80,7 @@ export const ProgramProvider = ({ children }) => {
     localStorage.setItem("programLocked", JSON.stringify(locked));
   }, [locked]);
 
-  // ✅ Save a day’s workouts into history
+  // ✅ Save a day’s workouts into history (append unless truly identical session)
   const saveDayToHistory = (weekIndex, dayNumber) => {
     const week = programs[weekIndex] || {};
     const dayKey = getDayKey(dayNumber);
@@ -87,7 +90,7 @@ export const ProgramProvider = ({ children }) => {
     const ids = workouts.map((w) => w.id).join(",");
 
     const entry = {
-      id: Date.now(),
+      id: Date.now(), // unique per save
       date,
       weekIndex,
       dayNumber,
@@ -99,7 +102,14 @@ export const ProgramProvider = ({ children }) => {
       const lastIds = last ? (last.workouts || []).map((w) => w.id).join(",") : null;
 
       let updated;
-      if (last && last.date === date && lastIds === ids) {
+      // 🔧 Only merge if it's the same date, same week/day, AND same workouts
+      if (
+        last &&
+        last.date === date &&
+        last.weekIndex === weekIndex &&
+        last.dayNumber === dayNumber &&
+        lastIds === ids
+      ) {
         updated = [...prev.slice(0, -1), entry];
       } else {
         updated = [...prev, entry];

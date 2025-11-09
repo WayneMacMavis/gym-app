@@ -14,17 +14,70 @@
   color: #222;
 }
 
-/* ProgressGraphs.scss */
-
 .workout-graph {
   margin-bottom: 1.5rem;
   width: 100%;
-  max-width: 800px;   /* optional cap for desktop */
-  height: 300px;      /* fixed height for stability */
-  position: relative; /* Chart.js uses absolute positioning internally */
+  max-width: 800px;
+  height: 300px;
+  position: relative;
 }
 
 .workout-graph canvas {
   width: 100% !important;
   height: 100% !important;
+}
+
+/* Fade animation */
+.fade {
+  opacity: 0;
+  animation: fadeIn 0.4s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Segmented control with deterministic indicator */
+.view-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.view-toggle__indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 33.333%;
+  height: 100%;
+  background: #007bff;
+  border-radius: 999px;
+  transition: left 0.3s ease;
+  z-index: 0;
+}
+
+.view-toggle button {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #444;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1;
+  transition: color 0.2s ease;
+}
+.view-toggle button:hover { background: rgba(0, 0, 0, 0.04); }
+.view-toggle button.active { color: #fff; }
+
+@media (max-width: 600px) {
+  .view-toggle { width: 100%; }
+  .view-toggle button { font-size: 0.85rem; padding: 0.5rem; }
 }

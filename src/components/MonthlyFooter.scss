@@ -1,0 +1,197 @@
+.overview-footer {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-top: 2px solid #ddd;
+  display: flex;
+  flex-direction: column; /* stack: toggle, row, totals */
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Toggle button */
+.toggle-view-btn {
+  background: #007bff;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.toggle-view-btn:hover { background: #0056b3; }
+.toggle-view-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.35);
+}
+
+/* Row containing arrows + summary */
+.month-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* Arrows */
+.footer-arrow {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #007bff;
+  cursor: pointer;
+  padding: 0.4rem;
+  transition: color 0.2s ease;
+  flex: 0 0 auto; /* fixed; keep flanking */
+}
+.footer-arrow:disabled { color: #ccc; cursor: not-allowed; }
+.footer-arrow:hover:not(:disabled) { color: #0056b3; }
+
+/* Monthly summary card */
+.footer-summary {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  min-width: 200px;
+  max-width: 280px;
+  text-align: center;
+  animation: slideInLeft 0.4s ease both;
+}
+
+/* Lifetime totals panel */
+.footer-grand-totals {
+  margin-top: 0.5rem;
+  padding: 1rem 1.2rem;
+  background: #f2f7ff;
+  border: 1px solid #d0e3ff;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+  max-width: 320px;
+  animation: slideInRight 0.4s ease both;
+}
+.footer-grand-totals h4 {
+  margin-bottom: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0056b3;
+  border-bottom: 1px solid #d0e3ff;
+  padding-bottom: 0.4rem;
+}
+.footer-grand-totals p {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+/* MonthSelect pill button */
+.month-select {
+  position: relative;
+  display: inline-block;
+}
+.month-select__button {
+  background: #007bff;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 2.2rem; /* space for chevron */
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.month-select__button:hover { background: #0056b3; }
+.month-select__button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.35);
+}
+
+/* Chevron with rotation */
+.chevron {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  font-size: 0.75rem;
+  transition: transform 0.25s ease;
+}
+.month-select.open .chevron { transform: translateY(-50%) rotate(180deg); }
+
+/* Popup menu */
+.month-select__menu {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(100% + 8px);
+  min-width: 220px;
+  background: #ffffff;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  padding: 0.4rem;
+  z-index: 10;
+  animation: fadeSlideDown 0.18s ease-out both;
+}
+.month-select__option {
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #222;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.month-select__option:hover { background: #f2f7ff; }
+.month-select__option.selected {
+  background: #e9f2ff;
+  color: #007bff;
+  font-weight: 600;
+}
+
+/* Animations */
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translate(-50%, -6px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+/* Utility class for fade-out if you wire it in JSX */
+.fade-out { animation: fadeOut 0.25s ease forwards; }
+
+/* Responsive: keep arrows left/right, tighten summary */
+@media (max-width: 600px) {
+  .month-row {
+    justify-content: space-between; /* arrows hug sides */
+    gap: 0.5rem;
+  }
+
+  .footer-summary {
+    max-width: 220px; /* tighter so arrows stay on same row */
+  }
+
+  .footer-arrow {
+    font-size: 1.8rem; /* larger touch targets */
+  }
+
+  .footer-grand-totals {
+    max-width: 300px;
+  }
+
+  .toggle-view-btn {
+    align-self: stretch; /* full width button */
+    text-align: center;
+  }
+}
