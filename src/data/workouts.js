@@ -244,7 +244,14 @@ export const workouts = [
     videoUrl: "/assets/videos/dumbbell-curl.mp4"
   },
   {
-    name: "Hammer Curl",
+    name: "Hammer Curl (Standing)",
+    category: "Biceps",
+    description: "Neutral‑grip curl targeting brachialis and forearms.",
+    snippet: "Keep palms facing each other throughout.",
+    videoUrl: "/assets/videos/hammer-curl.mp4"
+  },
+   {
+    name: "Hammer Curl (Seated)",
     category: "Biceps",
     description: "Neutral‑grip curl targeting brachialis and forearms.",
     snippet: "Keep palms facing each other throughout.",
@@ -258,7 +265,14 @@ export const workouts = [
     videoUrl: "/assets/videos/preacher-curl.mp4"
   },
   {
-    name: "Concentration Curl",
+    name: "Concentration Curl (Standing)",
+    category: "Biceps",
+    description: "Seated single‑arm curl emphasizing peak contraction.",
+    snippet: "Press upper arm into inner thigh for stability.",
+    videoUrl: "/assets/videos/concentration-curl.mp4"
+  },
+  {
+    name: "Concentration Curl (Seated)",
     category: "Biceps",
     description: "Seated single‑arm curl emphasizing peak contraction.",
     snippet: "Press upper arm into inner thigh for stability.",
