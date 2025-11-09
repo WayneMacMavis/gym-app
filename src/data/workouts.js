@@ -374,6 +374,20 @@ export const workouts = [
     videoUrl: "/assets/videos/leg-press.mp4"
   },
   {
+    name: "Leg Press (Low)",
+    category: "Legs",
+    description: "Sled press targeting quads and glutes with adjustable foot positions.",
+    snippet: "Don’t lift hips off the pad; control depth.",
+    videoUrl: "/assets/videos/leg-press.mp4"
+  },
+  {
+    name: "Leg Press (High)",
+    category: "Legs",
+    description: "Sled press targeting quads and glutes with adjustable foot positions.",
+    snippet: "Don’t lift hips off the pad; control depth.",
+    videoUrl: "/assets/videos/leg-press.mp4"
+  },
+  {
     name: "Lunge",
     category: "Legs",
     description: "Split‑stance step targeting quads and glutes with balance demand.",
@@ -431,6 +445,20 @@ export const workouts = [
   },
   {
     name: "Smith Machine Squat",
+    category: "Legs",
+    description: "Squat on a fixed track, offering stability and controlled path.",
+    snippet: "Set foot stance slightly forward to keep torso upright.",
+    videoUrl: "/assets/videos/smith-machine-squat.mp4"
+  },
+  {
+    name: "Abductor Machine (Outer Thigh)",
+    category: "Legs",
+    description: "Squat on a fixed track, offering stability and controlled path.",
+    snippet: "Set foot stance slightly forward to keep torso upright.",
+    videoUrl: "/assets/videos/smith-machine-squat.mp4"
+  },
+   {
+    name: "Adduction Machine (Inner Thigh)",
     category: "Legs",
     description: "Squat on a fixed track, offering stability and controlled path.",
     snippet: "Set foot stance slightly forward to keep torso upright.",
