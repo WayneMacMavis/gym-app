@@ -73,14 +73,14 @@ const EditWorkoutForm = ({
     setSuggestions([]);
   };
 
-  // ✅ helpers
+  // helpers
   const normalizeDecimal = (val) => {
     if (typeof val !== "string") return val;
     return val.replace(",", "."); // treat comma as dot
   };
   const roundToHalf = (val) => Math.round(val * 2) / 2;
 
-  // ✅ new submit handler that normalizes all inputs before saving
+  // ✅ fixed submit handler
   const handleSubmit = (e) => {
     e.preventDefault();
     if (locked) return;
@@ -110,7 +110,8 @@ const EditWorkoutForm = ({
       });
     });
 
-    saveEdit(e, workoutId);
+    // ✅ Pass the full updated workout object
+    saveEdit({ ...editData, id: workoutId });
   };
 
   return (

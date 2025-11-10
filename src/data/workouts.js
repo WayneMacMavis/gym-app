@@ -9,7 +9,7 @@ export const workouts = [
   name: "Bench Press",
   category: "Chest",
   description: "The bench press is a foundational compound movement that primarily targets the chest, shoulders, and triceps. Performed lying flat on a bench, you lower the barbell to mid‑chest under control and then press it upward until arms are extended. Keep your feet planted firmly on the floor, shoulder blades retracted against the bench, and maintain a stable torso without excessive arching. This setup ensures maximum chest activation while protecting your shoulders and lower back.",
-  imageUrl: "/assets/images/benchpress.png",
+  imageUrl: "/assets/images/chest-shoulders-triseps.png",
   videoUrl: "youtube.com/watch?v=t3f2L7NRRUY",
     videoStart: 10, // seconds
   videoEnd: 50    // seconds
@@ -18,63 +18,82 @@ export const workouts = [
     name: "Incline Bench Press",
     category: "Chest",
     description: "The incline bench press emphasizes the upper portion of the chest while also engaging the shoulders and triceps. Performed on a bench set at a 30–45° angle, you lower the barbell or dumbbells slowly to the upper chest, keeping elbows under the wrists and forearms vertical. Maintain a firm foot drive into the floor, retract your shoulder blades against the bench, and avoid flaring the elbows excessively. Press the weight upward in a controlled path until arms are extended, pausing briefly at the top to stabilize before the next rep. This variation builds upper chest thickness and contributes to a balanced, well‑developed torso.",
-    videoUrl: "/assets/videos/inclinebenchpress.mp4"
+    imageUrl: "/assets/images/chest-shoulders-triseps.png",
+    videoUrl: "youtube.com/watch?v=5k_enq6vXGM",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
   },
   {
     name: "Decline Bench Press",
     category: "Chest",
     description: "Emphasizes the lower chest using a decline bench angle.",
-    snippet: "Control the descent; don’t bounce the bar off your chest.",
-    videoUrl: "/assets/videos/decline-bench-press.mp4"
+    imageUrl: "/assets/images/chest-shoulders-triseps.png",
+    videoUrl: "youtube.com/watch?v=PYtLMSL_oeM",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
   },
   {
     name: "Dumbbell Bench Press",
     category: "Chest",
     description: "A free‑weight press with dumbbells for a greater range of motion.",
-    snippet: "Squeeze dumbbells slightly inward at the top for better contraction.",
-    videoUrl: "/assets/videos/dumbbell-bench-press.mp4"
+    imageUrl: "/assets/images/chest-shoulders-triseps.png",
+    videoUrl: "youtube.com/watch?v=YQ2s_Y7g5Qk",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
   },
   {
     name: "Dumbbell Fly",
     category: "Chest",
     description: "An isolation move that stretches and contracts the chest using dumbbells.",
-    snippet: "Keep a soft bend in elbows and open wide without overstretching.",
-    videoUrl: "/assets/videos/dumbbell-fly.mp4"
+    imageUrl: "/assets/images/chest-shoulders-triseps.png",
+    videoUrl: "youtube.com/watch?v=UKwkChzThig",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
   },
   {
     name: "Incline Dumbbell Fly",
     category: "Chest",
     description: "Fly movement on an incline to focus on upper chest fibers.",
-    snippet: "Control the bottom position; avoid letting elbows drop too low.",
-    videoUrl: "/assets/videos/incline-dumbbell-fly.mp4"
+    imageUrl: "/assets/images/chest-shoulders-triseps.png",
+    videoUrl: "youtube.com/watch?v=ETO4moWiCXI",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
   },
   {
     name: "Chest Press Machine",
     category: "Chest",
     description: "A guided machine press providing stability and controlled load.",
-    snippet: "Set seat height so handles align with mid‑chest.",
-    videoUrl: "/assets/videos/chest-press-machine.mp4"
+    imageUrl: "/assets/images/chest-shoulders-triseps.png",
+    videoUrl: "youtube.com/watch?v=vnd-GBtTMLI",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
   },
    {
     name: "Pectoral Fly Machine",
     category: "Chest",
     description: "A guided machine press providing stability and controlled load.",
-    snippet: "Set seat height so handles align with mid‑chest.",
-    videoUrl: "/assets/videos/chest-press-machine.mp4"
-  },
-  {
-    name: "Push-Up",
-    category: "Chest",
-    description: "A bodyweight press targeting chest, shoulders, and triceps.",
-    snippet: "Keep your body in a straight line; don’t let hips sag.",
-    videoUrl: "/assets/videos/push-up.mp4"
+    imageUrl: "/assets/images/chest-shoulders.png",
+    videoUrl: "youtube.com/watch?v=eGjt4lk6g34",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
   },
   {
     name: "Cable Crossover",
     category: "Chest",
     description: "Cable fly from high or mid pulleys targeting inner and lower chest.",
-    snippet: "Cross hands slightly at the bottom and squeeze the chest.",
-    videoUrl: "/assets/videos/cable-crossover.mp4"
+    imageUrl: "/assets/images/chest-shoulders-triseps.png",
+    videoUrl: "youtube.com/watch?v=hhruLxo9yZU",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
+  },
+  {
+    name: "Push-up",
+    category: "Chest",
+    description: "Cable fly from high or mid pulleys targeting inner and lower chest.",
+    imageUrl: "/assets/images/chest-shoulders-abs.png",
+    videoUrl: "youtube.com/watch?v=IODxDxX7oi4",
+    videoStart: 10, // seconds
+    videoEnd: 50    // seconds
   },
 
   // Back
