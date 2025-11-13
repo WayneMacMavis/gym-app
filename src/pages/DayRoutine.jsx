@@ -20,7 +20,6 @@ const DayRoutine = () => {
     updateWorkoutForward,
     updateProgressForward,
     locked,
-    setLocked,
   } = useProgram();
 
   const params = useParams();
@@ -78,7 +77,6 @@ const DayRoutine = () => {
         weekIndex={weekIdParam}
         dayNumber={dayIdParam}
         totalMinutes={totalMinutes}
-        onClick={() => setLocked(!locked)}
       />
 
       <h2>{`Week ${weekIdParam + 1}, Day ${dayIdParam}`}</h2>

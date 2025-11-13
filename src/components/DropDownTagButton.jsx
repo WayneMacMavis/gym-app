@@ -46,7 +46,7 @@ const DropDownTagButton = ({
   totalMinutes, // optional, used in floating badge
   onClick,
 }) => {
-  const { programs, locked, setLocked, saveDayToHistory } = useProgram();
+  const { programs, saveDayToHistory } = useProgram();
   const { totalSeconds } = useDayEstimates(weekIndex, dayNumber);
 
   const workouts = useMemo(
@@ -55,7 +55,7 @@ const DropDownTagButton = ({
   );
 
   const [open, setOpen] = useState(false);
-  const [running, setRunning] = useState(locked);
+  const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [startTimestamp, setStartTimestamp] = useState(null);
 
@@ -76,20 +76,15 @@ const DropDownTagButton = ({
 
   const stoppingRef = useRef(false);
 
-  // Restore session
+  // Restore session (does not toggle global lock)
   useEffect(() => {
     const saved = localStorage.getItem("workoutStart");
     if (saved) {
       setStartTimestamp(Number(saved));
-      setLocked(true);
+      setRunning(true);
       setStarted(true);
     }
-  }, [setLocked]);
-
-  // Sync running with locked
-  useEffect(() => {
-    setRunning(locked);
-  }, [locked]);
+  }, []);
 
   // Keep arrow slide aligned to button height
   useLayoutEffect(() => {
@@ -103,7 +98,7 @@ const DropDownTagButton = ({
     if (stoppingRef.current) return;
     stoppingRef.current = true;
 
-    setLocked(false);
+    setRunning(false);
     localStorage.removeItem("workoutStart");
     releaseWakeLock();
     setElapsed(0);
@@ -123,11 +118,11 @@ const DropDownTagButton = ({
       clearTimeout(t);
       stoppingRef.current = false;
     };
-  }, [setLocked, saveDayToHistory, weekIndex, dayNumber]);
+  }, [saveDayToHistory, weekIndex, dayNumber]);
 
-  // Button click
+  // Button click (does not toggle global lock)
   const handleButtonClick = () => {
-    if (!locked) {
+    if (!running) {
       const now = Date.now();
       setStartTimestamp(now);
       localStorage.setItem("workoutStart", now.toString());
@@ -137,7 +132,7 @@ const DropDownTagButton = ({
       setCurrentSet(1);
       setPhase("work");
 
-      setLocked(true);
+      setRunning(true);
       requestWakeLock();
       setVisible(true);  // show badge by default after start
       setStarted(true);  // mark workout as started (badge gating)
@@ -149,10 +144,10 @@ const DropDownTagButton = ({
 
   const handleArrowClick = () => setOpen((p) => !p);
 
-  // Visibility wake lock
+  // Visibility wake lock scoped to running
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && locked) {
+      if (document.visibilityState === "visible" && running) {
         requestWakeLock();
       } else {
         releaseWakeLock();
@@ -162,7 +157,7 @@ const DropDownTagButton = ({
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [locked]);
+  }, [running]);
 
   // Timer + phase state machine (no tick/progress updates)
   useEffect(() => {
@@ -279,7 +274,6 @@ const DropDownTagButton = ({
     const nextWorkout = workouts[currentWorkoutIndex + 1];
     statusLabel = `Rest (next: ${nextWorkout?.name || "Done"})`;
   }
-
   return (
     <>
       <div className={`dropdown-tag-button ${open ? "open" : ""}`}>
