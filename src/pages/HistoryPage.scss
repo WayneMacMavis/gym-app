@@ -1,5 +1,6 @@
 @use "../styles/toast";
 
+/* Page shell */
 .history-page {
   padding: 1.5rem;
   max-width: 700px;
@@ -11,51 +12,24 @@
     font-size: 1.6rem;
     font-weight: 600;
     color: #222;
+    text-align: center;
   }
 }
 
-/* ✅ Unified filter box */
+/* Filter box */
 .history-filter-box {
   display: flex;
-  flex-direction: column; // mobile-first: stacked
+  flex-direction: column;
   gap: .8rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.5rem;
   padding: 1rem;
   border: 1px solid #e5e5e5;
   border-radius: 10px;
   background: #fafafa;
-  overflow: hidden; // important for slide animations
-
-  .filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: .3rem;
-
-    label {
-      font-size: .85rem;
-      color: #444;
-    }
-
-    select,
-    input[type="date"] {
-      padding: .5rem .7rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: .9rem;
-      background: #fff;
-      color: #222;
-      cursor: pointer;
-    }
-
-    select:disabled {
-      background: #f3f4f6;
-      color: #999;
-      cursor: not-allowed;
-    }
-  }
+  overflow: hidden;
 }
 
-/* ✅ Toggle button for filters */
+/* Toggle button */
 .toggle-filters-btn {
   margin-bottom: 1rem;
   padding: .6rem 1rem;
@@ -72,32 +46,15 @@
   }
 }
 
-/* ✅ Slide animations */
-@keyframes slideDown {
-  from { opacity: 0; max-height: 0; transform: translateY(-8px); }
-  to   { opacity: 1; max-height: 500px; transform: translateY(0); }
-}
-
-@keyframes slideUp {
-  from { opacity: 1; max-height: 500px; transform: translateY(0); }
-  to   { opacity: 0; max-height: 0; transform: translateY(-8px); }
-}
-
-/* Utility classes to control animation */
-.history-filter-box.open {
-  animation: slideDown .3s ease forwards;
-}
-
-.history-filter-box.close {
-  animation: slideUp .3s ease forwards;
-}
-
+/* Entry card */
 .history-entry {
-  background: #fff;
+  display: block;               /* stack below filter */
+  width: max-content;           /* hug content when collapsed */
+  max-width: 100%;              /* never overflow viewport */
+  margin: 0 auto 1rem auto;     /* center horizontally */
   border: 1px solid #e5e5e5;
   border-radius: 10px;
-  margin-bottom: 1rem;
-  padding: 1rem 1.2rem;
+  background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 
@@ -106,12 +63,11 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
   }
 
+  /* Header shows only the date pill */
   .history-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: .75rem;
-    flex-wrap: wrap;
+    justify-content: center;
+    padding: .6rem 1rem;
 
     .history-date {
       background: #f0f6ff;
@@ -120,13 +76,36 @@
       border-radius: 20px;
       font-size: 0.95rem;
       font-weight: 600;
-      margin-right: .5rem;
     }
+  }
 
+  /* Expandable body */
+  .history-body {
+    overflow: hidden;
+    opacity: 0;
+    max-height: 0;
+    transition: opacity .3s ease, max-height .3s ease;
+    text-align: left;
+    max-width: 600px;    /* readable cap when expanded */
+    width: 100%;         /* shrink on narrow screens */
+    margin: 0 auto;      /* center expanded content */
+
+    &.open { animation: revealDown .35s ease forwards; }
+    &.close { animation: revealUp .3s ease forwards; }
+
+    /* Week/Day badges (stagger in) */
     .history-location {
       display: flex;
+      justify-content: center;
       gap: .4rem;
-      margin-top: .4rem;
+      margin: .5rem 0 1rem 0;
+
+      .week-badge,
+      .day-badge {
+        opacity: 0;
+        transform: translateY(6px);
+        animation: fadeInItem .4s ease forwards;
+      }
 
       .week-badge {
         background: #dcfce7;
@@ -136,6 +115,7 @@
         font-size: 0.85rem;
         font-weight: 600;
         white-space: nowrap;
+        animation-delay: .1s;
       }
 
       .day-badge {
@@ -146,14 +126,17 @@
         font-size: 0.85rem;
         font-weight: 600;
         white-space: nowrap;
+        animation-delay: .25s;
       }
     }
 
+    /* Actions (stagger in) */
     .history-actions {
       display: flex;
+      justify-content: center;
       flex-wrap: wrap;
       gap: .5rem;
-      margin-top: .5rem;
+      margin: .5rem 0 1rem 0;
 
       button {
         border: none;
@@ -162,55 +145,59 @@
         font-size: .9rem;
         cursor: pointer;
         transition: background .2s ease, transform .1s ease;
-        flex: 1 1 auto;
+        opacity: 0;
+        transform: translateY(6px);
+        animation: fadeInItem .4s ease forwards;
 
-        &:hover {
-          transform: translateY(-1px);
-        }
+        &:hover { transform: translateY(-1px); }
 
         &.recall-btn {
           background: #e0f2fe;
           color: #0369a1;
-
-          &:hover {
-            background: #bae6fd;
-          }
+          &:hover { background: #bae6fd; }
+          animation-delay: .4s;
         }
 
         &.jump-btn {
           background: #ede9fe;
           color: #4f46e5;
-
-          &:hover {
-            background: #c7d2fe;
-          }
-        }
-
-        &.delete-btn {
-          background: #fee2e2;
-          color: #991b1b;
-
-          &:hover {
-            background: #fecaca;
-          }
+          &:hover { background: #c7d2fe; }
+          animation-delay: .55s;
         }
       }
-    }
-  }
 
-  .history-body {
+      /* HoldToDeleteButton wrapper timing */
+      > *:last-child {
+        opacity: 0;
+        transform: translateY(6px);
+        animation: fadeInItem .4s ease forwards;
+        animation-delay: .7s;
+      }
+    }
+
+    /* Count label (stagger in) */
     small {
       display: block;
       margin-bottom: .5rem;
       color: #666;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(6px);
+      animation: fadeInItem .4s ease forwards;
+      animation-delay: .85s;
     }
 
+    /* Workout list (stagger in) */
     ul {
       list-style: none;
       padding-left: 0;
+      margin: 0 auto;
 
       li {
         margin-bottom: .6rem;
+        opacity: 0;
+        transform: translateY(6px);
+        animation: fadeInItem .4s ease forwards;
 
         strong {
           display: block;
@@ -237,11 +224,36 @@
           }
         }
       }
+
+      /* staggered delays */
+      li:nth-child(1) { animation-delay: 1s; }
+      li:nth-child(2) { animation-delay: 1.15s; }
+      li:nth-child(3) { animation-delay: 1.3s; }
+      li:nth-child(4) { animation-delay: 1.45s; }
+      li:nth-child(5) { animation-delay: 1.6s; }
     }
   }
 }
 
-/* Toast / Snackbar notification */
+/* Pop expand with synchronized shadow lift */
+@keyframes revealDown {
+  0%   { opacity: 0; max-height: 0; transform: scale(0.95) translateY(-6px); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  60%  { opacity: 1; max-height: 600px; transform: scale(1.03) translateY(0); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+  100% { opacity: 1; max-height: 600px; transform: scale(1) translateY(0); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+}
+
+@keyframes revealUp {
+  from { opacity: 1; max-height: 600px; transform: scale(1) translateY(0); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  to   { opacity: 0; max-height: 50px; transform: scale(0.95) translateY(-6px); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+}
+
+/* Staggered fade-in primitive */
+@keyframes fadeInItem {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast notification */
 .toast {
   position: fixed;
   bottom: 1.5rem;
@@ -266,26 +278,9 @@
   100% { opacity: 0; transform: translate(-50%, 20px); }
 }
 
-/* ✅ Responsive tweaks */
+/* Responsive tweaks */
 @media (min-width: 600px) {
-  .history-filter-box {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-
-    .filter-group {
-      flex: 1;
-    }
-  }
-
-  .history-entry .history-header .history-actions {
-    flex-wrap: nowrap;
-    margin-top: 0;
-  }
-
-  .history-entry .history-header .history-actions button {
-    flex: 0 0 auto;
-    font-size: .85rem;
-    padding: .4rem .7rem;
-  }
+  .history-entry { width: 100%; }             /* full width for readability */
+  .history-entry .history-body { max-width: 700px; }
+  .history-entry .history-body ul { max-width: 600px; }
 }

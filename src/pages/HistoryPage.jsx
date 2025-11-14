@@ -19,15 +19,30 @@ export default function HistoryPage() {
   const [filterDay, setFilterDay] = useState("all");
   const [filterDate, setFilterDate] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [closing, setClosing] = useState(false); // track closing animation
+  const [closingFilters, setClosingFilters] = useState(false);
 
-  // normalize day numbers
+  // Track which entry is open
+  const [openEntryId, setOpenEntryId] = useState(null);
+  const [closingEntryId, setClosingEntryId] = useState(null);
+
+  const toggleEntry = (id) => {
+    if (openEntryId === id) {
+      // start closing animation
+      setClosingEntryId(id);
+      setTimeout(() => {
+        setOpenEntryId(null);
+        setClosingEntryId(null);
+      }, 300); // match SCSS animation duration
+    } else {
+      setOpenEntryId(id);
+    }
+  };
+
   const normalizeDayNumber = (d) => {
     const n = Number(d);
     return Number.isFinite(n) ? n : null;
   };
 
-  // build available days based on history + selected week
   const availableDays = useMemo(() => {
     const set = new Set();
     (history || []).forEach((h) => {
@@ -40,7 +55,6 @@ export default function HistoryPage() {
     return Array.from(set).sort((a, b) => a - b);
   }, [history, filterWeek]);
 
-  // filtering logic
   const filteredHistory = useMemo(() => {
     return (history || [])
       .filter((entry) => {
@@ -54,7 +68,7 @@ export default function HistoryPage() {
         if (selectedDay === null || entryDay === null) return false;
 
         if (filterWeek === "all") {
-          return entryDay === selectedDay; // match across all weeks
+          return entryDay === selectedDay;
         }
         return (
           entryDay === selectedDay &&
@@ -72,15 +86,13 @@ export default function HistoryPage() {
     setFilterDate("");
   };
 
-  // handle toggle with animation
   const toggleFilters = () => {
     if (filtersOpen) {
-      // start closing animation
-      setClosing(true);
+      setClosingFilters(true);
       setTimeout(() => {
         setFiltersOpen(false);
-        setClosing(false);
-      }, 300); // match SCSS animation duration
+        setClosingFilters(false);
+      }, 300);
     } else {
       setFiltersOpen(true);
     }
@@ -90,7 +102,6 @@ export default function HistoryPage() {
     <div className="history-page">
       <h2>Workout History</h2>
 
-      {/* Toggle button */}
       <button
         type="button"
         className="toggle-filters-btn"
@@ -99,11 +110,10 @@ export default function HistoryPage() {
         {filtersOpen ? "Hide Filters ▲" : "Show Filters ▼"}
       </button>
 
-      {/* Collapsible filter box with animation classes */}
-      {(filtersOpen || closing) && (
+      {(filtersOpen || closingFilters) && (
         <div
           className={`history-filter-box ${
-            filtersOpen && !closing ? "open" : "close"
+            filtersOpen && !closingFilters ? "open" : "close"
           }`}
         >
           <div className="filter-group">
@@ -163,63 +173,79 @@ export default function HistoryPage() {
 
       {filteredHistory.map((entry) => (
         <div key={entry.id} className="history-entry">
-          <div className="history-header">
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <strong className="history-date">{entry.date}</strong>
-              <span className="history-location">
+          {/* Header shows only the date */}
+          <div
+            className="history-header"
+            onClick={() => toggleEntry(entry.id)}
+            style={{ cursor: "pointer" }}
+          >
+            <strong className="history-date">{entry.date}</strong>
+          </div>
+
+          {/* Reveal body only when open */}
+          {(openEntryId === entry.id || closingEntryId === entry.id) && (
+            <div
+              className={`history-body ${
+                openEntryId === entry.id ? "open" : "close"
+              }`}
+            >
+              {/* Week/Day badges now inside body */}
+              <div className="history-location">
                 <span className="week-badge">Week {entry.weekIndex + 1}</span>
                 <span className="day-badge">Day {entry.dayNumber}</span>
-              </span>
+              </div>
+
+              <div className="history-actions">
+                <button
+                  className="recall-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    recallDayFromHistory(entry, entry.weekIndex, entry.dayNumber);
+                  }}
+                >
+                  ↩ Recall
+                </button>
+
+                <button
+                  className="jump-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/week/${entry.weekIndex + 1}/day/${entry.dayNumber}`);
+                  }}
+                >
+                  🔗 Jump
+                </button>
+
+                <HoldToDeleteButton
+                  onConfirm={() => deleteHistoryEntry(entry.id)}
+                  confirmMessage="Workout deleted ✅"
+                  cancelMessage="Delete cancelled ⚠️"
+                >
+                  🗑 Hold to Delete
+                </HoldToDeleteButton>
+              </div>
+
+              <small>{(entry.workouts || []).length} exercise(s)</small>
+              <ul>
+                {(entry.workouts || []).map((w, i) => (
+                  <li key={w.id || i}>
+                    <strong>{w.name}</strong>
+                    <div className="tags">
+                      <span className="tag sets">Sets: {w.sets}</span>
+                      {w.reps?.length > 0 && (
+                        <span className="tag reps">Reps: {w.reps.join(", ")}</span>
+                      )}
+                      {w.weights?.length > 0 && (
+                        <span className="tag weights">
+                          Weights: {w.weights.join(", ")}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-
-            <div className="history-actions">
-              <button
-                className="recall-btn"
-                onClick={() =>
-                  recallDayFromHistory(entry, entry.weekIndex, entry.dayNumber)
-                }
-              >
-                ↩ Recall
-              </button>
-
-              <button
-                className="jump-btn"
-                onClick={() =>
-                  navigate(`/week/${entry.weekIndex + 1}/day/${entry.dayNumber}`)
-                }
-              >
-                🔗 Jump
-              </button>
-
-              <HoldToDeleteButton
-                onConfirm={() => deleteHistoryEntry(entry.id)}
-                confirmMessage="Workout deleted ✅"
-                cancelMessage="Delete cancelled ⚠️"
-              >
-                🗑 Hold to Delete
-              </HoldToDeleteButton>
-            </div>
-          </div>
-
-          <div className="history-body">
-            <small>{(entry.workouts || []).length} exercise(s)</small>
-            <ul>
-              {(entry.workouts || []).map((w, i) => (
-                <li key={w.id || i}>
-                  <strong>{w.name}</strong>
-                  <div className="tags">
-                    <span className="tag sets">Sets: {w.sets}</span>
-                    {w.reps?.length > 0 && (
-                      <span className="tag reps">Reps: {w.reps.join(", ")}</span>
-                    )}
-                    {w.weights?.length > 0 && (
-                      <span className="tag weights">Weights: {w.weights.join(", ")}</span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
         </div>
       ))}
     </div>
