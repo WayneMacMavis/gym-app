@@ -13,7 +13,7 @@
   --sets-col: minmax(80px, 1fr);
   --weights-col: minmax(85px, 1fr);
   --cols-gap: 2px;
-  --weights-header-nudge: 26px;
+  --weights-header-nudge: 33px;
 
   background: $color-bg-light;
   border-radius: $radius-lg;
@@ -203,7 +203,6 @@
     display: grid;
     grid-template-columns: var(--num-col) var(--sets-col) var(--weights-col);
     align-items: center;
-    column-gap: var(--cols-gap);
     margin-bottom: $spacing-xs;
 
     .row-number {
@@ -339,10 +338,10 @@ button.preview-active {
 
 @media (max-width: 420px) {
   .workout-card {
-    --num-col: 22px;
+    --num-col: 27px;
     --sets-col: minmax(70px, 1fr);
     --weights-col: minmax(75px, 1fr);
-    --cols-gap: 1px;
+    --cols-gap: 2px;
   }
 
   .delete-wrapper {

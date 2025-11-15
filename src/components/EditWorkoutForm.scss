@@ -35,7 +35,6 @@
     font-weight: 500;
   }
 
-  /* Autocomplete suggestions — styles provided by @use "../styles/suggestions" */
   .input-with-suggestions {
     position: relative;
   }
@@ -74,7 +73,7 @@
     }
 
     &.locked {
-      opacity: 0.6;
+      opacity: $locked-opacity; // 0.6
 
       input {
         cursor: not-allowed;
@@ -84,10 +83,10 @@
         content: "🔒";
         position: absolute;
         top: 50%;
-        right: -1.5rem;
+        right: $locked-icon-offset; // -1.5rem
         transform: translateY(-50%);
-        font-size: 0.9rem;
-        color: #666;
+        font-size: $locked-icon-size; // 0.9rem
+        color: $color-gray;           // #666
         pointer-events: none;
       }
     }
@@ -110,11 +109,10 @@
     &:disabled {
       background: $color-border-muted;
       cursor: not-allowed;
-      opacity: 0.7;
+      opacity: $btn-disabled-opacity; // 0.7
     }
   }
 
-  /* ✅ unified cancel button */
   .cancel-btn {
     background: $color-primary;
     color: $color-bg-white;
@@ -132,7 +130,7 @@
     &:disabled {
       background: $color-border-muted;
       cursor: not-allowed;
-      opacity: 0.7;
+      opacity: $btn-disabled-opacity; // 0.7
     }
   }
 
@@ -143,7 +141,7 @@
     margin-top: $spacing-md;
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: $form-breakpoint) { // 768px
     .edit-actions {
       flex-direction: row;
       justify-content: flex-end;
@@ -162,10 +160,10 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    color: #fff;
+    background: $locked-overlay-bg; // rgba(0,0,0,0.4)
+    color: $color-white;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: $locked-overlay-font-size; // 1rem
     display: flex;
     align-items: center;
     justify-content: center;
@@ -173,3 +171,14 @@
     pointer-events: none;
   }
 }
+
+// src/components/EditWorkoutForm.scss
+$locked-opacity: 0.6;
+$locked-icon-offset: -1.5rem;
+$locked-icon-size: 0.9rem;
+
+$btn-disabled-opacity: 0.7;
+$form-breakpoint: 768px;
+
+$locked-overlay-bg: rgba(0, 0, 0, 0.4);
+$locked-overlay-font-size: 1rem;

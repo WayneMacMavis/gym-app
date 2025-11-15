@@ -54,7 +54,7 @@
   }
 
   .set-row {
-    position: relative; // ✅ ensures lock icon positions correctly
+    position: relative; 
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $spacing-sm;
@@ -73,7 +73,7 @@
     }
 
     &.locked {
-      opacity: 0.6;
+      opacity: $locked-opacity; // 0.6
 
       input {
         cursor: not-allowed;
@@ -83,10 +83,10 @@
         content: "🔒";
         position: absolute;
         top: 50%;
-        right: -1.5rem;
+        right: $locked-icon-offset; // -1.5rem
         transform: translateY(-50%);
-        font-size: 0.9rem;
-        color: #666;
+        font-size: $locked-icon-size; // 0.9rem
+        color: $color-gray;           // #666
         pointer-events: none;
       }
     }
@@ -109,7 +109,7 @@
     &:disabled {
       background: $color-border-muted;
       cursor: not-allowed;
-      opacity: 0.7;
+      opacity: $btn-disabled-opacity; // 0.7
     }
   }
 
@@ -122,7 +122,7 @@
     cursor: pointer;
     font-size: $font-size-small;
     width: 100%;
-    z-index: 1;
+    z-index: $btn-z-index; // 1
 
     &:hover {
       background: $color-gray-light-hover;
@@ -132,7 +132,7 @@
     &:disabled {
       background: $color-border-muted;
       cursor: not-allowed;
-      opacity: 0.7;
+      opacity: $btn-disabled-opacity; // 0.7
     }
   }
 
@@ -146,7 +146,7 @@
     .cancel-btn { order: 2; }
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: $form-breakpoint) { // 768px
     .form-actions {
       flex-direction: row;
       justify-content: flex-end;
@@ -165,10 +165,10 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    color: #fff;
+    background: $locked-overlay-bg; // rgba(0,0,0,0.4)
+    color: $color-white;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: $locked-overlay-font-size; // 1rem
     display: flex;
     align-items: center;
     justify-content: center;

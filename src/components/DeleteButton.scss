@@ -2,16 +2,16 @@
 
 .delete-btn {
   position: relative;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: $delete-btn-size;              // 36px
+  height: $delete-btn-size;             // 36px
+  border-radius: $radius-round;         // 50%
   display: flex;
   align-items: center;
   justify-content: center;
 
   .delete-icon {
     position: relative;
-    z-index: 2;
+    z-index: $delete-icon-z-index;      // 2
   }
 
   .progress-ring {
@@ -19,11 +19,11 @@
     top: 0;
     left: 0;
     pointer-events: none;
-    transform: rotate(-90deg); // start stroke at top
-    z-index: 1;
+    transform: rotate($progress-ring-rotation); // -90deg
+    z-index: $progress-ring-z-index;    // 1
   }
 
   .progress-ring__circle {
-    transition: stroke-dashoffset 0.2s linear;
+    transition: stroke-dashoffset $progress-ring-transition linear; // 0.2s
   }
 }

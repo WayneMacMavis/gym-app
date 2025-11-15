@@ -1,0 +1,125 @@
+@use "../styles/variables" as *;
+
+/* Filters box */
+.history-filter-box {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg; // 1rem
+  margin-bottom: $history-filter-margin-bottom; // 2rem
+  padding: $history-filter-padding; // 1.25rem
+  border: 1px solid $history-filter-border; // #e0e0e0
+  border-radius: $history-filter-radius; // 12px
+  background: $color-bg-white;
+  box-shadow: $history-filter-shadow; // 0 2px 6px rgba(0,0,0,0.05)
+  transition: all $transition-medium ease; // .3s
+
+  &.open {
+    animation: fadeInItem $transition-medium ease forwards; // .3s
+    border-color: $history-filter-border-open; // #c7d2fe
+    box-shadow: $history-filter-shadow-open; // 0 4px 12px rgba(79,70,229,0.15)
+  }
+
+  &.close {
+    animation: revealUp $transition-medium ease forwards; // .3s
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: $filter-group-gap; // .75rem
+
+    label {
+      flex: 0 0 $filter-label-width; // 80px
+      font-size: $filter-label-font-size; // .85rem
+      font-weight: 600;
+      color: $filter-label-color; // #374151
+      text-align: right;
+    }
+
+    select,
+    input[type="date"],
+    .clear-btn {
+      flex: 1;
+      padding: $filter-input-padding-y $filter-input-padding-x; // .5rem .75rem
+      border: 1px solid $filter-input-border; // #d1d5db
+      border-radius: $filter-input-radius; // 8px
+      background: $filter-input-bg; // #f9fafb
+      font-size: $filter-input-font-size; // .9rem
+      transition: border-color $transition-fast ease, box-shadow $transition-fast ease;
+
+      &:focus {
+        outline: none;
+        border-color: $filter-focus-border; // #4f46e5
+        box-shadow: $filter-focus-shadow;   // 0 0 0 2px rgba(79,70,229,0.2)
+      }
+    }
+
+    .clear-btn {
+      background: $clear-btn-bg; // #f3f4f6
+      cursor: pointer;
+      font-weight: 500;
+      color: $filter-label-color; // #374151
+      transition: background $transition-fast ease, transform $transition-fast ease;
+
+      &:hover {
+        background: $clear-btn-hover-bg; // #e5e7eb
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+
+/* Toggle button */
+.toggle-filters-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $filter-group-gap; // .75rem
+  margin-bottom: $spacing-lg; // 1rem
+  padding: $toggle-btn-padding-y $toggle-btn-padding-x; // .65rem 1rem
+  border: none;
+  border-radius: $toggle-btn-radius; // 10px
+  background: $toggle-btn-bg; // linear-gradient(135deg, #6366f1, #4f46e5)
+  color: $color-white;
+  font-size: $toggle-btn-font-size; // .95rem
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform $transition-fast ease, box-shadow $transition-medium ease;
+
+  &:hover {
+    transform: translateY(-$toggle-btn-hover-offset); // 2px
+    box-shadow: $toggle-btn-hover-shadow; // 0 4px 12px rgba(79,70,229,0.25)
+  }
+
+  .label {
+    line-height: 1.2;
+  }
+
+  /* Chevron layout */
+  .chevron-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: $spacing-lg; // 1rem
+  }
+
+  .chevron {
+    position: absolute;
+    left: -$spacing-lg; // -1rem
+    top: 50%;
+    width: $chevron-size; // 16px
+    height: $chevron-size; // 16px
+    color: currentColor;
+    transition: transform $transition-medium ease; // .25s
+    transform-origin: center;
+    transform: translateY(-50%);
+  }
+
+  .chevron[data-state="up"] {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+  .chevron[data-state="down"] {
+    transform: translateY(-50%) rotate(0deg);
+  }
+}

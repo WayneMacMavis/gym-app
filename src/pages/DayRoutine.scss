@@ -1,13 +1,13 @@
 @use "../styles/variables" as *;
 
 .day-routine {
-  max-width: 500px;
+  max-width: $day-routine-max-width;       // 500px
   margin: $spacing-xl auto;
   padding: $spacing-lg;
 
   h2 {
     text-align: center;
-    margin-bottom: 0.25rem;
+    margin-bottom: $spacing-xxs;           // 0.25rem
   }
 
   .day-total-time {
@@ -46,8 +46,8 @@
   /* ✅ Inline summary below each card */
   .workout-summary-inline {
     display: flex;
-    background: rgba(103, 129, 212, 0.486);
-    height: 30px;
+    background: $color-bg-summary-inline;  // rgba(103, 129, 212, 0.486)
+    height: $height-summary-inline;        // 30px
     justify-content: center;
     align-items: center;
     gap: $spacing-xl; // space between reps and weight
@@ -77,9 +77,9 @@
 }
 
 /* Mobile tweaks for container */
-@media (max-width: 420px) {
+@media (max-width: $day-routine-breakpoint) { // 420px
   .day-routine {
-    padding: 0.75rem;
+    padding: $day-routine-padding-mobile;  // 0.75rem
   }
 
   .day-routine .collapse-toggle {
@@ -87,5 +87,4 @@
     margin-left: 0;
     text-align: center;
   }
-
 }

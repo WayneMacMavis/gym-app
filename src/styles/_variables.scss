@@ -1,5 +1,4 @@
 // src/styles/_variables.scss
-
 // Brand colors
 $color-primary: #3f51b5;
 $color-primary-hover: #303f9f;
@@ -8,7 +7,7 @@ $color-success: #4caf50;
 $color-success-hover: #219150;
 
 $color-danger: #f44336;
-$color-danger-hover: #d32f2f;
+$color-danger-hover: #d32f2f; 
 
 // Neutral colors
 $color-white: #ffffff;
@@ -16,6 +15,7 @@ $color-black: #000000;
 
 $color-gray-dark: #555555;
 $color-gray: #666666;
+$color-blue-light: #e3f2ff;
 $color-gray-light: #e0e0e0;
 $color-gray-light-hover: #636e72;
 $color-border: #cccccc;
@@ -26,26 +26,27 @@ $color-bg-light: #f9f9f9;
 $color-bg-form: #f0f0f0;
 $color-bg-hover: #eaeaea;  // hover background for buttons
 $color-bg-white: #ffffff;  // plain white background
-$color-surface: #f9f9f9;   // unified surface background
-
-// Tags
-$color-bg-tag: #e0f7e9;    // tag background
-$color-tag-text: #2a7a4b;  // green tag text
-
-// Text
-$color-text-dark: #222222; // darkest text
-$color-text: #333333;      // standard text
 
 // Accent (used for highlights like Preview button)
 $color-accent: #ff9800;        // orange accent
 $color-accent-hover: #e68900;  // darker hover state
 
-// Typography
-$font-size-base: 0.95rem;
-$font-size-small: 0.85rem;
-$font-size-large: 1.1rem;
+// Info banner colors
+$color-banner-bg: #ffeaa7;
+$color-banner-border: #fdcb6e;
+
+$color-info-blue: #0984e3;
+$color-info-blue-hover: #0652dd;
+
+// Lock state additions
+$color-bg-disabled: #f2f2f2;
+$color-bg-muted: #eaeaea;
+$color-text-light: #999999;
+$color-border-muted: #dddddd;
+$color-border-strong: #bbbbbb;
 
 // Spacing
+$spacing-xxs: 0.25rem; // tiny spacing for h2 margin
 $spacing-xs: 0.2rem;
 $spacing-sm: 0.4rem;
 $spacing-md: 0.6rem;
@@ -56,7 +57,18 @@ $spacing-xl: 2rem;
 $radius-sm: 4px;
 $radius-md: 6px;
 $radius-lg: 8px;
-$radius-xl: 10px; // larger cards
+$radius-xl: 10px;
+$radius-pill: 999px; // fully rounded segmented control
+
+// Typography
+$font-size-base: 0.95rem;
+$font-size-small: 0.85rem;
+$font-size-large: 1.1rem;
+$font-size-xsmall: 0.85rem; // alias for small, used in ProgressGraphs
+
+// Text
+$color-text-dark: #222222; // darkest text
+$color-text: #333333;      // standard text
 
 // Shadows
 $shadow-card: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -65,26 +77,602 @@ $shadow-hover-red: 0 2px 6px rgba(231, 76, 60, 0.3);
 $shadow-hover-strong: 0 4px 10px rgba(0, 0, 0, 0.12);
 $shadow-light: 0 2px 4px rgba(0, 0, 0, 0.05); // subtle shadow
 
-// Info banner colors
-$color-banner-bg: #ffeaa7;
-$color-banner-border: #fdcb6e;
 
-$color-info-blue: #0984e3;
-$color-info-blue-hover: #0652dd;
+// src/pages/Home.scss
+$program-overview-min-height: 100vh;
 
-// Arrow button tokens
-$arrow-up-color: $color-success;  // green
-$arrow-down-color: $color-danger; // red
+$program-input-width: 80px;
+$program-input-width-mobile: 72px;
+
+$lock-toggle-font-size: 2rem;
+$lock-toggle-font-size-mobile: 1.9rem;
+$lock-toggle-margin-bottom: 2px;
+$lock-toggle-icon-size: 28px;
+$lock-toggle-icon-size-mobile: 26px;
+
+$day-list-max-width: 800px;
+$day-card-min-width: 160px;
+$day-card-min-width-mobile: 140px;
+
+$tag-padding-y: 2px;
+$tag-padding-x: 6px;
+
+$program-breakpoint: 420px;
+
+$transition-fast: 0.2s; // used for hover/active transitions
+
+
+
+// src/components/DayRoutine.scss
+$day-routine-max-width: 500px;              // container max width
+$day-routine-breakpoint: 420px;             // mobile breakpoint
+$day-routine-padding-mobile: 0.75rem;       // mobile container padding
+
+$color-bg-summary-inline: rgba(103, 129, 212, 0.486); // inline workout summary background
+$height-summary-inline: 30px;               // fixed height for inline summary bar
+
+
+// src/pages/HistoryPage.scss
+$history-page-padding: 1.5rem;
+$history-page-max-width: 700px;
+$history-heading-size: 1.6rem;
+$history-breakpoint: 600px;
+$history-page-max-width-lg: 800px;
+
+$chevron-size-sm: 0.6rem;
+$chevron-stroke: 2px;
+
+$color-text-muted: #888888;
+$color-text-subtle: #aaaaaa;
+
+$shadow-toast: 0 2px 6px rgba(0,0,0,0.2);
+$toast-z-index: 1000;
+
+$animation-offset: 6px;
+$animation-max-height: 600px;
+$animation-min-height: 50px;
+$toast-offset: 20px;
+
+// src/pages/ProgressGraphs.scss
+
+$page-content-padding-top: 6rem;          // clears burger height + breathing room
+$page-heading-size: 1.4rem;               // h2 heading size
+
+$workout-graph-margin-bottom: 1.5rem;
+$workout-graph-max-width: 800px;
+$workout-graph-height: 300px;
+
+$fade-duration: 0.4s;
+$fade-offset: 8px;
+
+$view-toggle-max-width: 480px;
+$color-bg-toggle: #f5f5f5;                // segmented control background
+$view-toggle-indicator-width: 33.333%;    // indicator width
+$transition-fast: 0.3s;                   // fast transition timing (⚠️ unify with Home.scss)
+$color-text-toggle: #444444;              // button text color
+$color-bg-hover-light: rgba(0,0,0,0.04);  // hover background
+
+$view-toggle-breakpoint: 600px;
+$view-toggle-btn-padding-y: 0.6rem;
+$view-toggle-btn-padding-x: 1.2rem;
+$view-toggle-btn-padding-mobile: 0.5rem;
+
+// === NEW dataset color tokens ===
+$color-sets: #1f77b4;    // blue line for Sets
+$color-reps: #2ca02c;    // green line for Reps
+$color-weight: #e74c3c;  // red line for Weight
+
+
+
+// src/components/AddWorkoutForm.scss
+$locked-opacity: 0.6;
+$locked-icon-offset: -1.5rem;
+$locked-icon-size: 0.9rem;
+
+$btn-disabled-opacity: 0.7;
+$btn-z-index: 1;
+
+$form-breakpoint: 768px;
+
+$locked-overlay-bg: rgba(0, 0, 0, 0.4);
+$locked-overlay-font-size: 1rem;
+
+
+// src/components/DeleteButton.scss
+$delete-btn-size: 36px;
+$delete-icon-z-index: 2;
+$progress-ring-rotation: -90deg; // start stroke at top
+$progress-ring-z-index: 1;
+$progress-ring-transition: 0.2s;
+
+// src/components/DropDownTagButton.scss
+$dropdown-z-index: 1000;
+
+$drop-btn-padding-y: 12px;
+$drop-btn-padding-x: 18px;
+$drop-btn-font-size: 16px;
+$drop-btn-font-size-mobile: 14px;
+$button-content-gap-mobile: 2px;
+$time-line-font-size-mobile: 18px;
+$status-line-font-size: 14px;
+$status-line-font-size-mobile: 13.5px;
+
+$phase-work-bg: #0f766e;
+$phase-rest-bg: #334155;
+$phase-between-bg: #6b7280;
+
+$phase-work-text: #a7f3d0;
+$phase-rest-text: #fcd34d;
+$phase-between-text: #e5e7eb;
+$phase-completed-bg: #2a7a4b;
+
+$pulse-duration: 0.6s;
+
+$confetti-width: 6px;
+$confetti-height: 10px;
+$confetti-duration: 900ms;
+$confetti-delay: 40ms;
+
+$arrow-bg: #333333;
+$arrow-bg-hover: #555555;
+$arrow-font-size: 14px;
+$arrow-padding-y: 6px;
+$arrow-padding-x: 12px;
+$arrow-radius: 3px;
+$arrow-radius-mobile: 4px;
+$arrow-flip-duration: 0.45s;
+
+$dropdown-max-width: 480px;
+$dropdown-bg: #1f1f1f;
+$shadow-drop-btn: 0 2px 10px rgba(0,0,0,0.12);
+$shadow-dropdown: 0 10px 24px rgba(0,0,0,0.2);
+
+$workout-row-padding-y: 10px;
+$workout-row-padding-x: 14px;
+$workout-row-padding-x-mobile: 12px;
+$workout-row-gap: 10px;
+$workout-row-border: rgba(255,255,255,0.06);
+$workout-name-font-size: 15px;
+$workout-name-font-size-mobile: 14.5px;
+$workout-name-color: #eaeaea;
+
+$floating-timer-top: 20px;
+$floating-timer-left: 20px;
+$floating-timer-bg: #111827;
+$floating-timer-padding-y: 10px;
+$floating-timer-padding-x: 14px;
+$floating-timer-padding-y-mobile: 8px;
+$floating-timer-padding-x-mobile: 12px;
+$floating-timer-radius: 14px;
+$floating-timer-shadow: 0 2px 8px rgba(0,0,0,0.15);
+$floating-timer-z-index: 9999;
+
+$badge-close-offset: 6px;
+$badge-close-size: 24px;
+$badge-close-radius: 6px;
+$badge-close-font-size: 14px;
+$badge-close-hover-bg: rgba(255,255,255,0.08);
+$focus-ring-color: #60a5fa;
+
+$floating-time-font-size: 20px;
+$floating-time-font-size-mobile: 19px;
+$floating-total-font-size: 14px;
+
+$floating-phase-font-size: 14px;
+$floating-phase-font-size-mobile: 13px;
+$floating-phase-color: #111111;
+$floating-phase-bg: rgba(255,255,255,0.9);
+$floating-phase-padding-y: 4px;
+$floating-phase-padding-x: 10px;
+
+$dropdown-breakpoint: 480px;
+
+$transition-fast: 0.2s;       // ⚠️ unify with global timing
+$transition-medium: 0.3s;
+
+$fade-duration: 0.3s;         // ⚠️ unify with global fade
+$fade-exit-duration: 0.25s;
+
+// src/components/HistoryEntry.scss
+$history-entry-border: #e5e5e5;
+$history-entry-radius: 10px;
+$shadow-history-card: 0 1px 3px rgba(0,0,0,0.05);
+$shadow-history-hover: 0 4px 10px rgba(0,0,0,0.08);
+$history-hover-offset: 2px;
+
+$history-header-padding-y: 0.6rem;
+$history-header-padding-x: 1rem;
+
+$fade-in-duration: 0.35s;
+$fade-out-duration: 0.25s;
+$fade-delay-date: 0.05s;
+$fade-delay-pill: 0.18s;
+$fade-delay-time: 0.31s;
+$fade-delay-pill-close: 0.08s;
+$fade-delay-date-close: 0.16s;
+
+$history-date-bg: #f0f6ff;
+$history-date-color: #005ea2;
+$history-date-padding-y: 0.25rem;
+$history-date-padding-x: 0.75rem;
+$history-date-radius: 20px;
+
+$exercise-pill-bg: #f5a623;
+$exercise-pill-padding-y: 0.25rem;
+$exercise-pill-padding-x: 0.6rem;
+$exercise-pill-font-size: 0.8rem;
+
+$history-body-max-width: 600px;
+
+$history-location-margin: 0.5rem 0 1rem 0;
+$history-actions-margin: 0.5rem 0 1rem 0;
+
+$badge-padding-y: 0.25rem;
+$badge-padding-x: 0.6rem;
+$badge-radius: 14px;
+$badge-week-bg: #dcfce7;
+$badge-week-color: #166534;
+$badge-week-delay: 0.1s;
+$badge-day-bg: #fee2e2;
+$badge-day-color: #991b1b;
+$badge-day-delay: 0.25s;
+
+$button-padding-y: 0.5rem;
+$button-padding-x: 0.9rem;
+
+$recall-btn-bg: #e0f2fe;
+$recall-btn-color: #0369a1;
+$recall-btn-hover: #bae6fd;
+$recall-btn-delay: 0.4s;
+
+$jump-btn-bg: #ede9fe;
+$jump-btn-color: #4f46e5;
+$jump-btn-hover: #c7d2fe;
+$jump-btn-delay: 0.55s;
+
+$last-child-delay: 0.7s;
+
+$tag-radius: 12px;
+$tag-padding-y: 0.2rem;
+$tag-padding-x: 0.6rem;
+$tag-font-size: 0.75rem;
+$tag-sets-bg: #6b7280;
+$tag-reps-bg: #16a34a;
+$tag-weights-bg: #ea580c;
+
+// src/components/HistoryFilters.scss
+$history-filter-margin-bottom: 2rem;
+$history-filter-padding: 1.25rem;
+$history-filter-border: #e0e0e0;
+$history-filter-radius: 12px;
+$history-filter-shadow: 0 2px 6px rgba(0,0,0,0.05);
+$history-filter-border-open: #c7d2fe;
+$history-filter-shadow-open: 0 4px 12px rgba(79,70,229,0.15);
+
+$filter-group-gap: 0.75rem;
+$filter-label-width: 80px;
+$filter-label-font-size: 0.85rem; // could reuse $font-size-small
+$filter-label-color: #374151;
+
+$filter-input-padding-y: 0.5rem;
+$filter-input-padding-x: 0.75rem;
+$filter-input-border: #d1d5db;
+$filter-input-radius: 8px;
+$filter-input-bg: #f9fafb;
+$filter-input-font-size: 0.9rem;
+$filter-focus-border: #4f46e5;
+$filter-focus-shadow: 0 0 0 2px rgba(79,70,229,0.2);
+
+$clear-btn-bg: #f3f4f6;
+$clear-btn-hover-bg: #e5e7eb;
+
+$toggle-btn-padding-y: 0.65rem;
+$toggle-btn-padding-x: 1rem;
+$toggle-btn-radius: 10px;
+$toggle-btn-bg: linear-gradient(135deg, #6366f1, #4f46e5);
+$toggle-btn-font-size: 0.95rem;
+$toggle-btn-hover-offset: 2px;
+$toggle-btn-hover-shadow: 0 4px 12px rgba(79,70,229,0.25);
+
+$chevron-size: 16px;
+
+
+// src/components/MonthlyFooter.scss
+$overview-footer-margin-top: 2rem;
+$overview-footer-padding: 1rem;
+$overview-footer-bg: #f9f9f9;
+$overview-footer-border-top: 2px solid #dddddd;
+
+$toggle-view-font-size: 0.95rem;
+$toggle-view-padding-y: 0.4rem;
+$toggle-view-padding-x: 0.8rem;
+$toggle-view-bg-hover: #0056b3;
+$toggle-view-focus-shadow: 0 0 0 2px rgba(0,123,255,0.35);
+
+$month-row-gap: 0.75rem;
+
+$footer-arrow-font-size: 1.5rem;
+$footer-arrow-font-size-mobile: 1.8rem;
+$footer-arrow-padding: 0.4rem;
+
+$footer-summary-padding-y: 0.8rem;
+$footer-summary-padding-x: 1.2rem;
+$footer-summary-shadow: 0 2px 4px rgba(0,0,0,0.08);
+$footer-summary-min-width: 200px;
+$footer-summary-max-width: 280px;
+$footer-summary-max-width-mobile: 220px;
+
+$footer-grand-margin-top: 0.5rem;
+$footer-grand-padding-y: 1rem;
+$footer-grand-padding-x: 1.2rem;
+$footer-grand-bg: #f2f7ff;
+$footer-grand-border: #d0e3ff;
+$footer-grand-radius: 10px;
+$footer-grand-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+$footer-grand-max-width: 320px;
+$footer-grand-max-width-mobile: 300px;
+$footer-grand-title-margin: 0.6rem;
+$footer-grand-title-size: 1.05rem;
+$footer-grand-title-padding: 0.4rem;
+$footer-grand-text-margin: 0.25rem 0;
+$footer-grand-text-size: 0.95rem;
+$footer-grand-text-color: #333333;
+
+$month-select-font-size: 1rem;
+$month-select-padding-y: 0.45rem;
+$month-select-padding-x: 2.2rem;
+$month-select-menu-offset: 8px;
+$month-select-menu-min-width: 220px;
+$month-select-menu-border: #e2e2e2;
+$month-select-menu-radius: 12px;
+$month-select-menu-shadow: 0 8px 20px rgba(0,0,0,0.12);
+$month-select-menu-padding: 0.4rem;
+$month-select-menu-z: 10;
+$month-select-option-font-size: 0.95rem;
+$month-select-option-padding-y: 0.5rem;
+$month-select-option-padding-x: 1rem;
+$month-select-option-selected-bg: #e9f2ff;
+
+$chevron-right: 0.8rem;
+$chevron-font-size: 0.75rem;
+
+$overview-footer-breakpoint: 600px;
+$month-row-gap-mobile: 0.5rem;
+
+$overview-anim-duration: 0.4s;
+$month-select-anim-duration: 0.18s;
+$anim-offset-x: 30px;
+$anim-offset-y: 6px;
+
+$fade-exit-duration: 0.25s; // unify with global fade-out utilities
+
+// src/components/NumberAdjuster.scss
+$shake-offset: 3px;
+$shake-duration: 0.3s;
+
+$value-group-gap: 0.25rem;
+$digits-min-width: 3ch;
+$unit-font-size: 0.85rem;
+
+$arrows-margin-left: 4px;
+$arrow-margin: 0px;
+
+$arrow-up-color: #007bff;   // unify with $color-primary
+$arrow-down-color: #dc3545; // unify with $color-danger
+
+$arrow-size-sm: 0.85rem;
+$arrow-size-md: 1.5rem;
+$arrow-size-lg: 2rem;
+
 $arrow-hover-opacity: 0.8;
+$arrow-disabled-opacity: 0.6;
 
-// Arrow sizes
-$arrow-size-sm: 0.75rem; // small arrows
-$arrow-size-md: 1.6rem;  // default
-$arrow-size-lg: 1.1rem;  // larger arrows
+$locked-opacity: 0.6; // unify with AddWorkoutForm
 
-// Lock state additions
-$color-bg-disabled: #f2f2f2;
-$color-bg-muted: #eaeaea;
-$color-text-light: #999999;
-$color-border-muted: #dddddd;
-$color-border-strong: #bbbbbb;
+
+// src/components/RoutinePlanner.scss
+$routine-planner-max-width: 1000px;
+$planner-grid-min-width: 200px;
+$routine-planner-margin-y: $spacing-xl;
+$routine-planner-padding: $spacing-lg;
+$planner-grid-gap: $spacing-lg;
+
+$routine-planner-heading-margin-bottom: $spacing-xl;
+
+$routine-planner-bg: $color-bg-light;
+$routine-planner-radius: $radius-lg;
+$routine-planner-day-padding: $spacing-lg;
+$routine-planner-shadow: $shadow-light;
+
+$routine-planner-banner-bg: $color-banner-bg;
+$routine-planner-banner-border: $color-banner-border;
+$routine-planner-banner-padding: $spacing-lg;
+$routine-planner-banner-radius: $radius-md;
+$routine-planner-banner-margin-bottom: $spacing-lg;
+$routine-planner-banner-text-align: center;
+
+$routine-planner-banner-btn-margin-top: $spacing-sm;
+$routine-planner-banner-btn-padding-y: $spacing-sm;
+$routine-planner-banner-btn-padding-x: $spacing-lg;
+$routine-planner-banner-btn-bg: $color-info-blue;
+$routine-planner-banner-btn-bg-hover: $color-info-blue-hover;
+$routine-planner-banner-btn-color: $color-bg-white;
+$routine-planner-banner-btn-radius: $radius-sm;
+
+$routine-planner-cycle-font-size: $font-size-small;
+$routine-planner-cycle-color: $color-gray-dark;
+$routine-planner-cycle-margin-bottom: $spacing-lg;
+
+// src/components/SetRow.scss
+$set-row-padding-y: $spacing-sm;
+$set-row-border-color: $color-border-light;
+$set-row-font-size: $font-size-small;
+$set-row-number-color: $color-gray-dark;
+
+$set-row-completed-bg: rgba($color-success, 0.08);
+$set-row-completed-color: $color-success;
+$set-row-check-offset: 0.5rem;
+$set-row-check-size: 0.9rem;
+
+$set-row-disabled-opacity: 0.6; // unify with global $opacity-disabled
+$set-row-disabled-color: $color-gray;
+
+// src/components/SetRowInput.scss
+$set-row-input-gap: 1rem;
+$set-row-input-margin-bottom: 0.75rem;
+$set-row-input-locked-opacity: 0.6; // unify with global $opacity-disabled
+$set-row-input-lock-offset: -1.5rem;
+$set-row-input-lock-size: 0.9rem;
+$set-row-input-lock-color: #666;
+
+$unit-input-width: 90px;
+$unit-input-padding-y: 0.4rem;
+$unit-input-padding-x: 0.5rem;
+$unit-input-padding-right: 2.5rem;
+$unit-input-font-size: 0.9rem;
+$unit-input-border: #ccc;
+$unit-input-radius: 4px;
+$unit-input-bg-disabled: #f5f5f5;
+$unit-input-color-disabled: #999;
+
+$unit-label-right: 0.5rem;
+$unit-label-font-size: 0.8rem;
+$unit-label-color: #666;
+
+
+// Workout Card
+$workout-card-padding: $spacing-lg;
+$workout-heading-margin-bottom: $spacing-sm;
+$workout-heading-font-size: $font-size-large;
+$workout-title-gap: $spacing-sm;
+
+// Title icon
+$muscle-icon-width: 150px;
+$muscle-icon-height: 90px;
+$muscle-icon-margin-top: 10px;
+$muscle-icon-margin-left: 10px;
+$muscle-icon-radius: $radius-md;
+
+// Time text
+$workout-time-margin-top: $spacing-sm;
+$workout-time-font-size: $font-size-small;
+$workout-time-color: $color-gray;
+
+// Collapsible
+$collapsible-max-height: 1000px;
+$collapsible-transition-duration: 0.35s;
+$collapsible-opacity-duration: 0.25s;
+
+// Collapsed summary
+$collapsed-summary-font-size: $font-size-small;
+$collapsed-summary-color: $color-text;
+$collapsed-summary-margin-top: $spacing-lg;
+$collapsed-summary-opacity-duration: 0.25s;
+$collapsed-summary-height-duration: 0.25s;
+$collapsed-summary-p-margin-bottom: 2px;
+$collapsed-summary-strong-color: $color-gray-dark;
+
+// Actions column
+$delete-wrapper-gap: $spacing-sm;
+$top-actions-gap: $spacing-xs;
+
+$actions-divider-border: $color-border-light;
+$actions-divider-transition-duration: 0.3s;
+
+$preview-btn-margin-top: $spacing-sm;
+$preview-btn-transition-duration: 0.3s;
+
+// Collapsed animations
+$collapsed-top-actions-offset: 8px;
+$collapsed-top-actions-transition: 0.25s;
+$collapsed-divider-offset: 4px;
+$collapsed-preview-offset: 6px;
+$collapsed-preview-delay: 0.1s;
+
+// Header section
+$sets-weights-header-margin: $spacing-xs 0 $spacing-sm;
+
+$sets-control-label-margin-right: -10px;
+$sets-control-label-margin-left: 16px;
+$sets-control-label-font-size: $font-size-small;
+$sets-control-label-color: $color-gray-dark;
+
+$weights-col-label-font-size: $font-size-small;
+$weights-col-label-color: $color-gray-dark;
+
+// Rows list
+$set-row-margin-bottom: $spacing-xs;
+$set-row-font-size: $font-size-small;
+$set-row-color: $color-gray-dark;
+$set-info-gap: $spacing-xs;
+
+// Preview mode
+$preview-mode-padding: $spacing-md;
+$preview-mode-heading-margin-bottom: $spacing-sm;
+$preview-mode-heading-font-size: $font-size-large;
+
+$preview-mode-description-font-size: $font-size-base;
+$preview-mode-description-margin-bottom: $spacing-sm;
+$preview-mode-description-color: $color-text;
+
+$preview-mode-button-margin: $spacing-md auto 0;
+
+// Video wrapper
+$video-wrapper-margin-bottom: $spacing-sm;
+$video-wrapper-aspect-ratio: 56.25%;
+$video-wrapper-radius: $radius-md;
+$video-wrapper-bg: $color-black; // mapped to global token
+$video-wrapper-max-width: 640px;
+
+// Preview-active button
+$preview-active-bg: $color-primary;
+$preview-active-bg-hover: $color-primary-hover;
+$preview-active-color: $color-white;
+
+// Breakpoints and mobile tweaks
+$workout-card-breakpoint-xs: 420px;
+$workout-card-breakpoint-sm: 600px;
+$workout-card-breakpoint-md: 601px;
+
+$workout-card-padding-sm: $spacing-md;
+$muscle-icon-margin-sm: $spacing-xs 0 0;
+$muscle-icon-width-sm: 100px;
+
+$delete-wrapper-gap-sm: $spacing-sm;
+$top-actions-gap-xs: $spacing-xs;
+
+
+// src/components/WorkoutLibrary.scss
+$workout-library-max-width: 500px;
+$workout-library-margin: $spacing-xl;
+$workout-library-padding: $spacing-lg;
+$workout-library-bg: $color-bg-light;
+$workout-library-radius: $radius-lg;
+$workout-library-heading-margin-bottom: $spacing-lg;
+
+$workout-list-margin-bottom: $spacing-lg;
+
+$workout-card-bg: $color-bg-white;
+$workout-card-padding-y: 0.75rem;
+$workout-card-padding-x: $spacing-lg;
+$workout-card-margin-bottom: $spacing-sm;
+$workout-card-radius: $radius-md;
+$workout-card-shadow: $shadow-light;
+
+$workout-card-btn-font-size: 1.2rem;
+$workout-card-btn-color: $color-danger;
+$workout-card-btn-color-hover: $color-danger-hover;
+
+$add-workout-form-gap: $spacing-sm;
+$add-workout-input-padding: $spacing-sm;
+$add-workout-input-border: $color-border;
+$add-workout-input-radius: $radius-sm;
+
+$add-workout-btn-padding-y: $spacing-sm;
+$add-workout-btn-padding-x: $spacing-lg;
+$add-workout-btn-bg: $color-primary;
+$add-workout-btn-bg-hover: $color-primary-hover;
+$add-workout-btn-color: $color-bg-white;
+$add-workout-btn-radius: $radius-sm;
+
+

@@ -1,41 +1,41 @@
 @use "../styles/variables" as *;
 
 .workout-library {
-  max-width: 500px;
-  margin: $spacing-xl auto;
-  padding: $spacing-lg;
-  background: $color-bg-light;
-  border-radius: $radius-lg;
+  max-width: $workout-library-max-width; // 500px
+  margin: $workout-library-margin auto;  // spacing-xl
+  padding: $workout-library-padding;     // spacing-lg
+  background: $workout-library-bg;       // color-bg-light
+  border-radius: $workout-library-radius; // radius-lg
 
   h2 {
     text-align: center;
-    margin-bottom: $spacing-lg;
+    margin-bottom: $workout-library-heading-margin-bottom; // spacing-lg
   }
 
   .workout-list {
     list-style: none;
     padding: 0;
-    margin-bottom: $spacing-lg;
+    margin-bottom: $workout-list-margin-bottom; // spacing-lg
 
     .workout-card {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: $color-bg-white;
-      padding: 0.75rem $spacing-lg;
-      margin-bottom: $spacing-sm;
-      border-radius: $radius-md;
-      box-shadow: $shadow-light;
+      background: $workout-card-bg; // color-bg-white
+      padding: $workout-card-padding-y $workout-card-padding-x; // 0.75rem spacing-lg
+      margin-bottom: $workout-card-margin-bottom; // spacing-sm
+      border-radius: $workout-card-radius; // radius-md
+      box-shadow: $workout-card-shadow; // shadow-light
 
       button {
         background: none;
         border: none;
-        font-size: 1.2rem;
+        font-size: $workout-card-btn-font-size; // 1.2rem
         cursor: pointer;
-        color: $color-danger;
+        color: $workout-card-btn-color; // color-danger
 
         &:hover {
-          color: $color-danger-hover;
+          color: $workout-card-btn-color-hover; // color-danger-hover
         }
       }
     }
@@ -43,25 +43,25 @@
 
   .add-workout-form {
     display: flex;
-    gap: $spacing-sm;
+    gap: $add-workout-form-gap; // spacing-sm
 
     input {
       flex: 1;
-      padding: $spacing-sm;
-      border: 1px solid $color-border;
-      border-radius: $radius-sm;
+      padding: $add-workout-input-padding; // spacing-sm
+      border: 1px solid $add-workout-input-border; // color-border
+      border-radius: $add-workout-input-radius; // radius-sm
     }
 
     button {
-      padding: $spacing-sm $spacing-lg;
-      background: $color-primary;
-      color: $color-bg-white;
+      padding: $add-workout-btn-padding-y $add-workout-btn-padding-x; // spacing-sm spacing-lg
+      background: $add-workout-btn-bg; // color-primary
+      color: $add-workout-btn-color; // color-bg-white
       border: none;
-      border-radius: $radius-sm;
+      border-radius: $add-workout-btn-radius; // radius-sm
       cursor: pointer;
 
       &:hover {
-        background: $color-primary-hover;
+        background: $add-workout-btn-bg-hover; // color-primary-hover
       }
     }
   }

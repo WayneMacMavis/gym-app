@@ -1,11 +1,12 @@
+@use "../styles/variables" as *;
+
 .set-row {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: $set-row-input-margin-bottom; // 0.75rem
   position: relative; // ✅ allows overlay positioning
 
   &.locked {
-    opacity: 0.6;
+    opacity: $set-row-input-locked-opacity; // 0.6
 
     input {
       cursor: not-allowed;
@@ -16,10 +17,10 @@
       content: "🔒";
       position: absolute;
       top: 50%;
-      right: -1.5rem; // adjust as needed
+      right: $set-row-input-lock-offset;   // -1.5rem
       transform: translateY(-50%);
-      font-size: 0.9rem;
-      color: #666;
+      font-size: $set-row-input-lock-size; // 0.9rem
+      color: $set-row-input-lock-color;    // #666
       pointer-events: none;
     }
   }
@@ -30,28 +31,28 @@
   display: inline-block;
 
   input {
-    width: 90px;
-    padding: 0.4rem 0.5rem;
-    padding-right: 2.5rem; // make space for the unit
-    font-size: 0.9rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: $unit-input-width;              // 90px
+    padding: $unit-input-padding-y $unit-input-padding-x; // 0.4rem 0.5rem
+    padding-right: $unit-input-padding-right; // 2.5rem
+    font-size: $unit-input-font-size;      // 0.9rem
+    border: 1px solid $unit-input-border;  // #ccc
+    border-radius: $unit-input-radius;     // 4px
     text-align: left;
 
     &:disabled {
-      background: #f5f5f5;
-      color: #999;
+      background: $unit-input-bg-disabled; // #f5f5f5
+      color: $unit-input-color-disabled;   // #999
       cursor: not-allowed;
     }
   }
 
   .unit {
     position: absolute;
-    right: 0.5rem;
+    right: $unit-label-right;              // 0.5rem
     top: 50%;
     transform: translateY(-50%);
-    font-size: 0.8rem;
-    color: #666;
+    font-size: $unit-label-font-size;      // 0.8rem
+    color: $unit-label-color;              // #666
     pointer-events: none;
   }
 }

@@ -1,55 +1,55 @@
 @use "../styles/variables" as *;
 
 .routine-planner {
-  margin: $spacing-xl auto;
-  max-width: 1000px;
-  padding: $spacing-lg;
+  margin: $routine-planner-margin-y auto;
+  max-width: $routine-planner-max-width;
+  padding: $routine-planner-padding;
 
   h2 {
     text-align: center;
-    margin-bottom: $spacing-xl;
+    margin-bottom: $routine-planner-heading-margin-bottom;
   }
 
   .planner-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: $spacing-lg;
+    grid-template-columns: repeat(auto-fit, minmax($planner-grid-min-width, 1fr));
+    gap: $planner-grid-gap;
   }
 
   .day-column {
-    background: $color-bg-light;
-    border-radius: $radius-lg;
-    padding: $spacing-lg;
-    box-shadow: $shadow-light;
+    background: $routine-planner-bg;
+    border-radius: $routine-planner-radius;
+    padding: $routine-planner-day-padding;
+    box-shadow: $routine-planner-shadow;
   }
 }
 
 /* 🔽 Refresh banner */
 .refresh-banner {
-  background: $color-banner-bg;
-  border: 1px solid $color-banner-border;
-  padding: $spacing-lg;
-  border-radius: $radius-md;
-  margin-bottom: $spacing-lg;
-  text-align: center;
+  background: $routine-planner-banner-bg;
+  border: 1px solid $routine-planner-banner-border;
+  padding: $routine-planner-banner-padding;
+  border-radius: $routine-planner-banner-radius;
+  margin-bottom: $routine-planner-banner-margin-bottom;
+  text-align: $routine-planner-banner-text-align;
 
   button {
-    margin-top: $spacing-sm;
-    padding: $spacing-sm $spacing-lg;
-    background: $color-info-blue;
-    color: $color-bg-white;
+    margin-top: $routine-planner-banner-btn-margin-top;
+    padding: $routine-planner-banner-btn-padding-y $routine-planner-banner-btn-padding-x;
+    background: $routine-planner-banner-btn-bg;
+    color: $routine-planner-banner-btn-color;
     border: none;
-    border-radius: $radius-sm;
+    border-radius: $routine-planner-banner-btn-radius;
     cursor: pointer;
 
     &:hover {
-      background: $color-info-blue-hover;
+      background: $routine-planner-banner-btn-bg-hover;
     }
   }
 }
 
 .cycle-info {
-  font-size: $font-size-small;
-  color: $color-gray-dark;
-  margin-bottom: $spacing-lg;
+  font-size: $routine-planner-cycle-font-size;
+  color: $routine-planner-cycle-color;
+  margin-bottom: $routine-planner-cycle-margin-bottom;
 }

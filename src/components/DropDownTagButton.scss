@@ -5,6 +5,8 @@
  * - Phase-based colors + completion pulse + confetti
  */
 
+@use "../styles/variables" as *;
+
 :root {
   --btn-h: 0px; /* set by JS to align arrow slide */
 }
@@ -14,7 +16,7 @@
   top: env(safe-area-inset-top, 0px);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: $dropdown-z-index; // 1000
 
   .button-group {
     display: flex;
@@ -24,19 +26,19 @@
     left: 50%;
     transform: translateX(-50%);
     translate: 0 calc(-1 * var(--btn-h, 0px)); /* slide up when closed */
-    transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: translate $transition-medium cubic-bezier(0.22, 1, 0.36, 1);
     will-change: translate;
 
     .drop-button {
       position: relative;
-      padding: 12px 18px;
-      font-size: 16px;
+      padding: $drop-btn-padding-y $drop-btn-padding-x; // 12px 18px
+      font-size: $drop-btn-font-size; // 16px
       line-height: 1.2;
       border: none;
-      border-radius: 0 0 10px 10px;
-      color: #fff;
+      border-radius: 0 0 $radius-lg $radius-lg; // 10px
+      color: $color-white;
       cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+      box-shadow: $shadow-drop-btn; // 0 2px 10px rgba(0,0,0,0.12)
       -webkit-tap-highlight-color: transparent;
       max-width: 92vw;
       white-space: nowrap;
@@ -44,9 +46,9 @@
       text-overflow: ellipsis;
 
       /* Phase backgrounds */
-      &.work { background: #0f766e; }            /* teal-700 */
-      &.rest { background: #334155; }            /* slate-700 */
-      &.betweenWorkouts { background: #6b7280; } /* gray-600 */
+      &.work { background: $phase-work-bg; }             // teal-700
+      &.rest { background: $phase-rest-bg; }             // slate-700
+      &.betweenWorkouts { background: $phase-between-bg; } // gray-600
 
       &:hover { filter: brightness(1.05); }
 
@@ -54,26 +56,24 @@
       .button-content {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: $spacing-sm; // 6px
       }
-      .time-line {
-        font-weight: 800;
-      }
+      .time-line { font-weight: 800; }
       .status-line {
         font-weight: 600;
-        font-size: 14px;
+        font-size: $status-line-font-size; // 14px
         letter-spacing: 0.2px;
 
-        &.work { color: #a7f3d0; }            /* mint on work */
-        &.rest { color: #fcd34d; }            /* amber on rest */
-        &.betweenWorkouts { color: #e5e7eb; } /* light gray */
+        &.work { color: $phase-work-text; }             // mint on work
+        &.rest { color: $phase-rest-text; }             // amber on rest
+        &.betweenWorkouts { color: $phase-between-text; } // light gray
       }
 
       /* Completion flash styling */
       &.completed {
-        background: #2a7a4b; /* green-700 */
-        color: #fff;
-        animation: completePulse 0.6s ease-in-out 3;
+        background: $phase-completed-bg; // #2a7a4b
+        color: $color-white;
+        animation: completePulse $pulse-duration ease-in-out 3;
       }
 
       /* Confetti burst container */
@@ -87,16 +87,16 @@
 
         span {
           position: absolute;
-          width: 6px;
-          height: 10px;
+          width: $confetti-width;   // 6px
+          height: $confetti-height; // 10px
           top: 0;
           left: 0;
           transform: translateX(-50%);
           border-radius: 1px;
           /* Color wheel across the 12 pieces */
           background: hsl(calc(360 * var(--i) / 12), 80%, 60%);
-          animation: confetti-fall 900ms ease-out forwards;
-          animation-delay: calc(var(--i) * 40ms);
+          animation: confetti-fall $confetti-duration ease-out forwards; // 900ms
+          animation-delay: calc(var(--i) * $confetti-delay); // 40ms
           /* Scatter using per-index offsets (deterministic) */
           --spread: calc((var(--i) - 6) * 7px);
         }
@@ -104,17 +104,17 @@
     }
 
     .arrow {
-      background: #333;
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 3px;
+      background: $arrow-bg; // #333
+      color: $color-white;
+      padding: $arrow-padding-y $arrow-padding-x; // 6px 12px
+      border-radius: $arrow-radius; // 3px
       cursor: pointer;
-      font-size: 14px;
+      font-size: $arrow-font-size; // 14px
       line-height: 1;
-      transition: background 0.2s ease;
+      transition: background $transition-fast ease;
       -webkit-tap-highlight-color: transparent;
 
-      &:hover { background: #555; }
+      &:hover { background: $arrow-bg-hover; } // #555
     }
   }
 
@@ -122,21 +122,21 @@
     translate: 0 0;
 
     .drop-button { white-space: normal; }
-    .arrow { animation: arrowFlipOpen 0.45s cubic-bezier(0.68,-0.55,0.27,1.55) forwards; }
+    .arrow { animation: arrowFlipOpen $arrow-flip-duration cubic-bezier(0.68,-0.55,0.27,1.55) forwards; } // 0.45s
   }
 
   &:not(.open) .button-group .drop-button .status-line { display: none; }
   &:not(.open) .button-group .arrow {
-    animation: arrowFlipClose 0.45s cubic-bezier(0.68,-0.55,0.27,1.55) forwards;
+    animation: arrowFlipClose $arrow-flip-duration cubic-bezier(0.68,-0.55,0.27,1.55) forwards; // 0.45s
   }
 
   .dropdown-content {
     width: 92vw;
-    max-width: 480px;
-    background: #1f1f1f;
-    color: #fff;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+    max-width: $dropdown-max-width; // 480px
+    background: $dropdown-bg; // #1f1f1f
+    color: $color-white;
+    border-radius: 0 0 $radius-xl $radius-xl; // 12px
+    box-shadow: $shadow-dropdown; // 0 10px 24px rgba(0,0,0,0.2)
     overflow: hidden;
   }
 }
@@ -146,14 +146,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
-  gap: 10px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: $workout-row-padding-y $workout-row-padding-x; // 10px 14px
+  gap: $workout-row-gap; // 10px
+  border-top: 1px solid $workout-row-border; // rgba(255,255,255,0.06)
 
   .workout-name {
-    font-size: 15px;
+    font-size: $workout-name-font-size; // 15px
     line-height: 1.3;
-    color: #eaeaea;
+    color: $workout-name-color; // #eaeaea
   }
 }
 .workout-row:first-child { border-top: none; }
@@ -161,75 +161,75 @@
 /* Floating timer badge with close button + fade */
 .floating-timer {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  background: #111827; /* gray-900 */
-  color: #fff;
+  top: $floating-timer-top;   // 20px
+  left: $floating-timer-left; // 20px
+  background: $floating-timer-bg; // #111827
+  color: $color-white;
   font-weight: 700;
-  padding: 10px 14px;
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  z-index: 9999;
+  padding: $floating-timer-padding-y $floating-timer-padding-x; // 10px 14px
+  border-radius: $floating-timer-radius; // 14px
+  box-shadow: $floating-timer-shadow; // 0 2px 8px rgba(0,0,0,0.15)
+  z-index: $floating-timer-z-index; // 9999
   touch-action: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: $spacing-sm; // 6px
   -webkit-tap-highlight-color: transparent;
 
   /* Phase borders for subtle cue */
-  &.work { border: 1px solid #0f766e; }
-  &.rest { border: 1px solid #334155; }
-  &.betweenWorkouts { border: 1px solid #6b7280; }
+  &.work { border: 1px solid $phase-work-bg; }
+  &.rest { border: 1px solid $phase-rest-bg; }
+  &.betweenWorkouts { border: 1px solid $phase-between-bg; }
 
   /* Fade variants */
-  &.fade { animation: fadeIn 0.3s ease forwards; }
-  &.fade-exit { animation: fadeOut 0.25s ease forwards; }
+  &.fade { animation: fadeIn $fade-duration ease forwards; }          // 0.3s
+  &.fade-exit { animation: fadeOut $fade-exit-duration ease forwards; } // 0.25s
 
   /* Close button */
   .badge-close {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 24px;
-    height: 24px;
+    top: $badge-close-offset;   // 6px
+    right: $badge-close-offset; // 6px
+    width: $badge-close-size;   // 24px
+    height: $badge-close-size;  // 24px
     display: grid;
     place-items: center;
-    border-radius: 6px;
+    border-radius: $badge-close-radius; // 6px
     background: transparent;
     border: none;
-    color: #fff;
-    font-size: 14px;
+    color: $color-white;
+    font-size: $badge-close-font-size; // 14px
     cursor: pointer;
     opacity: 0.85;
-    transition: opacity 0.2s ease, background 0.2s ease;
+    transition: opacity $transition-fast ease, background $transition-fast ease;
 
-    &:hover { opacity: 1; background: rgba(255,255,255,0.08); }
+    &:hover { opacity: 1; background: $badge-close-hover-bg; } // rgba(255,255,255,0.08)
     &:focus-visible {
-      outline: 2px solid #60a5fa; /* focus ring */
+      outline: 2px solid $focus-ring-color; // #60a5fa
       outline-offset: 2px;
     }
   }
 
   .floating-time {
     font-weight: 800;
-    font-size: 20px;
+    font-size: $floating-time-font-size; // 20px
     line-height: 1.2;
 
     .total-estimate {
       font-weight: 600;
-      font-size: 14px;
-      margin-left: 4px;
+      font-size: $floating-total-font-size; // 14px
+      margin-left: $spacing-xs; // 4px
       opacity: 0.85;
     }
   }
 
   .floating-phase {
-    font-size: 14px;
-    color: #111;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 4px 10px;
-    border-radius: 8px;
+    font-size: $floating-phase-font-size; // 14px
+    color: $floating-phase-color; // #111
+    background: $floating-phase-bg; // rgba(255,255,255,0.9)
+    padding: $floating-phase-padding-y $floating-phase-padding-x; // 4px 10px
+    border-radius: $radius-md; // 8px
     text-align: center;
     max-width: 90%;
     letter-spacing: 0.2px;
@@ -272,34 +272,34 @@
 }
 
 /* Mobile-friendly tweaks (stack time + status inside button) */
-@media (max-width: 480px) {
+@media (max-width: $dropdown-breakpoint) { // 480px
   .dropdown-tag-button .button-group .drop-button {
-    font-size: 14px;
-    padding: 12px 18px;
-    border-radius: 0 0 12px 12px;
+    font-size: $drop-btn-font-size-mobile; // 14px
+    padding: $drop-btn-padding-y $drop-btn-padding-x;
+    border-radius: 0 0 $radius-xl $radius-xl; // 12px
   }
 
   .dropdown-tag-button .button-group .drop-button .button-content {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 2px;
+    gap: $button-content-gap-mobile; // 2px
   }
 
   .dropdown-tag-button .button-group .drop-button .time-line {
-    font-size: 18px;
+    font-size: $time-line-font-size-mobile; // 18px
     font-weight: 800;
   }
 
   .dropdown-tag-button .button-group .drop-button .status-line {
-    font-size: 13.5px;
+    font-size: $status-line-font-size-mobile; // 13.5px
     font-weight: 600;
     opacity: 0.95;
   }
 
   .dropdown-tag-button .button-group .arrow {
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: $arrow-padding-y $arrow-padding-x; // 6px 12px
+    border-radius: $arrow-radius-mobile; // 4px
   }
 
   .dropdown-tag-button .dropdown-content {
@@ -308,22 +308,22 @@
   }
 
   .floating-timer {
-    padding: 8px 12px;
-    border-radius: 14px;
+    padding: $floating-timer-padding-y-mobile $floating-timer-padding-x-mobile; // 8px 12px
+    border-radius: $floating-timer-radius; // 14px
 
-    .floating-time { font-size: 19px; }
+    .floating-time { font-size: $floating-time-font-size-mobile; } // 19px
     .floating-phase {
-      font-size: 13px;
-      padding: 4px 10px;
-      border-radius: 8px;
+      font-size: $floating-phase-font-size-mobile; // 13px
+      padding: $floating-phase-padding-y $floating-phase-padding-x; // 4px 10px
+      border-radius: $radius-md; // 8px
       max-width: 92%;
     }
   }
 
   .workout-row {
-    padding: 10px 12px;
+    padding: $workout-row-padding-y $workout-row-padding-x-mobile; // 10px 12px
 
-    .workout-name { font-size: 14.5px; }
+    .workout-name { font-size: $workout-name-font-size-mobile; }   // 14.5px
   }
 }
 
