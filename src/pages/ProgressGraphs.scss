@@ -1,5 +1,68 @@
 @use "../styles/variables" as *;
 
+// src/pages/ProgressGraphs.scss
+@use "../styles/variables" as *;
+
+// ——— Page-level tokens (safe fallbacks if your global variables don’t define them)
+$page-content-padding-top: 6rem !default;   // clears burger height + breathing room
+$page-heading-size: 1.4rem !default;
+
+$workout-graph-max-width: 800px !default;
+$workout-graph-height: 300px !default;
+
+$fade-duration: 0.4s !default;
+$fade-offset: 8px !default;
+
+$view-toggle-max-width: 480px !default;
+$view-toggle-indicator-width: 33.333% !default;
+$transition-fast: 0.3s !default;
+
+$color-bg-toggle: #f5f5f5 !default;
+$color-text-toggle: #444444 !default;
+$color-bg-hover-light: rgba(0,0,0,0.04) !default;
+
+$view-toggle-breakpoint: 600px !default;
+$view-toggle-btn-padding-y: 0.6rem !default;
+$view-toggle-btn-padding-x: 1.2rem !default;
+$view-toggle-btn-padding-mobile: 0.5rem !default;
+
+// ——— Dataset colors (used by charts, sparkline, and info-card accents)
+$color-sets: #1f77b4 !default;    // blue
+$color-reps: #2ca02c !default;    // green
+$color-weight: #e74c3c !default;  // red
+
+// ——— General fallbacks (if your ../styles/variables doesn’t provide these)
+$spacing-xl: 1.5rem !default;
+$spacing-lg: 1rem !default;
+$spacing-md: 0.75rem !default;
+$spacing-sm: 0.5rem !default;
+$spacing-xs: 0.375rem !default;
+
+$radius-pill: 999px !default;
+$radius-md: 12px !default;
+$radius-sm: 8px !default;
+
+$font-size-small: 0.9rem !default;
+$font-size-xsmall: 0.85rem !default;
+
+$color-text-dark: #222 !default;
+$color-text: #333 !default;
+$color-text-muted: #777 !default;
+$color-white: #fff !default;
+$color-primary: #007bff !default;
+$color-border: #ddd !default;
+$color-bg-light: #ffffff !default;
+
+// Fix: $color-blue-light was undefined — provide a neutral panel bg token
+$color-blue-light: #f3f6fb !default; // subtle panel background
+
+// ——— Optional: expose dataset colors as CSS variables (for runtime access in JSX)
+:root {
+  --color-sets: #{$color-sets};
+  --color-reps: #{$color-reps};
+  --color-weight: #{$color-weight};
+}
+
 /* Page container */
 .page-content {
   padding-top: $page-content-padding-top;
@@ -185,6 +248,11 @@
 
   .info-label { color: $color-text-dark; }
   .info-hint { color: $color-text-muted; font-style: italic; }
+
+  /* Metric accent classes (apply in JSX when rendering selected metric) */
+  .metric-sets { color: $color-sets; }
+  .metric-reps { color: $color-reps; }
+  .metric-weight { color: $color-weight; }
 
   .info-clear {
     margin-top: $spacing-sm;

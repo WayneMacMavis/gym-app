@@ -8,6 +8,7 @@
 // - Summary sparkline always visible
 // - Staggered animations for chart and info card (sparkline not gated)
 
+// src/pages/ProgressGraphs.jsx
 import React, { useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useProgram } from "../context/ProgramContext";
@@ -81,7 +82,6 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
   const repsData = data.map((d) => d.reps ?? 0);
   const weightData = data.map((d) => d.weight ?? 0);
 
-  // Line colors (use SCSS tokens in CSS variables if you expose them; fallback hex used here)
   const COLORS = {
     sets: "#1f77b4",
     reps: "#2ca02c",
@@ -89,36 +89,9 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
   };
 
   const datasetsAll = [
-    {
-      label: "Sets",
-      data: setsData,
-      borderColor: COLORS.sets,
-      backgroundColor: COLORS.sets,
-      tension: 0.25,
-      pointRadius: isMobile ? 2 : 3,
-      hitRadius: isMobile ? 12 : 8,
-      hoverRadius: isMobile ? 6 : 5,
-    },
-    {
-      label: "Reps",
-      data: repsData,
-      borderColor: COLORS.reps,
-      backgroundColor: COLORS.reps,
-      tension: 0.25,
-      pointRadius: isMobile ? 2 : 3,
-      hitRadius: isMobile ? 12 : 8,
-      hoverRadius: isMobile ? 6 : 5,
-    },
-    {
-      label: "Weight (kg)",
-      data: weightData,
-      borderColor: COLORS.weight,
-      backgroundColor: COLORS.weight,
-      tension: 0.25,
-      pointRadius: isMobile ? 2 : 3,
-      hitRadius: isMobile ? 12 : 8,
-      hoverRadius: isMobile ? 6 : 5,
-    },
+    { label: "Sets", data: setsData, borderColor: COLORS.sets, backgroundColor: COLORS.sets, tension: 0.25 },
+    { label: "Reps", data: repsData, borderColor: COLORS.reps, backgroundColor: COLORS.reps, tension: 0.25 },
+    { label: "Weight (kg)", data: weightData, borderColor: COLORS.weight, backgroundColor: COLORS.weight, tension: 0.25 },
   ];
 
   const datasetsSingle =
@@ -135,28 +108,37 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
     plugins: {
       title: { display: true, text: `${name} Progress`, font: { size: isMobile ? 14 : 18 } },
       legend: { display: true, position: isMobile ? "top" : "bottom" },
-      tooltip: { enabled: false }, // fixed info card for mobile reliability
+      tooltip: { enabled: false },
     },
     animation: { duration: 300, easing: "easeOutQuart" },
     onClick: (evt, elements) => {
       if (!elements.length) return;
-      const idx = elements[0].index;
-      setSelectedPoint(data[idx]);
+      const { datasetIndex, index } = elements[0];
+      const datasetLabel = chartData.datasets[datasetIndex].label;
+      const value = chartData.datasets[datasetIndex].data[index];
+
+      setSelectedPoint({
+        label: datasetLabel,
+        value,
+        date:
+          data[index].date
+            ? new Date(data[index].date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : data[index].month
+            ? data[index].month
+            : `Week ${data[index].weekIndex + 1}`,
+      });
     },
     scales: {
-      x: {
-        ticks: { autoSkip: true, maxRotation: 0, font: { size: isMobile ? 9 : 12 } },
-        grid: { display: false },
-      },
-      y: {
-        beginAtZero: true,
-        ticks: { font: { size: isMobile ? 9 : 12 } },
-        grid: { color: "rgba(0,0,0,0.05)" },
-      },
+      x: { ticks: { autoSkip: true, maxRotation: 0, font: { size: isMobile ? 9 : 12 } }, grid: { display: false } },
+      y: { beginAtZero: true, ticks: { font: { size: isMobile ? 9 : 12 } }, grid: { color: "rgba(0,0,0,0.05)" } },
     },
   };
 
-  // Sparkline dataset + color (summary should reflect the active metric; use weight when "all")
+  // Sparkline dataset + color (reflect active metric; default to weight on "all")
   const sparklineData =
     metric === "sets" ? setsData :
     metric === "reps" ? repsData :
@@ -169,6 +151,13 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
     metric === "weight" ? COLORS.weight :
     COLORS.weight;
 
+  // Map dataset label to SCSS class for colored metric text
+  const metricClass =
+    selectedPoint?.label?.toLowerCase().includes("set") ? "metric-sets" :
+    selectedPoint?.label?.toLowerCase().includes("rep") ? "metric-reps" :
+    selectedPoint?.label?.toLowerCase().includes("weight") ? "metric-weight" :
+    "";
+
   return (
     <details
       className="graph-panel"
@@ -177,12 +166,10 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
     >
       <summary>
         <span className="graph-title">{name}</span>
-        {/* Sparkline always visible in summary */}
         <Sparkline data={sparklineData} labels={labels} color={sparklineColor} />
         <span className="chevron" aria-hidden="true">▾</span>
       </summary>
 
-      {/* Metric toggle */}
       <div className="metric-toggle" role="tablist" aria-label={`${name} metric selection`}>
         <button className={metric === "all" ? "active" : ""} onClick={() => setMetric("all")} type="button">All</button>
         <button className={metric === "sets" ? "active" : ""} onClick={() => setMetric("sets")} type="button">Sets</button>
@@ -190,7 +177,6 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
         <button className={metric === "weight" ? "active" : ""} onClick={() => setMetric("weight")} type="button">Weight</button>
       </div>
 
-      {/* Chart and info card are always mounted; only opacity/transform animated */}
       <div className={`workout-graph fade-chart ${isOpen ? "visible" : ""}`}>
         <Line data={chartData} options={options} />
       </div>
@@ -198,18 +184,8 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
       <div className={`info-card fade-info ${isOpen ? "visible" : ""}`} aria-live="polite">
         {selectedPoint ? (
           <>
-            {"weekIndex" in selectedPoint && (
-              <p className="info-label"><strong>Week:</strong> {selectedPoint.weekIndex + 1}</p>
-            )}
-            {"date" in selectedPoint && (
-              <p className="info-label"><strong>Date:</strong> {new Date(selectedPoint.date).toLocaleDateString()}</p>
-            )}
-            {"month" in selectedPoint && (
-              <p className="info-label"><strong>Month:</strong> {selectedPoint.month}</p>
-            )}
-            <p><strong>Sets:</strong> {selectedPoint.sets}</p>
-            <p><strong>Reps:</strong> {selectedPoint.reps}</p>
-            <p><strong>Weight:</strong> {selectedPoint.weight} kg</p>
+            <p><strong>Date:</strong> {selectedPoint.date}</p>
+            <p className={metricClass}><strong>{selectedPoint.label}:</strong> {selectedPoint.value}</p>
             <button className="info-clear" type="button" onClick={() => setSelectedPoint(null)}>Clear</button>
           </>
         ) : (
