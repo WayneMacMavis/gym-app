@@ -88,10 +88,15 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
     weight: "#e74c3c",
   };
 
+  // Larger radii for mobile touch targets
+  const pointRadius = isMobile ? 6 : 3;
+  const hitRadius = isMobile ? 20 : 8;
+  const hoverRadius = isMobile ? 10 : 5;
+
   const datasetsAll = [
-    { label: "Sets", data: setsData, borderColor: COLORS.sets, backgroundColor: COLORS.sets, tension: 0.25 },
-    { label: "Reps", data: repsData, borderColor: COLORS.reps, backgroundColor: COLORS.reps, tension: 0.25 },
-    { label: "Weight (kg)", data: weightData, borderColor: COLORS.weight, backgroundColor: COLORS.weight, tension: 0.25 },
+    { label: "Sets", data: setsData, borderColor: COLORS.sets, backgroundColor: COLORS.sets, tension: 0.25, pointRadius, hitRadius, hoverRadius },
+    { label: "Reps", data: repsData, borderColor: COLORS.reps, backgroundColor: COLORS.reps, tension: 0.25, pointRadius, hitRadius, hoverRadius },
+    { label: "Weight (kg)", data: weightData, borderColor: COLORS.weight, backgroundColor: COLORS.weight, tension: 0.25, pointRadius, hitRadius, hoverRadius },
   ];
 
   const datasetsSingle =
@@ -138,7 +143,7 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
     },
   };
 
-  // Sparkline dataset + color (reflect active metric; default to weight on "all")
+  // Sparkline dataset + color
   const sparklineData =
     metric === "sets" ? setsData :
     metric === "reps" ? repsData :
@@ -151,7 +156,6 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
     metric === "weight" ? COLORS.weight :
     COLORS.weight;
 
-  // Map dataset label to SCSS class for colored metric text
   const metricClass =
     selectedPoint?.label?.toLowerCase().includes("set") ? "metric-sets" :
     selectedPoint?.label?.toLowerCase().includes("rep") ? "metric-reps" :
