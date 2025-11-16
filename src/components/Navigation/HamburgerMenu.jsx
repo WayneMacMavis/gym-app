@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useProgram } from "../../context/ProgramContext";
-import { FiHome, FiList, FiClock, FiTrendingUp } from "react-icons/fi"; // ✅ icons
+import { FiHome, FiList, FiClock, FiTrendingUp, FiBookOpen } from "react-icons/fi"; // ✅ added FiBookOpen for Library
 import "./HamburgerMenu.scss";
 
 const HamburgerMenu = () => {
@@ -120,6 +120,17 @@ const HamburgerMenu = () => {
               onClick={closeMenu}
             >
               <FiTrendingUp className="nav-icon" /> Progress
+            </NavLink>
+          </li>
+
+          {/* ✅ New Workout Library link */}
+          <li>
+            <NavLink
+              to="/library"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={closeMenu}
+            >
+              <FiBookOpen className="nav-icon" /> Workout Library
             </NavLink>
           </li>
         </ul>

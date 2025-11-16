@@ -4,14 +4,15 @@ import Home from "./pages/Home";
 import DayRoutine from "./pages/DayRoutine";
 import HistoryPage from "./pages/HistoryPage";
 import ProgressGraphs from "./pages/ProgressGraphs";
+import WorkoutLibraryPage from "./pages/WorkoutLibraryPage"; // ✅ page-level import
 import { ProgramProvider } from "./context/ProgramContext";
-import HamburgerMenu from "./components/Navigation/HamburgerMenu"; // ✅ import
+import HamburgerMenu from "./components/Navigation/HamburgerMenu"; // ✅ component import
 
 function App() {
   return (
     <ProgramProvider>
       <Router>
-        {/* ✅ Always visible */}
+        {/* ✅ Always visible navigation */}
         <HamburgerMenu />
 
         <Routes>
@@ -26,6 +27,9 @@ function App() {
 
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/progress" element={<ProgressGraphs />} />
+
+          {/* ✅ New route for the Workout Library */}
+          <Route path="/library" element={<WorkoutLibraryPage />} />
         </Routes>
       </Router>
     </ProgramProvider>

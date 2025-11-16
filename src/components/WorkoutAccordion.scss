@@ -1,0 +1,56 @@
+.workout-accordion {
+  .accordion-section {
+    border-bottom: 1px solid #ddd;
+
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 0.75rem 1rem;
+      background: #f7f7f7;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background: #eee;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+    }
+
+    .accordion-content.animate {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s ease, opacity 0.4s ease;
+      padding: 0 1rem;
+    }
+
+    &.open .accordion-content.animate {
+      max-height: 1000px; // large enough to fit content
+      opacity: 1;
+      padding: 1rem;
+    }
+  }
+
+  .accordion-card {
+    margin-bottom: 1rem;
+
+    &.fade-in {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+      animation: fadeInUp 0.3s ease forwards;
+    }
+  }
+}
+
+/* Keyframes for staggered fade-in */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
