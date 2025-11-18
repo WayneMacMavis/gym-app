@@ -9,7 +9,7 @@
 // - Staggered animations for chart and info card (sparkline not gated)
 
 // src/pages/ProgressGraphs.jsx
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useProgram } from "../context/ProgramContext";
 import {
@@ -54,6 +54,8 @@ function Sparkline({ data, labels, color }) {
     maintainAspectRatio: false,
     plugins: { legend: { display: false }, tooltip: { enabled: false } },
     scales: { x: { display: false }, y: { display: false } },
+    events: ["click", "touchstart", "touchmove", "touchend"], // ensure touch is handled
+    normalized: true, // normalizes touch/mouse events across browsers
   };
   return (
     <div className="sparkline">
@@ -63,6 +65,7 @@ function Sparkline({ data, labels, color }) {
 }
 
 function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
+  const chartRef = useRef(null);
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [metric, setMetric] = useState("all");
   const [isOpen, setIsOpen] = useState(false);
@@ -90,8 +93,8 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
 
   // Larger radii for mobile touch targets
   const pointRadius = isMobile ? 6 : 3;
-  const hitRadius = isMobile ? 20 : 8;
-  const hoverRadius = isMobile ? 10 : 5;
+  const hitRadius = isMobile ? 24 : 8;
+  const hoverRadius = isMobile ? 12 : 5;
 
   const datasetsAll = [
     { label: "Sets", data: setsData, borderColor: COLORS.sets, backgroundColor: COLORS.sets, tension: 0.25, pointRadius, hitRadius, hoverRadius },
@@ -107,6 +110,40 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
 
   const chartData = { labels, datasets: datasetsSingle };
 
+  // Robust handler: compute the active element via chartRef (works better on mobile)
+  const handleChartClick = (evt) => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    const el = chart.getElementsAtEventForMode(
+      evt,
+      "nearest",
+      { intersect: true, axis: "x" },
+      true
+    );
+
+    if (!el || !el.length) return;
+
+    const { datasetIndex, index } = el[0];
+    const datasetLabel = chartData.datasets[datasetIndex].label;
+    const value = chartData.datasets[datasetIndex].data[index];
+
+    setSelectedPoint({
+      label: datasetLabel,
+      value,
+      date:
+        data[index].date
+          ? new Date(data[index].date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : data[index].month
+          ? data[index].month
+          : `Week ${data[index].weekIndex + 1}`,
+    });
+  };
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -115,28 +152,12 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
       legend: { display: true, position: isMobile ? "top" : "bottom" },
       tooltip: { enabled: false },
     },
+    interaction: { mode: "nearest", intersect: true, axis: "x" },
     animation: { duration: 300, easing: "easeOutQuart" },
-    onClick: (evt, elements) => {
-      if (!elements.length) return;
-      const { datasetIndex, index } = elements[0];
-      const datasetLabel = chartData.datasets[datasetIndex].label;
-      const value = chartData.datasets[datasetIndex].data[index];
-
-      setSelectedPoint({
-        label: datasetLabel,
-        value,
-        date:
-          data[index].date
-            ? new Date(data[index].date).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })
-            : data[index].month
-            ? data[index].month
-            : `Week ${data[index].weekIndex + 1}`,
-      });
-    },
+    // Keep onClick here for desktop; mobile touch is captured by events + ref handler
+    onClick: handleChartClick,
+    events: ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"],
+    normalized: true,
     scales: {
       x: { ticks: { autoSkip: true, maxRotation: 0, font: { size: isMobile ? 9 : 12 } }, grid: { display: false } },
       y: { beginAtZero: true, ticks: { font: { size: isMobile ? 9 : 12 } }, grid: { color: "rgba(0,0,0,0.05)" } },
@@ -182,7 +203,8 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
       </div>
 
       <div className={`workout-graph fade-chart ${isOpen ? "visible" : ""}`}>
-        <Line data={chartData} options={options} />
+        {/* Attach ref so we can compute active elements from touch */}
+        <Line ref={chartRef} data={chartData} options={options} />
       </div>
 
       <div className={`info-card fade-info ${isOpen ? "visible" : ""}`} aria-live="polite">
@@ -202,11 +224,11 @@ function WorkoutGraphPanel({ name, data, viewMode, isMobile }) {
 
 export default function ProgressGraphs() {
   const { history } = useProgram();
-  const [viewMode, setViewMode] = useState("weekly"); // "weekly" | "sessions" | "monthly"
+  const [viewMode, setViewMode] = useState("weekly");
   const tabIndex = viewMode === "weekly" ? 0 : viewMode === "sessions" ? 1 : 2;
   const isMobile = typeof window !== "undefined" ? window.innerWidth < 480 : false;
 
-  // Weekly totals (group by workout + weekIndex)
+  // Weekly totals
   const weeklyData = useMemo(() => {
     const grouped = {};
     (history || []).forEach((entry) => {
@@ -224,17 +246,14 @@ export default function ProgressGraphs() {
     const result = {};
     Object.keys(grouped).forEach((name) => {
       const weeks = Object.keys(grouped[name])
-        .map((week) => ({
-          weekIndex: parseInt(week, 10),
-          ...grouped[name][week],
-        }))
+        .map((week) => ({ weekIndex: parseInt(week, 10), ...grouped[name][week] }))
         .sort((a, b) => a.weekIndex - b.weekIndex);
       result[name] = weeks;
     });
     return result;
   }, [history]);
 
-  // Raw sessions (chronological entries per workout)
+  // Raw sessions
   const sessionData = useMemo(() => {
     const grouped = {};
     (history || []).forEach((entry) => {
@@ -254,7 +273,7 @@ export default function ProgressGraphs() {
     return grouped;
   }, [history]);
 
-  // Monthly totals (group by workout + monthKey)
+  // Monthly totals
   const monthlyData = useMemo(() => {
     const grouped = {};
     (history || []).forEach((entry) => {
